@@ -126,47 +126,137 @@ prop_startIsSameColor board = all f moves
 
 -- Black and white give the same moves, but pawns inverted
 
+
 --------------------------------------------------------------------------------
--- Rook (-)
+-- King, Queen, Rook and Bishop (-) - move direction is valid
 --------------------------------------------------------------------------------
 
-prop_rookMovesVerticalOrHorizontal :: Board -> (Int,Int) -> Bool
-prop_rookMovesVerticalOrHorizontal board pos = all isVerticalOrHorizontal moves
+prop_kingOnlyMovesStraight :: Board -> (Int,Int) -> Bool
+prop_kingOnlyMovesStraight = pieceOnlyMoves King isMoveStraight
+
+prop_kingOnlyMovesOneStep :: Board -> (Int,Int) -> Bool
+prop_kingOnlyMovesOneStep = pieceOnlyMoves King isMoveOneStep
+
+prop_queenOnlyMovesStraight :: Board -> (Int,Int) -> Bool
+prop_queenOnlyMovesStraight = pieceOnlyMoves Bishop isMoveStraight
+
+prop_rookOnlyMovesHorizontallyOrVertically :: Board -> (Int,Int) -> Bool
+prop_rookOnlyMovesHorizontallyOrVertically =
+  pieceOnlyMoves Rook isMoveHorizontalOrVertical
+
+prop_bishopOnlyMovesDiagonally :: Board -> (Int,Int) -> Bool
+prop_bishopOnlyMovesDiagonally = pieceOnlyMoves Bishop isMoveDiagonal
+
+pieceOnlyMoves :: Kind ->
+                  (((Int,Int),(Int,Int)) -> Bool) ->
+                  Board ->
+                  (Int,Int) ->
+                  Bool
+pieceOnlyMoves kind isOkay board pos = all isOkay moves
   where
-    (_board', _pos', moves) = placePieceAndGetMoves board pos Rook
-    isVerticalOrHorizontal ((rowS,colS),(rowD,colD)) = rowS-rowD == 0 ||
+    (_board', _pos', moves) = placePieceAndGetMoves board pos kind
+
+isMoveStraight :: ((Int,Int),(Int,Int)) -> Bool
+isMoveStraight move = isMoveHorizontalOrVertical move || isMoveDiagonal move
+
+isMoveHorizontalOrVertical :: ((Int,Int),(Int,Int)) -> Bool
+isMoveHorizontalOrVertical ((rowS,colS),(rowD,colD)) = rowS-rowD == 0 ||
                                                        colS-colD == 0
 
+isMoveDiagonal :: ((Int,Int),(Int,Int)) -> Bool
+isMoveDiagonal ((rowS,colS),(rowD,colD)) = abs (rowS-rowD) == abs (colS-colD)
+
+
+--------------------------------------------------------------------------------
+-- Queen, Rook and Bishop (-) - empty between start and dest
+--------------------------------------------------------------------------------
+
+prop_queenEmptyBetweenStartAndDest :: Board -> (Int,Int) -> Bool
+prop_queenEmptyBetweenStartAndDest = emptyBetweenStartAndDest Queen
+
 prop_rookEmptyBetweenStartAndDest :: Board -> (Int,Int) -> Bool
-prop_rookEmptyBetweenStartAndDest board pos = all (allEmpty board') moves
+prop_rookEmptyBetweenStartAndDest = emptyBetweenStartAndDest Rook
+
+prop_bishopEmptyBetweenStartAndDest :: Board -> (Int,Int) -> Bool
+prop_bishopEmptyBetweenStartAndDest = emptyBetweenStartAndDest Bishop
+
+emptyBetweenStartAndDest :: Kind -> Board -> (Int,Int) -> Bool
+emptyBetweenStartAndDest kind board pos = all (allEmpty board') moves
   where
-    (board', _pos', moves) = placePieceAndGetMoves board pos Rook
+    (board', _pos', moves) = placePieceAndGetMoves board pos kind
+
 
 --------------------------------------------------------------------------------
--- Rook (+)
+-- King, Queen, Rook and Bishop (+) moves if can
 --------------------------------------------------------------------------------
 
--- For a given destination, if it is vertical and horizontal and
---    nothing is between dest and src, and dest is empty or other color,
---    it exists.
+prop_kingMovesIfCan :: Board -> (Int,Int) -> Int -> Int -> Property
+prop_kingMovesIfCan = movesIfCan getDirKingQueen King 1
+
+prop_queenMovesIfCan :: Board -> (Int,Int) -> Int -> Int -> Property
+prop_queenMovesIfCan = movesIfCan getDirKingQueen Queen 7
 
 prop_rookMovesIfCan :: Board -> (Int,Int) -> Int -> Int -> Property
-prop_rookMovesIfCan board start dir length = isWithinBoard dest &&
-                                             not (isColor Black atDest) &&
-                                             allEmpty board' move ==>
-                                             move `elem` moves
-  where
-    (board', start', moves) = placePieceAndGetMoves board start Rook
-    dir' = case dir `mod` 4 of
-              0 -> (0,1)  -- Right
-              1 -> (1,0)  -- Down
-              2 -> (0,-1) -- Left
-              3 -> (-1,0) -- Up
-    length' = length `mod` 7 + 1
-    diff = dir' `tupleMul` length'
-    dest = start' `tupleAdd` diff
-    move = (start',dest)
-    atDest = get dest board'
+prop_rookMovesIfCan = movesIfCan getDirRook Rook 7
+
+prop_bishopMovesIfCan :: Board -> (Int,Int) -> Int -> Int -> Property
+prop_bishopMovesIfCan = movesIfCan getDirBishop Bishop 7
+
+getDirKingQueen :: Int -> (Int,Int)
+getDirKingQueen dir = case dir `mod` 8 of
+                        0 -> (0,1)  -- Right
+                        1 -> (1,0)  -- Down
+                        2 -> (0,-1) -- Left
+                        3 -> (-1,0) -- Up
+                        4 -> (1,1)   -- Down right
+                        5 -> (1,-1)  -- Down left
+                        6 -> (-1,1)  -- Up right
+                        7 -> (-1,-1) -- Up left
+
+getDirRook :: Int -> (Int,Int)
+getDirRook dir = case dir `mod` 4 of
+                    0 -> (0,1)  -- Right
+                    1 -> (1,0)  -- Down
+                    2 -> (0,-1) -- Left
+                    3 -> (-1,0) -- Up
+
+getDirBishop :: Int -> (Int,Int)
+getDirBishop dir = case dir `mod` 4 of
+                      0 -> (1,1)   -- Down right
+                      1 -> (1,-1)  -- Down left
+                      2 -> (-1,1)  -- Up right
+                      3 -> (-1,-1) -- Up left
+
+movesIfCan :: (Int -> (Int,Int)) ->
+              Kind ->
+              Int ->
+              Board ->
+              (Int,Int) ->
+              Int ->
+              Int ->
+              Property
+movesIfCan getDir kind maxLength board start dir length =
+  isWithinBoard dest &&
+  not (isColor Black atDest) &&
+  allEmpty board' move ==>
+  move `elem` moves
+    where
+      (board', start', moves) = placePieceAndGetMoves board start kind
+      dir'                    = getDir dir
+      length'                 = length `mod` maxLength + 1
+      diff                    = dir' `tupleMul` length'
+      dest                    = start' `tupleAdd` diff
+      move                    = (start',dest)
+      atDest                  = get dest board'
+
+
+
+
+
+
+
+
+
 
 
 
