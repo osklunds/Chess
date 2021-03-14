@@ -22,8 +22,8 @@ movesAtPos pos c board
                  (Piece _ Bishop) -> bishopMoves
                  (Piece _ Rook)   -> rookMoves
                  (Piece _ Pawn)   -> pawnMoves
-                 _               -> \_ _ -> []
-                 --Empty           -> \_ _ -> []
+                 (Piece _ Knight) -> knightMoves
+                 Empty            -> \_ _ -> []
 
 kingMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
 kingMoves pos board = filter f $ queenMoves pos board
@@ -92,6 +92,29 @@ pawnMoves pos board = [(pos,dest) | dest <- dests]
                   True -> [posDouble]
                   False -> []
 
+-- pos -> start
+knightMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
+knightMoves pos board = filter hasValidDest moves
+  where
+    atPos    = get pos board
+    color    = B.color atPos
+    diffs    = [(2,1),  -- L
+                (2,-1),
+                (1,-2),
+                (-1,-2),
+                (-2,-1),
+                (-2,1),
+                (1,2),
+                (-1,2)]
+    moves    = map (\diff -> (pos, pos `tupleAdd` diff)) diffs
+    hasValidDest (_start,dest) = isWithinBoard dest &&
+                                 not (isColor color atDest)
+      where
+        atDest = get dest board
+
+
+
+-- deltas -> dir
 straightDeltas :: [(Int,Int)]
 straightDeltas = [(1,0),  -- Down
                   (0,-1), -- Left
@@ -119,6 +142,7 @@ tupleMaxAbs (a,b) = max (abs a) (abs b)
 isWithinBoard :: (Int,Int) -> Bool
 isWithinBoard (row,col) = 0 <= row && row < 8 && 0 <= col && col < 8
 
+-- delta -> dir
 movesFromDelta :: Board ->
                   (Int,Int) ->
                   (Int,Int) ->
@@ -132,6 +156,6 @@ movesFromDelta board diff start color
   where
     pos   = start `tupleAdd` diff
     atPos = B.get pos board
-    here  = (start,pos)
+    here  = (start,pos) -- here -> currMove
     rest  = movesFromDelta board diff' start color
     diff' = diff `tupleAdd` tupleSignum diff

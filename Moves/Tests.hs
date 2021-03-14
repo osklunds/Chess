@@ -15,7 +15,7 @@ import Moves
 --------------------------------------------------------------------------------
 
 prop_fixedBoard1 :: Property
-prop_fixedBoard1 = verifyMoves board moves
+prop_fixedBoard1 = verifyMoves Black board moves
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♟         ♚   ♝ 0\n\
@@ -69,7 +69,37 @@ prop_fixedBoard1 = verifyMoves board moves
             (movesFrom (5,7) [(5,6)]) ++
 
             -- Rook at (3,2)
-            (movesFrom (3,2) [(2,2), (1,2), (0,2), (3,3), (3,4), (3,1), (3,0)])
+            (movesFrom (3,2) [(2,2), (1,2), (0,2), (3,3), (3,4), (3,1),
+                              (3,0)]) ++
+
+            -- Knight at (1,1)
+            (movesFrom (1,1) [(0,3), (2,3), (3,0)]) ++
+
+            -- Knight at (7,5)
+            (movesFrom (7,5) [(5,6), (5,4), (6,3)]) ++
+
+            -- Knight at (6,4)
+            (movesFrom (6,4) [(4,3), (5,6), (7,6), (7,2), (5,2)])
+
+prop_fixedBoard2 :: Property
+prop_fixedBoard2 = verifyMoves White board moves
+  where
+    board = read  "  0 1 2 3 4 5 6 7  \n\
+                  \0                 0\n\
+                  \1                 1\n\
+                  \2                 2\n\
+                  \3                 3\n\
+                  \4                 4\n\
+                  \5         ♚       5\n\
+                  \6       ♙         6\n\
+                  \7 ♔               7\n\
+                  \  0 1 2 3 4 5 6 7"
+    moves = -- King at (7,0)
+            (movesFrom (7,0) [(6,0), (7,1), (6,1)]) ++
+
+            -- Pawn at (6,3)
+            (movesFrom (6,3) [(5,3), (4,3), (5,4)])
+
 
 --------------------------------------------------------------------------------
 -- Subsets
@@ -86,9 +116,6 @@ prop_kingMovesAreSubsetOfQueenMoves = (King `movesAreSubsetOfMoves` Queen)
 
 prop_pawnMovesAreSubsetOfQueenMoves :: Board -> (Int,Int) -> Bool
 prop_pawnMovesAreSubsetOfQueenMoves = (Pawn `movesAreSubsetOfMoves` Queen)
-
--- prop_pawnMovesAreSubsetOfKingMoves :: Board -> (Int,Int) -> Bool
--- prop_pawnMovesAreSubsetOfKingMoves = (Pawn `movesAreSubsetOfMoves` King)
 
 movesAreSubsetOfMoves :: Kind -> Kind -> (Board -> (Int,Int) -> Bool)
 movesAreSubsetOfMoves kind1 kind2 board pos = movesKind1 `isSubsetOf`
@@ -124,11 +151,65 @@ prop_startIsSameColor board = all f moves
     moves           = movesForColor Black board
     f (start,_dest) = isColor Black (get start board)
 
--- Black and white give the same moves, but pawns inverted
+prop_blackAndWhiteGiveSameMoves :: Board -> Property
+prop_blackAndWhiteGiveSameMoves board = counterexample errorString $
+                                        blackMoves `eqMoves` mirroredWhiteMoves
+  where
+    blackMoves         = movesForColor Black board
+    swappedColors      = swapColors board
+    mirroredBoard      = mirrorBoard swappedColors
+    whiteMoves         = movesForColor White mirroredBoard
+    mirroredWhiteMoves = map mirrorMove whiteMoves
+    errorString        = "board\n" ++ show board ++ "\n" ++
+                         "blackMoves\n" ++ show blackMoves ++ "\n" ++
+                         "swappedColors\n" ++ show swappedColors ++ "\n" ++
+                         "mirroredBoard\n" ++ show mirroredBoard ++ "\n" ++
+                         "whiteMoves\n" ++ show whiteMoves ++ "\n" ++
+                         "mirroredWhiteMoves\n" ++ show mirroredWhiteMoves
+
+swapColors :: Board -> Board
+swapColors board = foldl swapColorPos
+                         board
+                         [(row,col) | row <- [0..7], col <- [0..7]]
+
+swapColorPos :: Board -> (Int,Int) -> Board
+swapColorPos board pos = set pos newAtPos board
+  where
+    atPos    = get pos board
+    newAtPos = swapColor atPos
+
+swapColor :: Square -> Square
+swapColor Empty = Empty
+swapColor (Piece White kind) = Piece Black kind
+swapColor (Piece Black kind) = Piece White kind
+
+mirrorBoard :: Board -> Board
+mirrorBoard board = foldl mirrorPos
+                          board
+                          [(row,col) | row <- [0..3], col <- [0..7]]
+
+mirrorPos :: Board -> (Int,Int) -> Board
+mirrorPos board pos@(row,col) = set pos atMirroredPos $
+                                set mirroredPos atPos $ board
+  where
+    mirroredRow = 7-row
+    mirroredPos = (mirroredRow,col)
+    atPos       = get pos board
+    atMirroredPos = get mirroredPos board
+
+mirrorMove :: ((Int,Int),(Int,Int)) -> ((Int,Int),(Int,Int))
+mirrorMove ((rowS,colS),(rowD,colD)) = ((rowS',colS),(rowD',colD))
+  where
+    rowS' = 7-rowS
+    rowD' = 7-rowD
+
 
 
 --------------------------------------------------------------------------------
--- King, Queen, Rook and Bishop (-) - move direction is valid
+-- King, Queen, Rook and Bishop (-)
+--------------------------------------------------------------------------------
+
+-- Moves in valid direction
 --------------------------------------------------------------------------------
 
 prop_kingOnlyMovesStraight :: Board -> (Int,Int) -> Bool
@@ -166,9 +247,7 @@ isMoveHorizontalOrVertical ((rowS,colS),(rowD,colD)) = rowS-rowD == 0 ||
 isMoveDiagonal :: ((Int,Int),(Int,Int)) -> Bool
 isMoveDiagonal ((rowS,colS),(rowD,colD)) = abs (rowS-rowD) == abs (colS-colD)
 
-
---------------------------------------------------------------------------------
--- Queen, Rook and Bishop (-) - empty between start and dest
+-- Empty between start and dest
 --------------------------------------------------------------------------------
 
 prop_queenEmptyBetweenStartAndDest :: Board -> (Int,Int) -> Bool
@@ -187,7 +266,7 @@ emptyBetweenStartAndDest kind board pos = all (allEmpty board') moves
 
 
 --------------------------------------------------------------------------------
--- King, Queen, Rook and Bishop (+) moves if can
+-- King, Queen, Rook and Bishop (+)
 --------------------------------------------------------------------------------
 
 prop_kingMovesIfCan :: Board -> (Int,Int) -> Int -> Int -> Property
@@ -250,105 +329,120 @@ movesIfCan getDir kind maxLength board start dir length =
       atDest                  = get dest board'
 
 
+--------------------------------------------------------------------------------
+-- Pawn (+ and -)
+--------------------------------------------------------------------------------
 
+prop_pawnSingleForward :: Board -> (Int,Int) -> Property
+prop_pawnSingleForward board pos = isWithinBoard dest ==>
+                                   (move `elem` moves) ==
+                                   isEmpty atDest
+  where
+    (board', start, moves) = placePieceAndGetMoves board pos Pawn
+    dest                   = start `tupleAdd` (1,0)
+    atDest                 = get dest board'
+    move                   = (start,dest)
 
+prop_pawnDoubleForward :: Board -> (Int,Int) -> Property
+prop_pawnDoubleForward board pos = isWithinBoard dest ==>
+                                   (move `elem` moves) ==
+                                   (isEmpty atBetween && isEmpty atDest
+                                    && startRow == 1)
+  where
+    (board', start, moves) = placePieceAndGetMoves board pos Pawn
+    (startRow, _startCol)  = start
+    between                = start `tupleAdd` (1,0)
+    dest                   = start `tupleAdd` (2,0)
+    atBetween              = get between board'
+    atDest                 = get dest board'
+    move                   = (start,dest)
 
+prop_pawnMovesRight :: Board -> (Int,Int) -> Property
+prop_pawnMovesRight board pos = isWithinBoard dest ==>
+                                (move `elem` moves) ==
+                                isOtherColor Black atDest
+  where
+    (board', start, moves) = placePieceAndGetMoves board pos Pawn
+    dest                   = start `tupleAdd` (1,1)
+    atDest                 = get dest board'
+    move                   = (start,dest)
 
+prop_pawnMovesLeft :: Board -> (Int,Int) -> Property
+prop_pawnMovesLeft board pos = isWithinBoard dest ==>
+                               (move `elem` moves) ==
+                               isOtherColor Black atDest
+  where
+    (board', start, moves) = placePieceAndGetMoves board pos Pawn
+    dest                   = start `tupleAdd` (1,-1)
+    atDest                 = get dest board'
+    move                   = (start,dest)
 
-
-
-
+prop_pawnNoOtherMove :: Board -> (Int,Int) -> Property
+prop_pawnNoOtherMove board pos = counterexample errorString 
+                                                (moves `isSubsetOf` legalMoves)
+  where
+    (board', start, moves) = placePieceAndGetMoves board pos Pawn
+    singleForward          = (start, start `tupleAdd` (1,0))
+    doubleForward          = (start, start `tupleAdd` (2,0))
+    right                  = (start, start `tupleAdd` (1,1))
+    left                   = (start, start `tupleAdd` (1,-1))
+    legalMoves             = [singleForward,doubleForward,right,left]
+    errorString            = show board' ++ "\n" ++ show moves
 
 
 --------------------------------------------------------------------------------
--- Pawn (-)
+-- Knight (-)
 --------------------------------------------------------------------------------
 
--- prop_pawnMovesOne :: Board -> (Int,Int) -> Bool
--- prop_pawnMovesOne board pos = all isMoveOneStep movesPawn
---   where
---     pos'           = withinizePos pos
---     boardWithPawn  = set pos' (Piece Black Pawn) board
---     moves          = movesForColor Black boardWithPawn
---     movesPawn      = filter (isMoveFrom pos') moves
-
-prop_pawnNotMovesCenterIfOther :: Board -> (Int,Int) -> Property
-prop_pawnNotMovesCenterIfOther board pos = isWithinBoard pos'' &&
-                                           isOtherColor Black atPos'' ==>
-                                           not ((pos',pos'') `elem` movesPawn)
+prop_knightOnlyMovesLShaped :: Board -> (Int,Int) -> Bool
+prop_knightOnlyMovesLShaped board pos = all isMoveLShaped moves
   where
-    (boardWithPawn, pos', movesPawn) = pawnMoves board pos
-    pos''   = pos' `tupleAdd` (1,0)
-    atPos'' = get pos'' boardWithPawn
+    (_board', _start, moves) = placePieceAndGetMoves board pos Knight
+
+isMoveLShaped :: ((Int,Int),(Int,Int)) -> Bool
+isMoveLShaped ((rowS,colS),(rowD,colD)) = rowDiff `elem` [1,2] &&
+                                          colDiff `elem` [1,2] &&
+                                          rowDiff+colDiff == 3
+  where
+    rowDiff = abs $ rowD-rowS
+    colDiff = abs $ colD-colS
 
 
 --------------------------------------------------------------------------------
--- Pawn (+)
+-- Knight (+)
 --------------------------------------------------------------------------------
 
-prop_pawnMovesForwardIfEmpty :: Board -> (Int,Int) -> Property
-prop_pawnMovesForwardIfEmpty board pos = isWithinBoard pos'' &&
-                                        isEmpty atPos'' ==>
-                                        (pos',pos'') `elem` movesPawn
+prop_knightMovesIfCan :: Board -> (Int,Int) -> Int -> Int -> Property
+prop_knightMovesIfCan board pos rowDiff colDiff = isWithinBoard dest && 
+                                                  isMoveLShaped move ==>
+                                                  (move `elem` moves) == 
+                                                  not (isColor Black atDest)
   where
-    (boardWithPawn, pos', movesPawn) = pawnMoves board pos
-    pos''   = pos' `tupleAdd` (1,0)
-    atPos'' = get pos'' boardWithPawn
+    (board', start, moves) = placePieceAndGetMoves board pos Knight
+    rowDiff'               = fixDiff rowDiff
+    colDiff'               = fixDiff colDiff
+    diff                   = (rowDiff',colDiff')
+    dest                   = start `tupleAdd` diff
+    atDest                 = get dest board'
+    move                   = (start,dest)
 
-prop_pawnMovesDobuleIfEmptyAndStart :: Board -> Int -> Property
-prop_pawnMovesDobuleIfEmptyAndStart board col = isWithinBoard pos1 &&
-                                                isWithinBoard pos2 &&
-                                                isEmpty atPos1 &&
-                                                isEmpty atPos2 ==>
-                                                (pos',pos2) `elem` movesPawn
+    fixDiff diff = case diff `mod` 4 of
+                      0 -> -2
+                      1 -> -1
+                      2 -> 1
+                      3 -> 2
 
-  where
-    row = 1
-    (boardWithPawn, pos', movesPawn) = pawnMoves board (row,col)
-    pos1   = pos' `tupleAdd` (1,0)
-    pos2   = pos' `tupleAdd` (2,0)
-    atPos1 = get pos1 boardWithPawn
-    atPos2 = get pos2 boardWithPawn
-
-prop_pawnMovesRightIfOtherColor :: Board -> (Int,Int) -> Property
-prop_pawnMovesRightIfOtherColor board pos = isWithinBoard pos'' &&
-                                            isOtherColor Black atPos'' ==>
-                                            (pos',pos'') `elem` movesPawn
-  where
-    (boardWithPawn, pos', movesPawn) = pawnMoves board pos
-    pos''   = pos' `tupleAdd` (1,1)
-    atPos'' = get pos'' boardWithPawn
-
-prop_pawnMovesLeftIfOtherColor :: Board -> (Int,Int) -> Property
-prop_pawnMovesLeftIfOtherColor board pos = isWithinBoard pos'' &&
-                                           isOtherColor Black atPos'' ==>
-                                           (pos',pos'') `elem` movesPawn
-  where
-    (boardWithPawn, pos', movesPawn) = pawnMoves board pos
-    pos''   = pos' `tupleAdd` (1,-1)
-    atPos'' = get pos'' boardWithPawn
-
---------------------------------------------------------------------------------
--- Pawn helper functions
---------------------------------------------------------------------------------
-
-pawnMoves :: Board -> (Int,Int) -> (Board, (Int,Int), [((Int,Int),(Int,Int))])
-pawnMoves board pos = (boardWithPawn, pos', movesPawn)
-  where
-    pos'           = withinizePos pos
-    boardWithPawn  = set pos' (Piece Black Pawn) board
-    moves          = movesForColor Black boardWithPawn
-    movesPawn      = filter (isMoveFrom pos') moves
 
 --------------------------------------------------------------------------------
 -- General helper functions
 --------------------------------------------------------------------------------
 
-verifyMoves :: Board -> [((Int, Int), (Int, Int))] -> Property
-verifyMoves board expectedMoves = counterexample errorString verificationResult
+verifyMoves :: Color -> Board -> [((Int,Int),(Int,Int))] -> Property
+verifyMoves color board expectedMoves =
+  counterexample errorString verificationResult
   where
     expectedMoves'     = sort expectedMoves
-    actualMoves        = sort $ movesForColor Black board
+    actualMoves        = sort $ movesForColor color board
     verificationResult = expectedMoves' == actualMoves
     actualMissing      = expectedMoves' \\ actualMoves
     actualExtra        = actualMoves    \\ expectedMoves'
@@ -357,6 +451,9 @@ verifyMoves board expectedMoves = counterexample errorString verificationResult
                          "Actual moves:   " ++ show actualMoves ++ "\n" ++
                          "Actual is missing: " ++ show actualMissing ++ "\n" ++
                          "Actual has these extra: " ++ show actualExtra
+
+eqMoves :: [((Int,Int),(Int,Int))] -> [((Int,Int),(Int,Int))] -> Bool
+eqMoves moves1 moves2 = sort moves1 == sort moves2
 
 placePieceAndGetMoves :: Board ->
                          (Int,Int) ->
