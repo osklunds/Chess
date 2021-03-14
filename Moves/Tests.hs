@@ -100,6 +100,24 @@ prop_fixedBoard2 = verifyMoves White board moves
             -- Pawn at (6,3)
             (movesFrom (6,3) [(5,3), (4,3), (5,4)])
 
+verifyMoves :: Color -> Board -> [((Int,Int),(Int,Int))] -> Property
+verifyMoves color board expectedMoves =
+  counterexample errorString verificationResult
+  where
+    expectedMoves'     = sort expectedMoves
+    actualMoves        = sort $ movesForColor color board
+    verificationResult = expectedMoves' == actualMoves
+    actualMissing      = expectedMoves' \\ actualMoves
+    actualExtra        = actualMoves    \\ expectedMoves'
+    errorString        = show board ++ "\n" ++
+                         "Expected moves: " ++ show expectedMoves' ++ "\n" ++
+                         "Actual moves:   " ++ show actualMoves ++ "\n" ++
+                         "Actual is missing: " ++ show actualMissing ++ "\n" ++
+                         "Actual has these extra: " ++ show actualExtra
+
+movesFrom :: (Int,Int) -> [(Int,Int)] -> [((Int,Int),(Int,Int))]
+movesFrom start ends = map (\end -> (start, end)) ends
+
 
 --------------------------------------------------------------------------------
 -- Subsets
@@ -133,39 +151,34 @@ movesAreSubsetOfMoves kind1 kind2 board pos = movesKind1 `isSubsetOf`
 -- All pieces (-)
 --------------------------------------------------------------------------------
 
+-- No non moves
+
 prop_destinationIsWithinBoard :: Board -> Bool
-prop_destinationIsWithinBoard board = all f moves
+prop_destinationIsWithinBoard board = all pred moves
   where
     moves = movesForColor Black board
-    f (_start,(row,col)) = 0 <= row && row < 8 && 0 <= col && col < 8
+    pred (_start,(row,col)) = 0 <= row && row < 8 && 0 <= col && col < 8
 
 prop_destinationIsNotSameColor :: Board -> Bool
-prop_destinationIsNotSameColor board = all f moves
+prop_destinationIsNotSameColor board = all pred moves
   where
-    moves           = movesForColor Black board
-    f (_start,dest) = not (isColor Black (get dest board))
+    moves              = movesForColor Black board
+    pred (_start,dest) = not (isColor Black (get dest board))
 
 prop_startIsSameColor :: Board -> Bool
-prop_startIsSameColor board = all f moves
+prop_startIsSameColor board = all pred moves
   where
-    moves           = movesForColor Black board
-    f (start,_dest) = isColor Black (get start board)
+    moves              = movesForColor Black board
+    pred (start,_dest) = isColor Black (get start board)
 
-prop_blackAndWhiteGiveSameMoves :: Board -> Property
-prop_blackAndWhiteGiveSameMoves board = counterexample errorString $
-                                        blackMoves `eqMoves` mirroredWhiteMoves
+prop_blackAndWhiteGiveSameMoves :: Board -> Bool
+prop_blackAndWhiteGiveSameMoves board = blackMoves `eqMoves` mirroredWhiteMoves
   where
     blackMoves         = movesForColor Black board
     swappedColors      = swapColors board
     mirroredBoard      = mirrorBoard swappedColors
     whiteMoves         = movesForColor White mirroredBoard
     mirroredWhiteMoves = map mirrorMove whiteMoves
-    errorString        = "board\n" ++ show board ++ "\n" ++
-                         "blackMoves\n" ++ show blackMoves ++ "\n" ++
-                         "swappedColors\n" ++ show swappedColors ++ "\n" ++
-                         "mirroredBoard\n" ++ show mirroredBoard ++ "\n" ++
-                         "whiteMoves\n" ++ show whiteMoves ++ "\n" ++
-                         "mirroredWhiteMoves\n" ++ show mirroredWhiteMoves
 
 swapColors :: Board -> Board
 swapColors board = foldl swapColorPos
@@ -192,9 +205,9 @@ mirrorPos :: Board -> (Int,Int) -> Board
 mirrorPos board pos@(row,col) = set pos atMirroredPos $
                                 set mirroredPos atPos $ board
   where
-    mirroredRow = 7-row
-    mirroredPos = (mirroredRow,col)
-    atPos       = get pos board
+    mirroredRow   = 7-row
+    mirroredPos   = (mirroredRow,col)
+    atPos         = get pos board
     atMirroredPos = get mirroredPos board
 
 mirrorMove :: ((Int,Int),(Int,Int)) -> ((Int,Int),(Int,Int))
@@ -203,12 +216,15 @@ mirrorMove ((rowS,colS),(rowD,colD)) = ((rowS',colS),(rowD',colD))
     rowS' = 7-rowS
     rowD' = 7-rowD
 
+eqMoves :: [((Int,Int),(Int,Int))] -> [((Int,Int),(Int,Int))] -> Bool
+eqMoves moves1 moves2 = sort moves1 == sort moves2
 
 
 --------------------------------------------------------------------------------
 -- King, Queen, Rook and Bishop (-)
 --------------------------------------------------------------------------------
 
+--------------------------------------------------------------------------------
 -- Moves in valid direction
 --------------------------------------------------------------------------------
 
@@ -219,7 +235,7 @@ prop_kingOnlyMovesOneStep :: Board -> (Int,Int) -> Bool
 prop_kingOnlyMovesOneStep = pieceOnlyMoves King isMoveOneStep
 
 prop_queenOnlyMovesStraight :: Board -> (Int,Int) -> Bool
-prop_queenOnlyMovesStraight = pieceOnlyMoves Bishop isMoveStraight
+prop_queenOnlyMovesStraight = pieceOnlyMoves Queen isMoveStraight
 
 prop_rookOnlyMovesHorizontallyOrVertically :: Board -> (Int,Int) -> Bool
 prop_rookOnlyMovesHorizontallyOrVertically =
@@ -233,7 +249,7 @@ pieceOnlyMoves :: Kind ->
                   Board ->
                   (Int,Int) ->
                   Bool
-pieceOnlyMoves kind isOkay board pos = all isOkay moves
+pieceOnlyMoves kind movePred board pos = all movePred moves
   where
     (_board', _pos', moves) = placePieceAndGetMoves board pos kind
 
@@ -247,20 +263,22 @@ isMoveHorizontalOrVertical ((rowS,colS),(rowD,colD)) = rowS-rowD == 0 ||
 isMoveDiagonal :: ((Int,Int),(Int,Int)) -> Bool
 isMoveDiagonal ((rowS,colS),(rowD,colD)) = abs (rowS-rowD) == abs (colS-colD)
 
+--------------------------------------------------------------------------------
 -- Empty between start and dest
 --------------------------------------------------------------------------------
 
 prop_queenEmptyBetweenStartAndDest :: Board -> (Int,Int) -> Bool
-prop_queenEmptyBetweenStartAndDest = emptyBetweenStartAndDest Queen
+prop_queenEmptyBetweenStartAndDest = emptyBetweenStartAndDestForKind Queen
 
 prop_rookEmptyBetweenStartAndDest :: Board -> (Int,Int) -> Bool
-prop_rookEmptyBetweenStartAndDest = emptyBetweenStartAndDest Rook
+prop_rookEmptyBetweenStartAndDest = emptyBetweenStartAndDestForKind Rook
 
 prop_bishopEmptyBetweenStartAndDest :: Board -> (Int,Int) -> Bool
-prop_bishopEmptyBetweenStartAndDest = emptyBetweenStartAndDest Bishop
+prop_bishopEmptyBetweenStartAndDest = emptyBetweenStartAndDestForKind Bishop
 
-emptyBetweenStartAndDest :: Kind -> Board -> (Int,Int) -> Bool
-emptyBetweenStartAndDest kind board pos = all (allEmpty board') moves
+emptyBetweenStartAndDestForKind :: Kind -> Board -> (Int,Int) -> Bool
+emptyBetweenStartAndDestForKind kind board pos =
+  all (emptyBetweenStartAndDest board') moves
   where
     (board', _pos', moves) = placePieceAndGetMoves board pos kind
 
@@ -270,23 +288,27 @@ emptyBetweenStartAndDest kind board pos = all (allEmpty board') moves
 --------------------------------------------------------------------------------
 
 prop_kingMovesIfCan :: Board -> (Int,Int) -> Int -> Int -> Property
-prop_kingMovesIfCan = movesIfCan getDirKingQueen King 1
+prop_kingMovesIfCan = let maxLength = 1
+                      in  movesIfCan getDirKingQueen King maxLength
 
 prop_queenMovesIfCan :: Board -> (Int,Int) -> Int -> Int -> Property
-prop_queenMovesIfCan = movesIfCan getDirKingQueen Queen 7
+prop_queenMovesIfCan = let maxLength = 7
+                       in  movesIfCan getDirKingQueen Queen maxLength
 
 prop_rookMovesIfCan :: Board -> (Int,Int) -> Int -> Int -> Property
-prop_rookMovesIfCan = movesIfCan getDirRook Rook 7
+prop_rookMovesIfCan = let maxLength = 7
+                      in  movesIfCan getDirRook Rook maxLength
 
 prop_bishopMovesIfCan :: Board -> (Int,Int) -> Int -> Int -> Property
-prop_bishopMovesIfCan = movesIfCan getDirBishop Bishop 7
+prop_bishopMovesIfCan = let maxLength = 7
+                        in  movesIfCan getDirBishop Bishop maxLength
 
 getDirKingQueen :: Int -> (Int,Int)
 getDirKingQueen dir = case dir `mod` 8 of
-                        0 -> (0,1)  -- Right
-                        1 -> (1,0)  -- Down
-                        2 -> (0,-1) -- Left
-                        3 -> (-1,0) -- Up
+                        0 -> (0,1)   -- Right
+                        1 -> (1,0)   -- Down
+                        2 -> (0,-1)  -- Left
+                        3 -> (-1,0)  -- Up
                         4 -> (1,1)   -- Down right
                         5 -> (1,-1)  -- Down left
                         6 -> (-1,1)  -- Up right
@@ -317,7 +339,7 @@ movesIfCan :: (Int -> (Int,Int)) ->
 movesIfCan getDir kind maxLength board start dir length =
   isWithinBoard dest &&
   not (isColor Black atDest) &&
-  allEmpty board' move ==>
+  emptyBetweenStartAndDest board' move ==>
   move `elem` moves
     where
       (board', start', moves) = placePieceAndGetMoves board start kind
@@ -414,9 +436,9 @@ isMoveLShaped ((rowS,colS),(rowD,colD)) = rowDiff `elem` [1,2] &&
 
 prop_knightMovesIfCan :: Board -> (Int,Int) -> Int -> Int -> Property
 prop_knightMovesIfCan board pos rowDiff colDiff = isWithinBoard dest && 
-                                                  isMoveLShaped move ==>
-                                                  (move `elem` moves) == 
-                                                  not (isColor Black atDest)
+                                                  isMoveLShaped move && 
+                                                  not (isColor Black atDest) ==>
+                                                  move `elem` moves
   where
     (board', start, moves) = placePieceAndGetMoves board pos Knight
     rowDiff'               = fixDiff rowDiff
@@ -437,24 +459,6 @@ prop_knightMovesIfCan board pos rowDiff colDiff = isWithinBoard dest &&
 -- General helper functions
 --------------------------------------------------------------------------------
 
-verifyMoves :: Color -> Board -> [((Int,Int),(Int,Int))] -> Property
-verifyMoves color board expectedMoves =
-  counterexample errorString verificationResult
-  where
-    expectedMoves'     = sort expectedMoves
-    actualMoves        = sort $ movesForColor color board
-    verificationResult = expectedMoves' == actualMoves
-    actualMissing      = expectedMoves' \\ actualMoves
-    actualExtra        = actualMoves    \\ expectedMoves'
-    errorString        = show board ++ "\n" ++
-                         "Expected moves: " ++ show expectedMoves' ++ "\n" ++
-                         "Actual moves:   " ++ show actualMoves ++ "\n" ++
-                         "Actual is missing: " ++ show actualMissing ++ "\n" ++
-                         "Actual has these extra: " ++ show actualExtra
-
-eqMoves :: [((Int,Int),(Int,Int))] -> [((Int,Int),(Int,Int))] -> Bool
-eqMoves moves1 moves2 = sort moves1 == sort moves2
-
 placePieceAndGetMoves :: Board ->
                          (Int,Int) ->
                          Kind ->
@@ -466,8 +470,9 @@ placePieceAndGetMoves board pos kind = (board', pos', movesPlaced)
     moves       = movesForColor Black board'
     movesPlaced = filter (isMoveFrom pos') moves
 
-allEmpty :: Board -> ((Int,Int),(Int,Int)) -> Bool
-allEmpty board (start,dest) = and [isEmpty (get p board) | p <- between]
+emptyBetweenStartAndDest :: Board -> ((Int,Int),(Int,Int)) -> Bool
+emptyBetweenStartAndDest board (start,dest) =
+  and [isEmpty (get p board) | p <- between]
   where
     diff    = dest `tupleSub` start
     dir     = tupleSignum diff
@@ -477,9 +482,6 @@ allEmpty board (start,dest) = and [isEmpty (get p board) | p <- between]
 --------------------------------------------------------------------------------
 -- Small/misc helper functions
 --------------------------------------------------------------------------------
-
-movesFrom :: (Int,Int) -> [(Int,Int)] -> [((Int,Int),(Int,Int))]
-movesFrom start ends = map (\end -> (start, end)) ends
 
 isSubsetOf :: (Eq a) => [a] -> [a] -> Bool
 xs `isSubsetOf` ys = null $ xs \\ ys
@@ -510,7 +512,6 @@ isMoveOneStep (start,dest) = tupleMaxAbs (dest `tupleSub` start) <= 1
 
 isMoveFrom :: (Int,Int) -> ((Int,Int),(Int,Int)) -> Bool
 isMoveFrom pos (start,_dest) = pos == start
-
 
 
 
