@@ -151,7 +151,10 @@ movesAreSubsetOfMoves kind1 kind2 board pos = movesKind1 `isSubsetOf`
 -- All pieces (-)
 --------------------------------------------------------------------------------
 
--- No non moves
+prop_noNonMoves :: Board -> Bool
+prop_noNonMoves board = all isMove $ movesForColor Black board
+  where
+    isMove (start,dest) = start /= dest
 
 prop_destinationIsWithinBoard :: Board -> Bool
 prop_destinationIsWithinBoard board = all pred moves
