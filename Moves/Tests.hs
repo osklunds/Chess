@@ -1,5 +1,5 @@
 
-{-# LANGUAGE TemplateHaskell #-} 
+{-# LANGUAGE TemplateHaskell #-}
 
 module Moves.Tests where
 
