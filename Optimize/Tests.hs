@@ -6,19 +6,23 @@ module Optimize.Tests where
 import Test.QuickCheck
 import System.Random
 
-import Optimize.MiniMax
+import Optimize.MiniMax as MM
+import Optimize.AlphaBeta as AB
 
 
 --------------------------------------------------------------------------------
 -- Fixed
 --------------------------------------------------------------------------------
 
-prop_fixed1 :: Bool
-prop_fixed1 = optimize genSts evalSt 0 initSt == initSt &&
-              optimize genSts evalSt 1 initSt == 3      &&
-              optimize genSts evalSt 2 initSt == 2      &&
-              optimize genSts evalSt 3 initSt == 1
+prop_fixed1 :: Property
+prop_fixed1 = counterexample errorString result
   where
+    result = AB.optimize genSts evalSt 0 initSt == initSt &&
+             AB.optimize genSts evalSt 1 initSt == 3      &&
+             AB.optimize genSts evalSt 2 initSt == 2      &&
+             AB.optimize genSts evalSt 3 initSt == 1
+    errorString = show $ AB.optimize genSts evalSt 3 initSt
+
     initSt = 0
 
     -- My moves, first turn
@@ -59,7 +63,7 @@ prop_fixed1 = optimize genSts evalSt 0 initSt == initSt &&
     genSts 313 = [3131]
 
     -- No move
-    evalSt 0 = 5
+    evalSt 0 = 5 :: Int
 
     -- My moves, first turn
     evalSt 1 = 100
@@ -132,13 +136,37 @@ prop_fixed1 = optimize genSts evalSt 0 initSt == initSt &&
     evalSt 3131 = 122
 
 
-
-
-return []
-runTests = $quickCheckAll
-
-
 --------------------------------------------------------------------------------
 -- Arbitrary
 --------------------------------------------------------------------------------
 
+type State = [Int]
+
+genSts :: Int -> State -> [State]
+genSts n st = [(m:st) | m <- [0..n-1]]
+
+evalSt :: Int -> (State -> Int)
+evalSt n state = (foldl (+) 0 state + foldl (*) 1 state) `mod` n
+
+prop_alphaBetaEqualsMiniMax :: Int -> Bool
+prop_alphaBetaEqualsMiniMax seed = snd optMiniMax == snd optAlphaBeta
+  where
+    g            = mkStdGen seed
+    (n,g')       = uniformR (1 :: Int, 8) g
+    (d,_)        = uniformR (1 :: Int, 7) g'
+    initSt       = []
+
+    optMiniMax   = MM.optimizeWithSc (genSts n) (evalSt n) d initSt
+    optAlphaBeta = AB.optimizeWithSc (genSts n) (evalSt n) d initSt
+
+
+
+
+
+
+
+
+
+
+return []
+runTests = $quickCheckAll

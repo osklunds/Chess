@@ -1,17 +1,17 @@
 
 module Optimize.MiniMax
 ( optimize
-, maxi
-, mini
+, optimizeWithSc
 )
 where
 
-
 optimize :: (Ord sc, Num sc, Integral d) =>
             (st -> [st]) -> (st -> sc) -> d -> st -> st
-optimize genSts evalSt d initSt = st
-  where
-    (st, _sc) = maxi genSts evalSt d initSt
+optimize genSts evalSt d initSt = fst $ optimizeWithSc genSts evalSt d initSt
+
+optimizeWithSc :: (Ord sc, Num sc, Integral d) =>
+                  (st -> [st]) -> (st -> sc) -> d -> st -> (st,sc)
+optimizeWithSc genSts evalSt d initSt = maxi genSts evalSt d initSt
 
 maxi :: (Ord sc, Num sc, Integral d) =>
         (st -> [st]) -> (st -> sc) -> d -> st -> (st,sc)

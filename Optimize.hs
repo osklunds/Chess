@@ -4,6 +4,6 @@ module Optimize
 )
 where
 
-import qualified Optimize.MiniMax as M
+import qualified Optimize.MiniMax as MM
 
-optimize = M.optimize
+optimize = MM.optimize
