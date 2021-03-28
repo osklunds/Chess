@@ -8,37 +8,19 @@ module Optimize.AlphaBeta
 where
 
 import Data.Maybe
+import Optimize.Score
+
 
 optimize :: (Score sc, Integral d) =>
             (st -> [st]) -> (st -> sc) -> d -> st -> st
 optimize genSts evalSt d initSt = snd $ optimizeWithSc genSts evalSt d initSt
 
-{-
-function alphabeta(node, depth, α, β, maximizingPlayer) is
-    if depth = 0 or node is a terminal node then
-        return the heuristic value of node
-    if maximizingPlayer then
-        value := −∞
-        for each child of node do
-            value := max(value, alphabeta(child, depth − 1, α, β, FALSE))
-            α := max(α, value)
-            if α ≥ β then
-                break (* β cutoff *)
-        return value
-    else
-        value := +∞
-        for each child of node do
-            value := min(value, alphabeta(child, depth − 1, α, β, TRUE))
-            β := min(β, value)
-            if β ≤ α then
-                break (* α cutoff *)
-        return value
+optimizeWithSc :: (Score sc, Integral d) =>
+            (st -> [st]) -> (st -> sc) -> d -> st -> (sc,st)
+optimizeWithSc genSts evalSt d st = (sc,st1)
+  where
+    (st1,sc) = alphabeta genSts evalSt d minBound maxBound maxSearch st
 
-(* Initial call *)
-alphabeta(origin, depth, −∞, +∞, TRUE)
--}
-
-type Score a = (Ord a, Num a, Bounded a)
 
 type SearchFun st sc d = (st -> [st]) ->
                          (st -> sc) ->
@@ -48,11 +30,6 @@ type SearchFun st sc d = (st -> [st]) ->
                          [st] ->
                          (st,sc)
 
-optimizeWithSc :: (Score sc, Integral d) =>
-            (st -> [st]) -> (st -> sc) -> d -> st -> (sc,st)
-optimizeWithSc genSts evalSt d st = (sc,st1)
-  where
-    (st1,sc) = alphabeta genSts evalSt d minBound maxBound maxSearch st
 
 alphabeta :: (Score sc, Integral d) => (st -> [st]) ->
                                        (st -> sc) ->
@@ -62,9 +39,11 @@ alphabeta :: (Score sc, Integral d) => (st -> [st]) ->
                                        SearchFun st sc d ->
                                        st ->
                                        (st,sc)
-alphabeta _genSts evalSt 0 _a _b _searchFun st = (st, evalSt st)
-alphabeta  genSts evalSt d  a  b  searchFun st =
-  searchFun genSts evalSt d a b (genSts st)
+alphabeta  genSts evalSt d  a  b  searchFun st
+  | d == 0 || null sts = (st, evalSt st)
+  | otherwise          = searchFun genSts evalSt d a b sts
+  where
+    sts = genSts st
 
 maxSearch :: (Score sc, Integral d) => SearchFun st sc d
 maxSearch = maxSearch' (Nothing, minBound)

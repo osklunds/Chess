@@ -27,8 +27,8 @@ a       b             c             d
 30      31            32            33
                      ----
 
-p      q   r         s   t   u       v   w
-40      41  49        42  43  44      45  46
+       q   r         s   t   u       v   w
+        41  49        42  43  44      45  46
                            ---- 
 -}
 
@@ -46,7 +46,7 @@ prop_fixed1 = counterexample errorString result
     genSts "n" = ["x","y"]
     genSts "x" = ["a","b"]
     genSts "y" = ["c","d"]
-    genSts "a" = ["p"]
+    genSts "a" = [] -- ["p"]
     genSts "b" = ["q","r"]
     genSts "c" = ["s","t","u"]
     genSts "d" = ["v","w"]
@@ -76,8 +76,8 @@ type State = [Int]
 
 genSts :: Int -> State -> [State]
 genSts n st
---  | evalSt st == n-1 = []
-  | otherwise        = [(m:st) | m <- [0..n-1]]
+  | evalSt st == n-1 = []
+  | otherwise        = [(m:st) | m <- [1..n]]
 
 evalSt :: State -> Int
 evalSt state = (foldl (+) 0 state + foldl (*) 1 state)
@@ -86,8 +86,8 @@ prop_alphaBetaEqualsMiniMax :: Int -> Bool
 prop_alphaBetaEqualsMiniMax seed = fst optMiniMax == fst optAlphaBeta
   where
     g            = mkStdGen seed
-    (n,g')       = uniformR (1 :: Int, 7) g
-    (d,_)        = uniformR (1 :: Int, 7) g'
+    (n,g')       = uniformR (1 :: Int, 6) g
+    (d,_)        = uniformR (1 :: Int, 6) g'
     initSt       = []
     genF         = genSts n
     evalF        = evalSt
