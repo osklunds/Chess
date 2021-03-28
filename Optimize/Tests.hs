@@ -14,126 +14,58 @@ import Optimize.AlphaBeta as AB
 -- Fixed
 --------------------------------------------------------------------------------
 
+{-
+            n
+            10
+           ----
+
+    x                       y
+    21                      20
+   ----
+
+a       b             c             d
+30      31            32            33
+                     ----
+
+p      q   r         s   t   u       v   w
+40      41  49        42  43  44      45  46
+                           ---- 
+-}
+
 prop_fixed1 :: Property
 prop_fixed1 = counterexample errorString result
   where
-    result = AB.optimize genSts evalSt 0 initSt == initSt &&
-             AB.optimize genSts evalSt 1 initSt == 3      &&
-             AB.optimize genSts evalSt 2 initSt == 2      &&
-             AB.optimize genSts evalSt 3 initSt == 1
-    errorString = show $ AB.optimize genSts evalSt 3 initSt
+    result = AB.optimizeWithSc genSts evalSt 0 initSt == (10,"n") &&
+             AB.optimizeWithSc genSts evalSt 1 initSt == (21,"x") &&
+             AB.optimizeWithSc genSts evalSt 2 initSt == (32,"y") &&
+             AB.optimizeWithSc genSts evalSt 3 initSt == (44,"y")
+    errorString = show $ AB.optimizeWithSc genSts evalSt 3 initSt
 
-    initSt = 0
+    initSt = "n"
 
-    -- My moves, first turn
-    genSts 0 = [1,2,3]
+    genSts "n" = ["x","y"]
+    genSts "x" = ["a","b"]
+    genSts "y" = ["c","d"]
+    genSts "a" = ["p"]
+    genSts "b" = ["q","r"]
+    genSts "c" = ["s","t","u"]
+    genSts "d" = ["v","w"]
 
-    -- Opponent's moves, second turn
-    genSts 1 = [11,12]
-    genSts 2 = [21,22,23]
-    genSts 3 = [31]
-
-    -- My moves, third turn
-    genSts 11 = [111]
-    genSts 12 = [121,122]
-    
-    genSts 21 = [211]
-    genSts 22 = [221,222,223]
-    genSts 23 = [231,232]
-    
-    genSts 31 = [311,312,313]
-
-    -- Opponent's turn, fourth turn
-    genSts 111 = [1111,1112]
-    
-    genSts 121 = [1211]
-    genSts 122 = [1221,1222]
-    
-    genSts 211 = [2111,2112,2113,2114]
-    
-    genSts 221 = [2211]
-    genSts 222 = [2221,2222]
-    genSts 223 = [2231]
-    
-    genSts 231 = [2311]
-    genSts 232 = [2321,2322]
-    
-    genSts 311 = [3111,3112]
-    genSts 312 = [3121,3122,3123]
-    genSts 313 = [3131]
-
-    -- No move
-    evalSt 0 = 5 :: Int
-
-    -- My moves, first turn
-    evalSt 1 = 100
-    evalSt 2 = 200
-    evalSt 3 = 300 -- Current best move
-
-    -- Opponent's moves, second turn
-    evalSt 11 = 050 -- Bad move, made it good for me
-    evalSt 12 = 350 -- Good move, made it bad for me
-      -- Min is 050
-    evalSt 21 = 250
-    evalSt 22 = 200
-    evalSt 23 = 150
-      -- Min is 150
-    evalSt 31 = 100 
-      -- Min is 100
-    -- So if the opponent takes the move that makes it worst for me,
-    -- I should make sure that the worst move is still as good as
-    -- possible for me, meaning I should force the opponent to choose 150
-    -- as the min, i.e. I should take move 2.
-
-    -- My moves, third turn
-    evalSt 111 = 300 -- The best, but this won't happen, because if I chose
-                     -- move 1 in turn 1, the opponent will choose move 2 in
-                     -- turn 2, so I'll never have a chance to choose move 1 in
-                     -- turn 3.
-    evalSt 121 = 120
-    evalSt 122 = 160 -- Will be chosen, because of all moves that the opponent
-                     -- allowed me to do, this is the best.
-    
-    evalSt 211 = 300 -- Same here. Move 3 will be chosen if I chose move 3
-                     -- in turn 1.
-    evalSt 221 = 310
-    evalSt 222 = 320
-    evalSt 223 = 330
-    evalSt 231 = 100
-    evalSt 232 = 110
-    
-    evalSt 311 = 130
-    evalSt 312 = 140
-    evalSt 313 = 150
-
-    -- Opponent's moves, fourth turn
-    evalSt 1111 = 101
-    evalSt 1112 = 102
-
-    evalSt 1211 = 103
-    evalSt 1221 = 104
-    evalSt 1222 = 105
-    
-    evalSt 2111 = 106
-    evalSt 2112 = 107
-    evalSt 2113 = 108
-    evalSt 2114 = 109
-
-    evalSt 2211 = 110
-    evalSt 2221 = 111
-    evalSt 2222 = 112
-    evalSt 2231 = 113
-    
-    evalSt 2311 = 114
-    evalSt 2321 = 115
-    evalSt 2322 = 116
-    
-    evalSt 3111 = 117
-    evalSt 3112 = 118
-    evalSt 3121 = 119
-    evalSt 3122 = 120
-    evalSt 3123 = 121
-    evalSt 3131 = 122
+    evalSt "n" = 10 :: Int
+    evalSt "x" = 21
+    evalSt "y" = 20
+    evalSt "a" = 30
+    evalSt "b" = 31
+    evalSt "c" = 32
+    evalSt "d" = 33
+    evalSt "p" = 40
+    evalSt "q" = 41
+    evalSt "r" = 49
+    evalSt "s" = 42
+    evalSt "t" = 43
+    evalSt "u" = 44
+    evalSt "v" = 45
+    evalSt "w" = 46
 
 
 --------------------------------------------------------------------------------
@@ -143,28 +75,35 @@ prop_fixed1 = counterexample errorString result
 type State = [Int]
 
 genSts :: Int -> State -> [State]
-genSts n st = [(m:st) | m <- [0..n-1]]
+genSts n st
+--  | evalSt st == n-1 = []
+  | otherwise        = [(m:st) | m <- [0..n-1]]
 
-evalSt :: Int -> (State -> Int)
-evalSt n state = (foldl (+) 0 state + foldl (*) 1 state) `mod` n
+evalSt :: State -> Int
+evalSt state = (foldl (+) 0 state + foldl (*) 1 state)
 
 prop_alphaBetaEqualsMiniMax :: Int -> Bool
-prop_alphaBetaEqualsMiniMax seed = snd optMiniMax == snd optAlphaBeta
+prop_alphaBetaEqualsMiniMax seed = fst optMiniMax == fst optAlphaBeta
   where
     g            = mkStdGen seed
-    (n,g')       = uniformR (1 :: Int, 8) g
+    (n,g')       = uniformR (1 :: Int, 7) g
     (d,_)        = uniformR (1 :: Int, 7) g'
     initSt       = []
+    genF         = genSts n
+    evalF        = evalSt
 
-    optMiniMax   = MM.optimizeWithSc (genSts n) (evalSt n) d initSt
-    optAlphaBeta = AB.optimizeWithSc (genSts n) (evalSt n) d initSt
-
-
-
-
+    optMiniMax   = MM.optimizeWithSc genF evalF d initSt
+    optAlphaBeta = AB.optimizeWithSc genF evalF d initSt
 
 
+--------------------------------------------------------------------------------
+-- Benchmark
+--------------------------------------------------------------------------------
 
+--benchmark :: String
+--benchmark = optimize j
+
+--evalBoard
 
 
 

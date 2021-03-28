@@ -5,34 +5,39 @@ module Optimize.MiniMax
 )
 where
 
-optimize :: (Ord sc, Num sc, Integral d) =>
+import Optimize.Score
+
+
+optimize :: (Score sc, Integral d) =>
             (st -> [st]) -> (st -> sc) -> d -> st -> st
-optimize genSts evalSt d initSt = fst $ optimizeWithSc genSts evalSt d initSt
+optimize genF evalF d st = snd $ optimizeWithSc genF evalF d st
 
-optimizeWithSc :: (Ord sc, Num sc, Integral d) =>
-                  (st -> [st]) -> (st -> sc) -> d -> st -> (st,sc)
-optimizeWithSc genSts evalSt d initSt = maxi genSts evalSt d initSt
+optimizeWithSc :: (Score sc, Integral d) =>
+                  (st -> [st]) -> (st -> sc) -> d -> st -> (sc,st)
+optimizeWithSc genF evalF d st = maxi genF evalF d st
 
-maxi :: (Ord sc, Num sc, Integral d) =>
-        (st -> [st]) -> (st -> sc) -> d -> st -> (st,sc)
-maxi _genSts evalSt 0 initSt = (initSt, evalSt initSt)
-maxi  genSts evalSt d initSt = foldl1 maxStAndSc stsAndScs
+maxi :: (Score sc, Integral d) =>
+        (st -> [st]) -> (st -> sc) -> d -> st -> (sc,st)
+maxi genF evalF d st
+  | d == 0 || null sts = (evalF st, st)
+  | otherwise          = foldl1 maxScAndSt scsAndSts
   where
-    sts = genSts initSt
-    scs = map (snd . mini genSts evalSt (d-1)) sts
-    stsAndScs = zip sts scs
-    maxStAndSc x y
-      | snd x > snd y = x
+    sts = genF st
+    scs = map (fst . mini genF evalF (d-1)) sts
+    scsAndSts = zip scs sts
+    maxScAndSt x y
+      | fst x > fst y = x
       | otherwise     = y
 
-mini :: (Ord sc, Num sc, Integral d) =>
-        (st -> [st]) -> (st -> sc) -> d -> st -> (st,sc)
-mini _genSts evalSt 0 initSt = (initSt, evalSt initSt)
-mini  genSts evalSt d initSt = foldl1 minStAndSc stsAndScs
+mini :: (Score sc, Integral d) =>
+        (st -> [st]) -> (st -> sc) -> d -> st -> (sc,st)
+mini  genF evalF d st
+  | d == 0 || null sts = (evalF st, st)
+  | otherwise          = foldl1 minScAndSt scsAndSts
   where
-    sts = genSts initSt
-    scs = map (snd . maxi genSts evalSt (d-1)) sts
-    stsAndScs = zip sts scs
-    minStAndSc x y
-      | snd x < snd y = x
+    sts = genF st
+    scs = map (fst . maxi genF evalF (d-1)) sts
+    scsAndSts = zip scs sts
+    minScAndSt x y
+      | fst x < fst y = x
       | otherwise     = y

@@ -11,7 +11,7 @@ import Data.Maybe
 
 optimize :: (Score sc, Integral d) =>
             (st -> [st]) -> (st -> sc) -> d -> st -> st
-optimize genSts evalSt d initSt = fst $ optimizeWithSc genSts evalSt d initSt
+optimize genSts evalSt d initSt = snd $ optimizeWithSc genSts evalSt d initSt
 
 {-
 function alphabeta(node, depth, α, β, maximizingPlayer) is
@@ -49,9 +49,10 @@ type SearchFun st sc d = (st -> [st]) ->
                          (st,sc)
 
 optimizeWithSc :: (Score sc, Integral d) =>
-            (st -> [st]) -> (st -> sc) -> d -> st -> (st,sc)
-optimizeWithSc genSts evalSt d st =
-  alphabeta genSts evalSt d minBound maxBound maxSearch st
+            (st -> [st]) -> (st -> sc) -> d -> st -> (sc,st)
+optimizeWithSc genSts evalSt d st = (sc,st1)
+  where
+    (st1,sc) = alphabeta genSts evalSt d minBound maxBound maxSearch st
 
 alphabeta :: (Score sc, Integral d) => (st -> [st]) ->
                                        (st -> sc) ->
