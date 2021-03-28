@@ -13,22 +13,21 @@ import Optimize.Score
 
 optimize :: (Score sc, Integral d) =>
             (st -> [st]) -> (st -> sc) -> d -> st -> st
-optimize genSts evalSt d initSt = snd $ optimizeWithSc genSts evalSt d initSt
+optimize genF evalF d st = snd $ optimizeWithSc genF evalF d st
 
 optimizeWithSc :: (Score sc, Integral d) =>
             (st -> [st]) -> (st -> sc) -> d -> st -> (sc,st)
-optimizeWithSc genSts evalSt d st = (sc,st1)
-  where
-    (st1,sc) = alphabeta genSts evalSt d minBound maxBound maxSearch st
+optimizeWithSc genF evalF d st =
+  alphabeta genF evalF d minBound maxBound maxSearch st
 
 
-type SearchFun st sc d = (st -> [st]) ->
+type SearchFun sc st d = (st -> [st]) ->
                          (st -> sc) ->
                          d ->
                          sc ->
                          sc ->
                          [st] ->
-                         (st,sc)
+                         (sc,st)
 
 
 alphabeta :: (Score sc, Integral d) => (st -> [st]) ->
@@ -36,41 +35,41 @@ alphabeta :: (Score sc, Integral d) => (st -> [st]) ->
                                        d ->
                                        sc ->
                                        sc ->
-                                       SearchFun st sc d ->
+                                       SearchFun sc st d ->
                                        st ->
-                                       (st,sc)
-alphabeta  genSts evalSt d  a  b  searchFun st
-  | d == 0 || null sts = (st, evalSt st)
-  | otherwise          = searchFun genSts evalSt d a b sts
+                                       (sc,st)
+alphabeta genF evalF d  a  b  searchFun st
+  | d == 0 || null sts = (evalF st, st)
+  | otherwise          = searchFun genF evalF d a b sts
   where
-    sts = genSts st
+    sts = genF st
 
-maxSearch :: (Score sc, Integral d) => SearchFun st sc d
-maxSearch = maxSearch' (Nothing, minBound)
+maxSearch :: (Score sc, Integral d) => SearchFun sc st d
+maxSearch = maxSearch' (minBound, Nothing)
 
-maxSearch' :: (Score sc, Integral d) => (Maybe st, sc) -> SearchFun st sc d
-maxSearch' (maxSt, maxSc) genSts evalSt d a b (st:sts)
-  | newA >= b = (fromJust newMaxSt, newMaxSc)
-  | null sts  = (fromJust newMaxSt, newMaxSc)
-  | otherwise = maxSearch' (newMaxSt,newMaxSc) genSts evalSt d newA b sts
+maxSearch' :: (Score sc, Integral d) => (sc, Maybe st) -> SearchFun sc st d
+maxSearch' (maxSc,maxSt) genF evalF d a b (st:sts)
+  | newA >= b = (newMaxSc, fromJust newMaxSt)
+  | null sts  = (newMaxSc, fromJust newMaxSt)
+  | otherwise = maxSearch' (newMaxSc,newMaxSt) genF evalF d newA b sts
   where
-    (_thisSt, thisSc) = alphabeta genSts evalSt (d-1) a b minSearch st
-    (newMaxSt, newMaxSc) = case thisSc > maxSc of
-                              True  -> (Just st, thisSc)
-                              False -> (maxSt, maxSc)
+    (thisSc, _thisSt)    = alphabeta genF evalF (d-1) a b minSearch st
+    (newMaxSc, newMaxSt) = case thisSc > maxSc of
+                              True  -> (thisSc, Just st)
+                              False -> (maxSc, maxSt)
     newA                 = max a newMaxSc
 
-minSearch :: (Score sc, Integral d) => SearchFun st sc d
-minSearch = minSearch' (Nothing, maxBound)
+minSearch :: (Score sc, Integral d) => SearchFun sc st d
+minSearch = minSearch' (maxBound, Nothing)
 
-minSearch' :: (Score sc, Integral d) => (Maybe st, sc) -> SearchFun st sc d
-minSearch' (minSt,minSc) genSts evalSt d a b (st:sts)
-  | newB <= a = (fromJust newMinSt, newMinSc)
-  | null sts  = (fromJust newMinSt, newMinSc)
-  | otherwise = minSearch' (newMinSt,newMinSc) genSts evalSt d a newB sts
+minSearch' :: (Score sc, Integral d) => (sc, Maybe st) -> SearchFun sc st d
+minSearch' (minSc,minSt) genF evalF d a b (st:sts)
+  | newB <= a = (newMinSc, fromJust newMinSt)
+  | null sts  = (newMinSc, fromJust newMinSt)
+  | otherwise = minSearch' (newMinSc,newMinSt) genF evalF d a newB sts
   where
-    (_thisSt, thisSc) = alphabeta genSts evalSt (d-1) a b maxSearch st
-    (newMinSt, newMinSc) = case thisSc < minSc of
-                              True  -> (Just st, thisSc)
-                              False -> (minSt, minSc)
+    (thisSc, _thisSt)    = alphabeta genF evalF (d-1) a b maxSearch st
+    (newMinSc, newMinSt) = case thisSc < minSc of
+                              True  -> (thisSc, Just st)
+                              False -> (minSc, minSt)
     newB                 = min b newMinSc
