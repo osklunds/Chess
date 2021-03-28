@@ -76,8 +76,8 @@ type State = [Int]
 
 genSts :: Int -> State -> [State]
 genSts n st
-  | evalSt st == n-1 = []
-  | otherwise        = [(m:st) | m <- [1..n]]
+  | evalSt st `mod` n == 0 = []
+  | otherwise              = [(m:st) | m <- [1..n]]
 
 evalSt :: State -> Int
 evalSt state = (foldl (+) 0 state + foldl (*) 1 state)
