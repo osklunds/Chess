@@ -46,19 +46,19 @@ alphabeta genF evalF d  a  b  searchFun st
 
 maxSearch :: (Score sc, Integral d) => SearchFun sc st d
 maxSearch genF evalF d a b (st:sts) =
-  maxSearch' (evalF st, st) genF evalF d a b sts
+  maxSearch' (evalF st, Just st) genF evalF d a b sts
 
-maxSearch' :: (Score sc, Integral d) => (sc, st) -> SearchFun sc st d
-maxSearch' maxScAndSt                _genF _evalF _d _a _b [] = maxScAndSt
-maxSearch' maxScAndSt@(maxSc,_maxSt)  genF  evalF  d  a  b (st:sts)
-  | newA >= b = newMaxScAndSt
-  | otherwise = maxSearch' newMaxScAndSt genF evalF d newA b sts
+maxSearch' :: (Score sc, Integral d) => (sc, Maybe st) -> SearchFun sc st d
+maxSearch' (maxSc,maxSt) _genF _evalF _d _a _b [] = (maxSc, fromJust maxSt)
+maxSearch' (maxSc,maxSt) genF evalF d a b (st:sts)
+  | newA >= b = (newMaxSc, fromJust newMaxSt)
+  | otherwise = maxSearch' (newMaxSc,newMaxSt) genF evalF d newA b sts
   where
-    (thisSc, _thisSt) = alphabeta genF evalF (d-1) a b minSearch st
-    newMaxScAndSt@(newMaxSc, _newMaxSt) = case thisSc > maxSc of
-                                            True  -> (thisSc, st)
-                                            False -> maxScAndSt
-    newA                                = max a newMaxSc
+    (thisSc, _thisSt)    = alphabeta genF evalF (d-1) a b minSearch st
+    (newMaxSc, newMaxSt) = case thisSc > maxSc of
+                              True  -> (thisSc, Just st)
+                              False -> (maxSc, maxSt)
+    newA                 = max a newMaxSc
 
 minSearch :: (Score sc, Integral d) => SearchFun sc st d
 minSearch = minSearch' (maxBound, Nothing)
