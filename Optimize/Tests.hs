@@ -5,8 +5,11 @@ module Optimize.Tests where
 
 import Test.QuickCheck
 import System.Random
+import Data.List
+import Control.Parallel
 
 import Optimize.MiniMax as MM
+import Optimize.MiniMaxPar as MMP
 import Optimize.AlphaBeta as AB
 
 
@@ -32,14 +35,15 @@ a       b             c             d
                            ---- 
 -}
 
-prop_fixed1 :: Property
-prop_fixed1 = counterexample errorString result
+prop_fixed1 :: Bool
+prop_fixed1 = all check [MM.optimizeWithSc,
+                         AB.optimizeWithSc,
+                         MMP.optimizeWithSc]
   where
-    result = AB.optimizeWithSc genSts evalSt 0 initSt == (10,"n") &&
-             AB.optimizeWithSc genSts evalSt 1 initSt == (21,"x") &&
-             AB.optimizeWithSc genSts evalSt 2 initSt == (32,"y") &&
-             AB.optimizeWithSc genSts evalSt 3 initSt == (44,"y")
-    errorString = show $ AB.optimizeWithSc genSts evalSt 3 initSt
+    check optFun = optFun genSts evalSt 0 initSt == (10,"n") &&
+                   optFun genSts evalSt 1 initSt == (21,"x") &&
+                   optFun genSts evalSt 2 initSt == (32,"y") &&
+                   optFun genSts evalSt 3 initSt == (44,"y")
 
     initSt = "n"
 
@@ -94,17 +98,6 @@ prop_alphaBetaEqualsMiniMax seed = fst optMiniMax == fst optAlphaBeta
 
     optMiniMax   = MM.optimizeWithSc genF evalF d initSt
     optAlphaBeta = AB.optimizeWithSc genF evalF d initSt
-
-
---------------------------------------------------------------------------------
--- Benchmark
---------------------------------------------------------------------------------
-
---benchmark :: String
---benchmark = optimize j
-
---evalBoard
-
 
 
 return []
