@@ -4,6 +4,8 @@ module Cli
 )
 where
 
+import Prelude as P
+
 import Board
 import Moves
 import MoveSelection
@@ -12,13 +14,14 @@ import MoveSelection
 -- Player hard coded as White, computer as Black
 
 main :: IO ()
-main = beginTurn playerTurn defaultBoard
+main = do
+  let board = defaultBoard
+  putStrLn $ showBoard board
+  beginTurn playerTurn board
 
 beginTurn :: (Board -> IO ()) -> Board -> IO ()
 beginTurn nextState board = do
-  putStrLn "-------------------------------------"
   putStrLn ""
-  putStrLn $ showBoard board
   nextState board
 
 playerTurn :: Board -> IO ()
@@ -41,6 +44,7 @@ playerTurn' board = do
       case move `elem` allMoves of
         True -> do
           let newBoard = applyMove move board
+          putStrLn $ showBoard newBoard
           beginTurn computerTurn newBoard
         False -> do
           putStrLn "Illegal move"
@@ -84,4 +88,35 @@ computerTurn board = do
   let move = moveColor 4 Black board
   let newBoard = applyMove move board
 
+  putStrLn $ showBoardWithMove move newBoard
+
   beginTurn playerTurn newBoard
+
+showBoardWithMove :: ((Int,Int),(Int,Int)) -> Board -> String
+showBoardWithMove (start,dest) board =
+  "  a b c d e f g h\n" ++ rowsWithSquares ++ "  a b c d e f g h"
+  where
+    rowIndexes      = [0..7]
+    rowsWithSquares = (concatMap (showRow [start,dest] board) rowIndexes)
+
+showRow :: [(Int,Int)] -> Board -> Int -> String
+showRow positions board row =
+  showRowIndex row ++ initialChar ++ rowString ++ showRowIndex row ++ "\n"
+  where
+    initialChar = getCharForPosition positions (row,-1)
+    rowString   = P.concat [show sq ++ char |
+                            col <- [0..7],
+                            let sq   = get (row,col) board,
+                            let char = getCharForPosition positions
+                                                          (row,col)]
+
+showRowIndex :: Int -> String
+showRowIndex i = show $ 8 - i
+
+getCharForPosition :: [(Int,Int)] -> (Int,Int) -> String
+getCharForPosition positions (row,col)
+  | (row,col)   `elem` positions &&
+    (row,col+1) `elem` positions = "|"
+  | (row,col)   `elem` positions = "]"
+  | (row,col+1) `elem` positions = "["
+  | otherwise                    = " "
