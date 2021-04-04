@@ -7,7 +7,12 @@ module Board
 , defaultBoard
 , get
 , set
+, applyMove
+, fold
+, Board.map
+, Board.any
 , color
+, otherColor
 , isEmpty
 , isColor
 , isOtherColor
@@ -56,11 +61,11 @@ data Kind = Pawn
 --------------------------------------------------------------------------------
 
 defaultBoard :: Board
-defaultBoard = Board $ [map (\kind -> Piece Black kind) defaultRow] ++
+defaultBoard = Board $ [P.map (\kind -> Piece Black kind) defaultRow] ++
                        [replicate 8 $ Piece Black Pawn] ++
                        (replicate 4 $ replicate 8 $ Empty) ++
                        [replicate 8 $ Piece White Pawn] ++
-                       [map (\kind -> Piece White kind) defaultRow]
+                       [P.map (\kind -> Piece White kind) defaultRow]
 
 defaultRow = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
 
@@ -77,7 +82,7 @@ showBoard (Board rows) = "  a b c d e f g h\n" ++
 showRowAndIndex :: ([Square], Int) -> String
 showRowAndIndex (row, i) = show i ++
                            " " ++
-                           concat [show sq ++ " " | sq <- row] ++
+                           P.concat [show sq ++ " " | sq <- row] ++
                            show i ++
                            "\n"
 
@@ -103,7 +108,7 @@ instance Read Board where
   readsPrec _ str = [(fromString str, "")]
 
 fromString :: String -> Board
-fromString board = Board $ map f rows''
+fromString board = Board $ P.map f rows''
   where
     rows   = lines board
     rows'  = tail rows
@@ -173,9 +178,30 @@ replaceAt i x xs = prefix ++ [x] ++ suffix
   where
     (prefix,(_:suffix)) = splitAt i xs
 
+applyMove :: ((Int,Int),(Int,Int)) -> Board -> Board
+applyMove (start,dest) board = set dest atStart $ set start Empty board
+  where
+    atStart = get start board
+
+fold :: (a -> Square -> a) -> a -> Board -> a
+fold f v board = foldl f v $ Board.concat board
+
+concat :: Board -> [Square]
+concat (Board rows) = P.concat rows
+
+map :: (Square -> Square) -> Board -> Board
+map f (Board rows) = Board $ P.map (\row -> P.map f row) rows
+
+any :: (Square -> Bool) -> Board -> Bool
+any f = fold (\acc square -> acc || f square) False
+
 --------------------------------------------------------------------------------
 -- Misc
 --------------------------------------------------------------------------------
+
+otherColor :: Color -> Color
+otherColor White = Black
+otherColor Black = White
 
 color :: Square -> Color
 color (Piece c _) = c
