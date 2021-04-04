@@ -1,7 +1,6 @@
 
 module Score
 ( scoreForColor
-, sc
 )
 where
 
@@ -12,9 +11,6 @@ data FoldState = FoldState { score :: Int
                            , foundKing :: Bool
                            , foundOtherKing :: Bool
                            }
-
-sc :: Color -> Board -> Int
-sc color board = fold (\acc sq -> scoreForSquare color sq + acc) 0 board
 
 scoreForColor :: Color -> Board -> Int
 scoreForColor color board

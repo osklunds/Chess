@@ -4,7 +4,10 @@ module Moves
 )
 where
 
+import Prelude as P
+
 import Board as B
+
 
 movesForColor :: Color -> Board -> [((Int,Int),(Int,Int))]
 movesForColor color board = concat [movesFromPos (row,col) color board |
@@ -81,8 +84,8 @@ knightMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
 knightMoves start board = filter hasValidDest moves
   where
     (Piece color Knight) = get start board
-    moves                = map (\diff -> (start, start `tupleAdd` diff))
-                               knightDiffs
+    moves                = P.map (\diff -> (start, start `tupleAdd` diff))
+                                 knightDiffs
     hasValidDest (_start,dest) = let atDest = get dest board
                                  in  isWithinBoard dest &&
                                      not (isColor color atDest)

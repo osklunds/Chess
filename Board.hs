@@ -5,6 +5,7 @@ module Board
 , Color(..)
 , Kind(..)
 , defaultBoard
+, showBoard
 , get
 , set
 , applyMove
