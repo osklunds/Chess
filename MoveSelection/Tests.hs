@@ -1,5 +1,4 @@
 
-
 {-# LANGUAGE TemplateHaskell #-}
 
 module MoveSelection.Tests where

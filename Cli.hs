@@ -6,49 +6,78 @@ where
 
 import Prelude as P
 
-import Board
+import Board as B
 import Moves
 import MoveSelection
+import Game as G
 
 
 -- Player hard coded as White, computer as Black
 
 main :: IO ()
 main = do
-  let board = defaultBoard
-  putStrLn $ showBoard board
-  beginTurn playerTurn board
+  let gameState = newGameState
+  printBoard gameState
+  playerTurn gameState
 
-beginTurn :: (Board -> IO ()) -> Board -> IO ()
-beginTurn nextState board = do
+playerTurn :: GameState -> IO ()
+playerTurn gameState = do
   putStrLn ""
-  nextState board
-
-playerTurn :: Board -> IO ()
-playerTurn board = do
   putStrLn "Your turn!"
-  playerTurn' board
+  playerTurn' gameState
 
-playerTurn' :: Board -> IO ()
-playerTurn' board = do
+playerTurn' :: GameState -> IO ()
+playerTurn' gameState = do
   putStr "Enter your move: "
   input <- getLine
 
   case parseInput input of
     Nothing -> do
       putStrLn "Illegal syntax"
-      playerTurn' board
+      playerTurn' gameState
     Just move -> do
-      let allMoves = movesForColor White board
-
-      case move `elem` allMoves of
-        True -> do
-          let newBoard = applyMove move board
-          putStrLn $ showBoard newBoard
-          beginTurn computerTurn newBoard
-        False -> do
+      case validateMove move gameState of
+        IllegalMove -> do
           putStrLn "Illegal move"
-          playerTurn' board
+          playerTurn' gameState
+        WouldBeInCheck -> do
+          putStrLn "Doing that move would put you in check"
+          playerTurn' gameState
+        Ok -> do
+          let (gameState',result) = G.applyMove move gameState
+          printBoard gameState'
+
+          case result of
+            Normal ->
+              computerTurn gameState'
+            Check -> do
+              putStrLn "Computer is checked"
+              computerTurn gameState'
+            Checkmate ->
+              putStrLn "Checkmate! You win"
+            Draw ->
+              putStrLn "Draw!"
+
+computerTurn :: GameState -> IO ()
+computerTurn gameState = do
+  let move = moveColor 4 Black $ board gameState
+  let (gameState',result) = G.applyMove move gameState
+  printBoardWithMove move gameState'
+
+  case result of
+    Normal ->
+      playerTurn gameState'
+    Check -> do
+      putStrLn "You're checked"
+      playerTurn gameState'
+    Checkmate ->
+      putStrLn "Checkmate! Computer wins"
+    Draw ->
+      putStrLn "Draw!"
+
+--------------------------------------------------------------------------------
+-- Parsing
+--------------------------------------------------------------------------------
 
 -- Input ex: a4 b6
 parseInput :: String -> Maybe ((Int,Int),(Int,Int))
@@ -83,14 +112,15 @@ parseRow '2' = Just 6
 parseRow '1' = Just 7
 parseRow _   = Nothing
 
-computerTurn :: Board -> IO ()
-computerTurn board = do
-  let move = moveColor 4 Black board
-  let newBoard = applyMove move board
+--------------------------------------------------------------------------------
+-- Showing
+--------------------------------------------------------------------------------
 
-  putStrLn $ showBoardWithMove move newBoard
+printBoard :: GameState -> IO ()
+printBoard = putStrLn . showBoard . board
 
-  beginTurn playerTurn newBoard
+printBoardWithMove :: ((Int,Int),(Int,Int)) -> GameState -> IO ()
+printBoardWithMove move = putStrLn . (showBoardWithMove move) . board
 
 showBoardWithMove :: ((Int,Int),(Int,Int)) -> Board -> String
 showBoardWithMove (start,dest) board =
