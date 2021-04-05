@@ -1,6 +1,6 @@
 
 module Cli
-( main
+( start
 )
 where
 
@@ -14,8 +14,8 @@ import Game as G
 
 -- Player hard coded as White, computer as Black
 
-main :: IO ()
-main = do
+start :: IO ()
+start = do
   let gameState = newGameState
   printBoard gameState
   playerTurn gameState
@@ -60,7 +60,7 @@ playerTurn' gameState = do
 
 computerTurn :: GameState -> IO ()
 computerTurn gameState = do
-  let move = moveColor 4 Black $ board gameState
+  let move = moveColor 5 Black $ board gameState
   let (gameState',result) = G.applyMove move gameState
   printBoardWithMove move gameState'
 
