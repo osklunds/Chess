@@ -9,7 +9,7 @@ import Data.Maybe
 
 import Board as B
 import Moves
-import Score
+import MoveSelection.Score
 import Optimize
 
 
@@ -35,3 +35,7 @@ genStates (State {board = board, turn = color}) = states
 
 evalState :: Color -> State -> Int
 evalState color (State {board = board}) = scoreForColor color board
+
+-- TODO: GameState should be extended with e.g. last moves (to detect 3 draw),
+-- if player has move king and rooks, no capture for 50 turns etc, and let
+-- move selection take this into account.

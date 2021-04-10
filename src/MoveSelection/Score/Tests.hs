@@ -1,7 +1,7 @@
 
 {-# LANGUAGE TemplateHaskell #-}
 
-module Score.Tests where
+module MoveSelection.Score.Tests where
 
 import Test.QuickCheck
 

@@ -1,5 +1,5 @@
 
-module Score
+module MoveSelection.Score
 ( scoreForColor
 )
 where
