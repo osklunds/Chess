@@ -54,7 +54,7 @@ maxSearch' (maxSc,maxSt) genF evalF d a b (st:sts)
   | otherwise = maxSearch' (newMaxSc,newMaxSt) genF evalF d newA b sts
   where
     (thisSc, _thisSt)    = alphabeta genF evalF (d-1) a b minSearch st
-    (newMaxSc, newMaxSt) = case thisSc > maxSc of
+    (newMaxSc, newMaxSt) = case thisSc > maxSc  || isNothing maxSt of
                               True  -> (thisSc, Just st)
                               False -> (maxSc, maxSt)
     newA                 = max a newMaxSc
@@ -69,7 +69,7 @@ minSearch' (minSc,minSt) genF evalF d a b (st:sts)
   | otherwise = minSearch' (newMinSc,newMinSt) genF evalF d a newB sts
   where
     (thisSc, _thisSt)    = alphabeta genF evalF (d-1) a b maxSearch st
-    (newMinSc, newMinSt) = case thisSc < minSc of
+    (newMinSc, newMinSt) = case thisSc < minSc || isNothing minSt of
                               True  -> (thisSc, Just st)
                               False -> (minSc, minSt)
     newB                 = min b newMinSc

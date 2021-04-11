@@ -18,7 +18,7 @@ data State = State { board   :: Board
                    , turn    :: Color }
 
 
--- depth must be 2 or larger? To detect check and checkmate
+-- depth must be 2 or larger in order to detect check and checkmate
 moveColor :: Int -> Color -> Board -> ((Int,Int),(Int,Int))
 moveColor depth color board = fromJust $ reachBy nextState
   where

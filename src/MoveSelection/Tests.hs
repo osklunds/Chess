@@ -3,20 +3,114 @@
 
 module MoveSelection.Tests where
 
+import Prelude as P
 import Test.QuickCheck
 
 import Board as B
+import Moves
 import MoveSelection
 
 
-test = newBoard
+--------------------------------------------------------------------------------
+-- Fixed
+--------------------------------------------------------------------------------
+
+prop_capture :: Bool
+prop_capture = P.all verifyCapturesPiece
+                     [Queen, Rook, Bishop, Knight, Pawn]
+
+verifyCapturesPiece :: Kind -> Bool
+verifyCapturesPiece kind = verifyMakesMove ((5,5),pos) board'
   where
-    board    = defaultBoard
-    depth    = 5
-    move     = moveColor depth Black board
-    newBoard = applyMove move board
+    pos    = (6,4)
+    piece  = Piece White kind
+
+    board  = read  "  0 1 2 3 4 5 6 7  \n\
+                   \0                 0\n\
+                   \1 ♔               1\n\
+                   \2                 2\n\
+                   \3                 3\n\
+                   \4                 4\n\
+                   \5           ♟ ♚   5\n\
+                   \6        [ ]      6\n\
+                   \7                 7\n\
+                   \  0 1 2 3 4 5 6 7"
+    board' = set pos piece board
+
+verifyMakesMove :: ((Int,Int),(Int,Int)) -> Board -> Bool
+verifyMakesMove move board = P.all f [2..5]
+  where
+    f depth = makeMove depth board == move
+
+prop_escape :: Bool
+prop_escape = and [verifyEscapesFromThreat d k | d <- depths, k <- kinds]
+  where
+    depths = [2..5]
+    kinds  = [Queen, Rook, Bishop, Knight, Pawn]
+
+verifyEscapesFromThreat :: Int -> Kind -> Bool
+verifyEscapesFromThreat depth kind = P.all (\pos -> isEmpty $ get pos board'') 
+                                           threatenedPosList
+  where
+    curPos            = (6,4)
+    threatenedPosList = [curPos,(6,2),(0,0),(0,1),(1,1),(2,1),(2,0)]
+    piece             = Piece Black kind
+
+    board   = read  "  0 1 2 3 4 5 6 7  \n\
+                    \0               ♚ 0\n\
+                    \1 ♔               1\n\
+                    \2                 2\n\
+                    \3                 3\n\
+                    \4                 4\n\
+                    \5                 5\n\
+                    \6        [ ]      6\n\
+                    \7       ♙         7\n\
+                    \  0 1 2 3 4 5 6 7"
+    board'  = set curPos piece board
+    move    = makeMove depth board'
+    board'' = applyMove move board'
+
+-- TODO: checkmate by mvoing away other piece
+-- TODO: escape from check
+
+prop_checkmate :: Bool
+prop_checkmate = and [makeMove d board `elem` moves | d <- [2..5]]
+  where
+    moves = [((0,4),(0,3)), ((4,2),(3,3))]
+    board = read  "  0 1 2 3 4 5 6 7  \n\
+                  \0 ♟       ♜     ♝ 0\n\
+                  \1     ♞     ♛   ♝ 1\n\
+                  \2       ♔ ♝       2\n\
+                  \3     ♜   ♙     ♙ 3\n\
+                  \4     ♛   ♖ ♟ ♗ ♚ 4\n\
+                  \5     ♖         ♜ 5\n\
+                  \6       ♘ ♞ ♟ ♝ ♟ 6\n\
+                  \7       ♜   ♞ ♖ ♝ 7\n\
+                  \  0 1 2 3 4 5 6 7"
+
+-- TODO: The above fails. move generation from needs to consider if in check
+-- or not. Not enough with "at least 2 deep" because that reasoning applies
+-- to all levels.
 
 
+
+
+--------------------------------------------------------------------------------
+-- Arbitrary
+--------------------------------------------------------------------------------
+
+prop_legalMove :: Int -> Board -> Bool
+prop_legalMove d board = makeMove d' board `elem` movesForColor Black board
+  where
+    d' = 2 + d `mod` 3
+
+
+--------------------------------------------------------------------------------
+-- Helper functions
+--------------------------------------------------------------------------------
+
+makeMove :: Int -> Board -> ((Int,Int),(Int,Int))
+makeMove depth board = moveColor depth Black board
 
 
 

@@ -9,6 +9,10 @@ import Prelude as P
 import Board as B
 
 
+-- TODO: "all" moves as sub-module that's still tested. But
+-- exported from here should only be check moves/legal moves
+
+
 movesForColor :: Color -> Board -> [((Int,Int),(Int,Int))]
 movesForColor color board = concat [movesFromPos (row,col) color board |
                                     row <- [0..7], col <- [0..7]]

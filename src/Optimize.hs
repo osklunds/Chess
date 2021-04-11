@@ -7,6 +7,7 @@ module Optimize
 where
 
 import qualified Optimize.AlphaBeta as AB
+import qualified Optimize.MiniMax as MM
 import Optimize.Score
 
 optimize :: (Score sc, Integral d) =>

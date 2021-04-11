@@ -1,4 +1,6 @@
 
+{-# LANGUAGE LambdaCase #-}
+
 module Board
 ( Board
 , Square(..)
@@ -10,7 +12,7 @@ module Board
 , set
 , applyMove
 , fold
-, Board.map
+, mapB
 , Board.any
 , color
 , otherColor
@@ -156,8 +158,23 @@ instance Arbitrary Square where
 
 instance Arbitrary Board where
   arbitrary = do
-    board <- replicateM 8 $ replicateM 8 arbitrary
-    return $ Board board
+    rows <- replicateM 8 $ replicateM 8 arbitrary
+
+    let board   = Board rows
+    let noKings = mapB (\case
+                           (Piece _color King) -> Empty
+                           square              -> square
+                       ) board
+    positions <- replicateM 4 $ arbitrary
+    let [row1,col1,row2,col2] = map (`mod` 8) positions
+    let col2' = case (row1,col1) == (row2,col2) of
+                    True  -> (col2 + 1) `mod` 8
+                    False -> col2
+
+    let blackKing = set (row1,col1)  (Piece Black King) noKings
+    let whiteKing = set (row2,col2') (Piece White King) blackKing
+
+    return whiteKing
 
 
 --------------------------------------------------------------------------------
@@ -190,11 +207,12 @@ fold f v board = foldl f v $ Board.concat board
 concat :: Board -> [Square]
 concat (Board rows) = P.concat rows
 
-map :: (Square -> Square) -> Board -> Board
-map f (Board rows) = Board $ P.map (\row -> P.map f row) rows
+mapB :: (Square -> Square) -> Board -> Board
+mapB f (Board rows) = Board $ map (\row -> map f row) rows
 
 any :: (Square -> Bool) -> Board -> Bool
 any f = fold (\acc square -> acc || f square) False
+
 
 --------------------------------------------------------------------------------
 -- Misc
@@ -242,3 +260,4 @@ isQueen _               = False
 isKing :: Square -> Bool
 isKing (Piece _ King) = True
 isKing _              = False
+

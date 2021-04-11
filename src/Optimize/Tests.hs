@@ -32,7 +32,7 @@ a       b             c             d
 
        q   r         s   t   u       v   w
         41  49        42  43  44      45  46
-                           ---- 
+                             ---- 
 -}
 
 prop_fixed1 :: Bool
