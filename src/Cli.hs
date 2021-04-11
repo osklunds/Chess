@@ -60,7 +60,7 @@ playerTurn' gameState = do
 
 computerTurn :: GameState -> IO ()
 computerTurn gameState = do
-  let move = moveColor 5 Black $ board gameState
+  let move = moveColor 4 Black $ board gameState
   let (gameState',result) = G.applyMove move gameState
   printBoardWithMove move gameState'
 
@@ -117,36 +117,46 @@ parseRow _   = Nothing
 --------------------------------------------------------------------------------
 
 printBoard :: GameState -> IO ()
-printBoard = putStrLn . showBoard . board
+printBoard = putStrLn . (showBoardWithMarkers []) . board
 
 printBoardWithMove :: ((Int,Int),(Int,Int)) -> GameState -> IO ()
-printBoardWithMove move = putStrLn . (showBoardWithMove move) . board
+printBoardWithMove (start,dest) = putStrLn .
+                                  (showBoardWithMarkers [start,dest]) .
+                                  board
 
-showBoardWithMove :: ((Int,Int),(Int,Int)) -> Board -> String
-showBoardWithMove (start,dest) board =
-  "  a b c d e f g h\n" ++ rowsWithSquares ++ "  a b c d e f g h"
+showBoardWithMarkers :: [(Int,Int)] -> Board -> String
+showBoardWithMarkers markers board =
+  "  a b c d e f g h\n" ++ rows ++ "  a b c d e f g h"
   where
-    rowIndexes      = [0..7]
-    rowsWithSquares = (concatMap (showRow [start,dest] board) rowIndexes)
+    rowIndexes = [0..7]
+    rows       = concatMap (showRow markers board) rowIndexes
 
 showRow :: [(Int,Int)] -> Board -> Int -> String
-showRow positions board row =
+showRow posList board row =
   showRowIndex row ++ initialChar ++ rowString ++ showRowIndex row ++ "\n"
   where
-    initialChar = getCharForPosition positions (row,-1)
-    rowString   = P.concat [show sq ++ char |
+    initialChar = betweenCharForPosition posList (row,-1)
+    rowString   = P.concat [squareChar ++ betweenChar |
                             col <- [0..7],
-                            let sq   = get (row,col) board,
-                            let char = getCharForPosition positions
-                                                          (row,col)]
+                            let squareChar  = squareCharForPosition (row,col)
+                                                                    board,
+                            let betweenChar = betweenCharForPosition posList
+                                                                     (row,col)]
 
 showRowIndex :: Int -> String
 showRowIndex i = show $ 8 - i
 
-getCharForPosition :: [(Int,Int)] -> (Int,Int) -> String
-getCharForPosition positions (row,col)
-  | (row,col)   `elem` positions &&
-    (row,col+1) `elem` positions = "|"
-  | (row,col)   `elem` positions = "]"
-  | (row,col+1) `elem` positions = "["
-  | otherwise                    = " "
+betweenCharForPosition :: [(Int,Int)] -> (Int,Int) -> String
+betweenCharForPosition posList (row,col)
+  | (row,col)   `elem` posList && (row,col+1) `elem` posList = "|"
+  | (row,col)   `elem` posList                               = "]"
+  | (row,col+1) `elem` posList                               = "["
+  | otherwise                                                = " "
+
+squareCharForPosition :: (Int,Int) -> Board -> String
+squareCharForPosition pos@(row,col) board
+  | square /= Empty = show square
+  | even $ row+col  = " "
+  | odd  $ row+col  = "■"
+  where
+    square = get pos board
