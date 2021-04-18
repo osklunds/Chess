@@ -5,8 +5,8 @@ module MoveSelection.Score.Tests where
 
 import Test.QuickCheck
 
-import Board as B
-import Score
+import Board
+import MoveSelection.Score
 
 
 prop_fixed1 :: Bool
@@ -36,8 +36,8 @@ prop_noKing :: Board -> Property
 prop_noKing board = hasOtherKing ==>
                     scoreForColor Black boardNoOwnKing == minBound
   where
-    hasOtherKing   = B.any (== Piece White King) board
-    boardNoOwnKing = B.map removeKing board
+    hasOtherKing   = anyB (== Piece White King) board
+    boardNoOwnKing = mapB removeKing board
 
     removeKing (Piece Black King) = Empty
     removeKing square             = square
@@ -46,8 +46,8 @@ prop_noOtherKing :: Board -> Property
 prop_noOtherKing board = hasOwnKing ==>
                          scoreForColor Black boardNoOtherKing == maxBound
   where
-    hasOwnKing       = B.any (== Piece Black King) board
-    boardNoOtherKing = B.map removeKing board
+    hasOwnKing       = anyB (== Piece Black King) board
+    boardNoOtherKing = mapB removeKing board
 
     removeKing (Piece White King) = Empty
     removeKing square             = square

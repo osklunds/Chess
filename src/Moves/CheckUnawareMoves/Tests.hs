@@ -141,8 +141,8 @@ movesAreSubsetOfMoves kind1 kind2 board pos = movesKind1 `isSubsetOf`
   where
     pos' = withinizePos pos
 
-    boardKind1 = set pos' (Piece Black kind1) board
-    boardKind2 = set pos' (Piece Black kind2) board
+    boardKind1 = setB pos' (Piece Black kind1) board
+    boardKind2 = setB pos' (Piece Black kind2) board
 
     movesKind1 = movesForColor Black boardKind1
     movesKind2 = movesForColor Black boardKind2
@@ -166,13 +166,13 @@ prop_destinationIsNotSameColor :: Board -> Bool
 prop_destinationIsNotSameColor board = all pred moves
   where
     moves              = movesForColor Black board
-    pred (_start,dest) = not (isColor Black (get dest board))
+    pred (_start,dest) = not (isColor Black (getB dest board))
 
 prop_startIsSameColor :: Board -> Bool
 prop_startIsSameColor board = all pred moves
   where
     moves              = movesForColor Black board
-    pred (start,_dest) = isColor Black (get start board)
+    pred (start,_dest) = isColor Black (getB start board)
 
 prop_blackAndWhiteGiveSameMoves :: Board -> Bool
 prop_blackAndWhiteGiveSameMoves board = blackMoves `eqMoves` mirroredWhiteMoves
@@ -189,9 +189,9 @@ swapColors board = foldl swapColorPos
                          [(row,col) | row <- [0..7], col <- [0..7]]
 
 swapColorPos :: Board -> (Int,Int) -> Board
-swapColorPos board pos = set pos newAtPos board
+swapColorPos board pos = setB pos newAtPos board
   where
-    atPos    = get pos board
+    atPos    = getB pos board
     newAtPos = swapColor atPos
 
 swapColor :: Square -> Square
@@ -205,13 +205,13 @@ mirrorBoard board = foldl mirrorPos
                           [(row,col) | row <- [0..3], col <- [0..7]]
 
 mirrorPos :: Board -> (Int,Int) -> Board
-mirrorPos board pos@(row,col) = set pos atMirroredPos $
-                                set mirroredPos atPos $ board
+mirrorPos board pos@(row,col) = setB pos atMirroredPos $
+                                setB mirroredPos atPos $ board
   where
     mirroredRow   = 7-row
     mirroredPos   = (mirroredRow,col)
-    atPos         = get pos board
-    atMirroredPos = get mirroredPos board
+    atPos         = getB pos board
+    atMirroredPos = getB mirroredPos board
 
 mirrorMove :: ((Int,Int),(Int,Int)) -> ((Int,Int),(Int,Int))
 mirrorMove ((rowS,colS),(rowD,colD)) = ((rowS',colS),(rowD',colD))
@@ -351,7 +351,7 @@ movesIfCan getDir kind maxLength board start dir length =
       diff                    = dir' `tupleMul` length'
       dest                    = start' `tupleAdd` diff
       move                    = (start',dest)
-      atDest                  = get dest board'
+      atDest                  = getB dest board'
 
 
 --------------------------------------------------------------------------------
@@ -365,7 +365,7 @@ prop_pawnSingleForward board pos = isWithinBoard dest ==>
   where
     (board', start, moves) = placePieceAndGetMoves board pos Pawn
     dest                   = start `tupleAdd` (1,0)
-    atDest                 = get dest board'
+    atDest                 = getB dest board'
     move                   = (start,dest)
 
 prop_pawnDoubleForward :: Board -> (Int,Int) -> Property
@@ -378,8 +378,8 @@ prop_pawnDoubleForward board pos = isWithinBoard dest ==>
     (startRow, _startCol)  = start
     between                = start `tupleAdd` (1,0)
     dest                   = start `tupleAdd` (2,0)
-    atBetween              = get between board'
-    atDest                 = get dest board'
+    atBetween              = getB between board'
+    atDest                 = getB dest board'
     move                   = (start,dest)
 
 prop_pawnMovesRight :: Board -> (Int,Int) -> Property
@@ -389,7 +389,7 @@ prop_pawnMovesRight board pos = isWithinBoard dest ==>
   where
     (board', start, moves) = placePieceAndGetMoves board pos Pawn
     dest                   = start `tupleAdd` (1,1)
-    atDest                 = get dest board'
+    atDest                 = getB dest board'
     move                   = (start,dest)
 
 prop_pawnMovesLeft :: Board -> (Int,Int) -> Property
@@ -399,7 +399,7 @@ prop_pawnMovesLeft board pos = isWithinBoard dest ==>
   where
     (board', start, moves) = placePieceAndGetMoves board pos Pawn
     dest                   = start `tupleAdd` (1,-1)
-    atDest                 = get dest board'
+    atDest                 = getB dest board'
     move                   = (start,dest)
 
 prop_pawnNoOtherMove :: Board -> (Int,Int) -> Property
@@ -448,7 +448,7 @@ prop_knightMovesIfCan board pos rowDiff colDiff = isWithinBoard dest &&
     colDiff'               = fixDiff colDiff
     diff                   = (rowDiff',colDiff')
     dest                   = start `tupleAdd` diff
-    atDest                 = get dest board'
+    atDest                 = getB dest board'
     move                   = (start,dest)
 
     fixDiff diff = case diff `mod` 4 of
@@ -469,18 +469,19 @@ placePieceAndGetMoves :: Board ->
 placePieceAndGetMoves board pos kind = (board', pos', movesPlaced)
   where
     pos'        = withinizePos pos
-    board'      = set pos' (Piece Black kind) board
+    board'      = setB pos' (Piece Black kind) board
     moves       = movesForColor Black board'
     movesPlaced = filter (isMoveFrom pos') moves
 
 emptyBetweenStartAndDest :: Board -> ((Int,Int),(Int,Int)) -> Bool
 emptyBetweenStartAndDest board (start,dest) =
-  and [isEmpty (get p board) | p <- between]
+  and [isEmpty (getB p board) | p <- between]
   where
     diff    = dest `tupleSub` start
     dir     = tupleSignum diff
     length  = tupleMaxAbs diff
     between = map ((start `tupleAdd`) . (dir `tupleMul`)) [1..length-1]
+
 
 --------------------------------------------------------------------------------
 -- Small/misc helper functions

@@ -21,7 +21,7 @@ scoreForColor color board
     initState = FoldState { score = 0
                           , foundKing = False
                           , foundOtherKing = False }
-    finalState = fold (foldFun color) initState board
+    finalState = foldB (foldFun color) initState board
 
 foldFun :: Color -> FoldState -> Square -> FoldState
 foldFun color state (Piece color' King)

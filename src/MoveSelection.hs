@@ -4,10 +4,9 @@ module MoveSelection
 )
 where
 
-import Prelude as P
 import Data.Maybe
 
-import Board as B
+import Board
 import Moves
 import MoveSelection.Score
 import Optimize
@@ -29,9 +28,9 @@ genStates :: State -> [State]
 genStates (State {board = board, turn = color}) = states
   where
     moves  = movesForColor color board
-    states = P.map (\move -> State { board   = applyMove move board,
-                                     reachBy = Just move,
-                                     turn    = otherColor color}) moves
+    states = map (\move -> State { board   = applyMove move board,
+                                   reachBy = Just move,
+                                   turn    = invert color}) moves
 
 evalState :: Color -> State -> Int
 evalState color (State {board = board}) = scoreForColor color board

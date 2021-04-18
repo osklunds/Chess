@@ -14,8 +14,6 @@ module Game
 )
 where
 
-import Prelude as P
-
 import Board as B
 import Moves
 
@@ -46,22 +44,22 @@ validateMove move (GameState {board, turn})
     threatensCurKing = isKingThreatened turn newBoard
 
 isKingThreatened :: Color -> Board -> Bool
-isKingThreatened color board = P.any (== Piece color King) destSquares
+isKingThreatened color board = any (== Piece color King) destSquares
   where
-    movesOther  = movesForColor (otherColor color) board
-    dests       = P.map snd movesOther
-    destSquares = P.map (\dest -> get dest board) dests
+    movesOther  = movesForColor (invert color) board
+    dests       = map snd movesOther
+    destSquares = map (\dest -> getB dest board) dests
 
 applyMove :: ((Int,Int),(Int,Int)) -> GameState -> (GameState, Result)
 applyMove move (GameState {board, turn, captured}) = (nextGameState, result)
   where
     -- Next game state
-    atDest    = get (snd move) board
+    atDest    = getB (snd move) board
     captured' = case atDest of
                   Empty -> captured
                   _else -> atDest:captured
     board'    = B.applyMove move $ board
-    opponent  = otherColor turn
+    opponent  = invert turn
 
     nextGameState = GameState { board    = board'
                               , turn     = opponent

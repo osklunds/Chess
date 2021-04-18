@@ -4,8 +4,6 @@ module Moves.CheckUnawareMoves
 )
 where
 
-import Prelude as P
-
 import Board as B
 
 
@@ -18,7 +16,7 @@ movesFromPos pos color board
   | isColor color atPos = movesFun pos board
   | otherwise           = []
   where
-    atPos = get pos board
+    atPos = getB pos board
     movesFun = case atPos of
                  (Piece _ King )  -> kingMoves
                  (Piece _ Queen)  -> queenMoves
@@ -44,7 +42,7 @@ bishopMoves = movesFromDirs bishopDirs
 movesFromDirs :: [(Int,Int)] -> (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
 movesFromDirs dirs start board = concatMap movesFun dirs
   where
-    atPos         = get start board
+    atPos         = getB start board
     color         = B.color atPos
     movesFun diff = movesFromColorAndDiff color diff start board
 
@@ -60,7 +58,7 @@ movesFromColorAndDiff color diff start board
   | otherwise                 = []
   where
     dest           = start `tupleAdd` diff
-    atDest         = get dest board
+    atDest         = getB dest board
     thisMove       = (start,dest)
     remainingMoves = movesFromColorAndDiff color nextDiff start board
     nextDiff       = diff `tupleAdd` tupleSignum diff
@@ -83,10 +81,10 @@ bishopDirs = [(1,1),   -- Down-right
 knightMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
 knightMoves start board = filter hasValidDest moves
   where
-    (Piece color Knight) = get start board
-    moves                = P.map (\diff -> (start, start `tupleAdd` diff))
-                                 knightDiffs
-    hasValidDest (_start,dest) = let atDest = get dest board
+    (Piece color Knight) = getB start board
+    moves                = map (\diff -> (start, start `tupleAdd` diff))
+                               knightDiffs
+    hasValidDest (_start,dest) = let atDest = getB dest board
                                  in  isWithinBoard dest &&
                                      not (isColor color atDest)
 
@@ -102,7 +100,7 @@ knightDiffs = [(2,1),  -- L
 pawnMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
 pawnMoves start board = [(start,dest) | dest <- dests]
   where
-    color       = B.color $ get start board
+    color       = B.color $ getB start board
     forwardDir  = case color of
                     Black -> 1
                     White -> (-1)
@@ -116,10 +114,10 @@ pawnMoves start board = [(start,dest) | dest <- dests]
     forward       = start `tupleAdd` (forwardDir,  0)
     doubleForward = start `tupleAdd` (forwardDir*2,0)
 
-    atLeft          = get left  board
-    atRight         = get right board
-    atForward       = get forward board
-    atDoubleForward = get doubleForward board
+    atLeft          = getB left  board
+    atRight         = getB right board
+    atForward       = getB forward board
+    atDoubleForward = getB doubleForward board
 
     dests = [left    | isWithinBoard left    && isOtherColor color atLeft] ++
             [right   | isWithinBoard right   && isOtherColor color atRight] ++

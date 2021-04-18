@@ -2,20 +2,26 @@
 {-# LANGUAGE LambdaCase #-}
 
 module Board
-( Board
+( 
+-- Types
+  Board
 , Square(..)
 , Color(..)
 , Kind(..)
 , defaultBoard
-, showBoard
-, get
-, set
-, applyMove
-, fold
+
+-- Board operations
+, getB
+, setB
+, foldB
+, concatB
 , mapB
-, Board.any
+, anyB
+, applyMove
+
+-- Squares
 , color
-, otherColor
+, invert
 , isEmpty
 , isColor
 , isOtherColor
@@ -25,15 +31,13 @@ module Board
 , isRook
 , isQueen
 , isKing
-, fromString
 )
 where
 
-import Prelude as P
 import Control.Monad
+import Data.Char
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
-import Data.Char
 
 --------------------------------------------------------------------------------
 -- Types
@@ -60,24 +64,25 @@ data Kind = Pawn
 
 
 --------------------------------------------------------------------------------
--- Basic board functions
+-- Default, Show and Read
 --------------------------------------------------------------------------------
 
 defaultBoard :: Board
-defaultBoard = Board $ [P.map (\kind -> Piece Black kind) defaultRow] ++
+defaultBoard = Board $ [map (\kind -> Piece Black kind) defaultRow] ++
                        [replicate 8 $ Piece Black Pawn] ++
                        (replicate 4 $ replicate 8 $ Empty) ++
                        [replicate 8 $ Piece White Pawn] ++
-                       [P.map (\kind -> Piece White kind) defaultRow]
+                       [map (\kind -> Piece White kind) defaultRow]
 
 defaultRow = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
+
 
 instance Show Board where
   show = showBoard
 
 showBoard :: Board -> String
 showBoard (Board rows) = "  a b c d e f g h\n" ++
-                         (P.concatMap showRowAndIndex rowsAndIndexes) ++
+                         (concatMap showRowAndIndex rowsAndIndexes) ++
                          "  a b c d e f g h"
   where
     rowsAndIndexes = zip rows [8,7..1]
@@ -85,7 +90,7 @@ showBoard (Board rows) = "  a b c d e f g h\n" ++
 showRowAndIndex :: ([Square], Int) -> String
 showRowAndIndex (row, i) = show i ++
                            " " ++
-                           P.concat [show sq ++ " " | sq <- row] ++
+                           concat [show sq ++ " " | sq <- row] ++
                            show i ++
                            "\n"
 
@@ -107,11 +112,12 @@ showSquare (Piece White Rook)   = "♖"
 showSquare (Piece White Queen)  = "♕"
 showSquare (Piece White King)   = "♔"
 
+
 instance Read Board where
   readsPrec _ str = [(fromString str, "")]
 
 fromString :: String -> Board
-fromString board = Board $ P.map f rows''
+fromString board = Board $ map f rows''
   where
     rows   = lines board
     rows'  = tail rows
@@ -137,6 +143,7 @@ fromChar '♘' = Piece White Knight
 fromChar '♖' = Piece White Rook
 fromChar '♕' = Piece White Queen
 fromChar '♔' = Piece White King
+
 
 --------------------------------------------------------------------------------
 -- Arbitrary
@@ -171,8 +178,8 @@ instance Arbitrary Board where
                     True  -> (col2 + 1) `mod` 8
                     False -> col2
 
-    let blackKing = set (row1,col1)  (Piece Black King) noKings
-    let whiteKing = set (row2,col2') (Piece White King) blackKing
+    let blackKing = setB (row1,col1)  (Piece Black King) noKings
+    let whiteKing = setB (row2,col2') (Piece White King) blackKing
 
     return whiteKing
 
@@ -181,11 +188,11 @@ instance Arbitrary Board where
 -- Board operations
 --------------------------------------------------------------------------------
 
-get :: (Int,Int) -> Board -> Square
-get (row,col) (Board board) = (board !! row) !! col
+getB :: (Int,Int) -> Board -> Square
+getB (row,col) (Board board) = (board !! row) !! col
 
-set :: (Int,Int) -> Square -> Board -> Board
-set (rowIndex,colIndex) sq (Board oldBoard) = Board newBoard
+setB :: (Int,Int) -> Square -> Board -> Board
+setB (rowIndex,colIndex) sq (Board oldBoard) = Board newBoard
   where
     oldRow = oldBoard !! rowIndex
     newRow = replaceAt colIndex sq oldRow
@@ -196,34 +203,33 @@ replaceAt i x xs = prefix ++ [x] ++ suffix
   where
     (prefix,(_:suffix)) = splitAt i xs
 
-applyMove :: ((Int,Int),(Int,Int)) -> Board -> Board
-applyMove (start,dest) board = set dest atStart $ set start Empty board
-  where
-    atStart = get start board
+foldB :: (a -> Square -> a) -> a -> Board -> a
+foldB f v board = foldl f v $ concatB board
 
-fold :: (a -> Square -> a) -> a -> Board -> a
-fold f v board = foldl f v $ Board.concat board
-
-concat :: Board -> [Square]
-concat (Board rows) = P.concat rows
+concatB :: Board -> [Square]
+concatB (Board rows) = concat rows
 
 mapB :: (Square -> Square) -> Board -> Board
 mapB f (Board rows) = Board $ map (\row -> map f row) rows
 
-any :: (Square -> Bool) -> Board -> Bool
-any f = fold (\acc square -> acc || f square) False
+anyB :: (Square -> Bool) -> Board -> Bool
+anyB f = foldB (\acc square -> acc || f square) False
 
+applyMove :: ((Int,Int),(Int,Int)) -> Board -> Board
+applyMove (start,dest) board = setB dest atStart $ setB start Empty board
+  where
+    atStart = getB start board
 
 --------------------------------------------------------------------------------
 -- Misc
 --------------------------------------------------------------------------------
 
-otherColor :: Color -> Color
-otherColor White = Black
-otherColor Black = White
-
 color :: Square -> Color
 color (Piece c _) = c
+
+invert :: Color -> Color
+invert White = Black
+invert Black = White
 
 isEmpty :: Square -> Bool
 isEmpty Empty = True
@@ -260,4 +266,3 @@ isQueen _               = False
 isKing :: Square -> Bool
 isKing (Piece _ King) = True
 isKing _              = False
-

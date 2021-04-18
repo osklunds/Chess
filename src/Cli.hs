@@ -159,4 +159,4 @@ squareCharForPosition pos@(row,col) board
   | even $ row+col  = " "
   | odd  $ row+col  = "■"
   where
-    square = get pos board
+    square = getB pos board

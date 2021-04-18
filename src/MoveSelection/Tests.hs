@@ -3,10 +3,9 @@
 
 module MoveSelection.Tests where
 
-import Prelude as P
 import Test.QuickCheck
 
-import Board as B
+import Board
 import Moves
 import MoveSelection
 
@@ -16,8 +15,8 @@ import MoveSelection
 --------------------------------------------------------------------------------
 
 prop_capture :: Bool
-prop_capture = P.all verifyCapturesPiece
-                     [Queen, Rook, Bishop, Knight, Pawn]
+prop_capture = all verifyCapturesPiece
+                   [Queen, Rook, Bishop, Knight, Pawn]
 
 verifyCapturesPiece :: Kind -> Bool
 verifyCapturesPiece kind = verifyMakesMove ((5,5),pos) board'
@@ -35,10 +34,10 @@ verifyCapturesPiece kind = verifyMakesMove ((5,5),pos) board'
                    \6        [ ]      6\n\
                    \7                 7\n\
                    \  0 1 2 3 4 5 6 7"
-    board' = set pos piece board
+    board' = setB pos piece board
 
 verifyMakesMove :: ((Int,Int),(Int,Int)) -> Board -> Bool
-verifyMakesMove move board = P.all f [2..5]
+verifyMakesMove move board = all f [2..5]
   where
     f depth = makeMove depth board == move
 
@@ -49,8 +48,8 @@ prop_escape = and [verifyEscapesFromThreat d k | d <- depths, k <- kinds]
     kinds  = [Queen, Rook, Bishop, Knight, Pawn]
 
 verifyEscapesFromThreat :: Int -> Kind -> Bool
-verifyEscapesFromThreat depth kind = P.all (\pos -> isEmpty $ get pos board'') 
-                                           threatenedPosList
+verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'') 
+                                         threatenedPosList
   where
     curPos            = (6,4)
     threatenedPosList = [curPos,(6,2),(0,0),(0,1),(1,1),(2,1),(2,0)]
@@ -66,7 +65,7 @@ verifyEscapesFromThreat depth kind = P.all (\pos -> isEmpty $ get pos board'')
                     \6        [ ]      6\n\
                     \7       ♙         7\n\
                     \  0 1 2 3 4 5 6 7"
-    board'  = set curPos piece board
+    board'  = setB curPos piece board
     move    = makeMove depth board'
     board'' = applyMove move board'
 
