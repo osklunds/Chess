@@ -5,7 +5,7 @@ module Moves
 where
 
 import Board
-import qualified Moves.CheckUnawareMoves as CU
+import qualified Moves.CheckUnaware as CU
 
 
 movesForColor :: Color -> Board -> [((Int,Int),(Int,Int))]

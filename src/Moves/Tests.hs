@@ -8,6 +8,7 @@ import Test.QuickCheck
 
 import Board
 import Moves
+import qualified Moves.CheckUnaware as CU
 
 
 --------------------------------------------------------------------------------
@@ -158,6 +159,19 @@ movesFrom :: (Int,Int) -> [(Int,Int)] -> [((Int,Int),(Int,Int))]
 movesFrom start ends = map (\end -> (start, end)) ends
 
 
+--------------------------------------------------------------------------------
+-- Arbitrary boards
+--------------------------------------------------------------------------------
+
+prop_movesIsSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
+prop_movesIsSubsetOfCheckUnawareMoves color board =
+  moves `isSubsetOf` movesCheckUnaware
+  where
+    moves             = movesForColor color board
+    movesCheckUnaware = CU.movesForColor color board
+
+isSubsetOf :: (Eq a) => [a] -> [a] -> Bool
+xs `isSubsetOf` ys = null $ xs \\ ys
 
 
 return []

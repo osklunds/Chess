@@ -1,13 +1,13 @@
 
 {-# LANGUAGE TemplateHaskell #-}
 
-module Moves.CheckUnawareMoves.Tests where
+module Moves.CheckUnaware.Tests where
 
 import Test.QuickCheck
 import Data.List
 
 import Board
-import Moves.CheckUnawareMoves
+import Moves.CheckUnaware
 
 
 --------------------------------------------------------------------------------
