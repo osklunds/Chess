@@ -73,10 +73,10 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
 -- TODO: escape from check
 
 prop_checkmate :: Bool
-prop_checkmate = and [makeMove d board `elem` moves | d <- [5..5]]
+prop_checkmate = and [makeMove d board `elem` moves | d <- [2..5]]
   where
-    moves = [((0,4),(0,3)), ((4,2),(3,3))]
-board     = read  "  0 1 2 3 4 5 6 7  \n\
+    moves = [((0,4),(0,3)), ((4,2),(3,3)), ((1,5),(1,4))]
+    board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♟       ♜     ♝ 0\n\
                   \1     ♞     ♛   ♝ 1\n\
                   \2       ♔ ♝       2\n\
@@ -87,25 +87,17 @@ board     = read  "  0 1 2 3 4 5 6 7  \n\
                   \7       ♜   ♞ ♖ ♝ 7\n\
                   \  0 1 2 3 4 5 6 7"
 
--- TODO: The above fails. MiniMax doesn't realize it's checkmate because
--- opponent has no moves, so evaluates current, but current should be
--- maxBound because checkmate.
-
--- TODO: Above fails because can make irrelevant move and
--- later do the checkmate move
--- Score needs to consider depth, include depth in genSts
-
-
-
 
 --------------------------------------------------------------------------------
 -- Arbitrary
 --------------------------------------------------------------------------------
 
-prop_legalMove :: Int -> Board -> Bool
-prop_legalMove d board = makeMove d' board `elem` movesForColor Black board
+prop_legalMove :: Int -> Board -> Property
+prop_legalMove d board = not (null legalMoves) ==>
+                         makeMove d' board `elem` legalMoves
   where
-    d' = 2 + d `mod` 3
+    legalMoves = movesForColor Black board
+    d'         = 2 + d `mod` 3
 
 
 --------------------------------------------------------------------------------
@@ -114,9 +106,6 @@ prop_legalMove d board = makeMove d' board `elem` movesForColor Black board
 
 makeMove :: Int -> Board -> ((Int,Int),(Int,Int))
 makeMove depth board = moveColor depth Black board
-
-
-
 
 
 return []
