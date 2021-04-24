@@ -37,7 +37,7 @@ verifyCapturesPiece kind = verifyMakesMove ((5,5),pos) board'
     board' = setB pos piece board
 
 verifyMakesMove :: ((Int,Int),(Int,Int)) -> Board -> Bool
-verifyMakesMove move board = all f [2..5]
+verifyMakesMove move board = all f [1..7]
   where
     f depth = makeMove depth board == move
 
@@ -73,7 +73,7 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
 -- TODO: escape from check
 
 prop_checkmate :: Bool
-prop_checkmate = and [makeMove d board `elem` moves | d <- [2..5]]
+prop_checkmate = and [makeMove d board `elem` moves | d <- [1..7]]
   where
     moves = [((7,1),(7,0)), ((6,1),(6,0))]
     -- The board looks like this to reduce the number of moves to speed up
@@ -89,12 +89,11 @@ prop_checkmate = and [makeMove d board `elem` moves | d <- [2..5]]
                   \  0 1 2 3 4 5 6 7"
 
 -- TODO: Test performance with fold in score
--- TODO: Test more depths
 -- TODO: Test move that needs two steps ahead thinking
 
 prop_checkmateByMovingAwayPiece :: Bool
 prop_checkmateByMovingAwayPiece =
-  and [makeMove d board `elem` moves | d <- [2..5]]
+  and [makeMove d board `elem` moves | d <- [1..6]]
   where
     moves = [((3,0),(1,2)), ((3,0),(5,2))]
     -- The board looks like this to reduce the number of moves to speed up
@@ -116,10 +115,10 @@ prop_checkmateByMovingAwayPiece =
 
 prop_legalMove :: Int -> Board -> Property
 prop_legalMove d board = not (null legalMoves) ==>
-                         makeMove d' board `elem` legalMoves
+                         makeMove depth board `elem` legalMoves
   where
     legalMoves = movesForColor Black board
-    d'         = 2 + d `mod` 3
+    depth      = 1 + d `mod` 4
 
 
 --------------------------------------------------------------------------------
