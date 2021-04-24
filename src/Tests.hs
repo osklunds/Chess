@@ -2,19 +2,21 @@
 module Tests where
 
 import Board.Tests as B
-import Moves.Tests as M
-import Moves.CheckUnawareMoves.Tests as CU
+import Moves.CheckAware.Tests as MCA
+import Moves.CheckUnaware.Tests as MCU
 import MoveSelection.Tests as MS
 import MoveSelection.Score.Tests as S
 import Optimize.Tests as O
+import GameResult.Tests as GR
 
 runAllTests :: IO Bool
 runAllTests = do
-  b  <- B.runTests
-  m  <- M.runTests
-  cu <- CU.runTests
-  ms <- MS.runTests
-  s  <- S.runTests
-  o  <- O.runTests
+  b   <- B.runTests
+  mca <- MCA.runTests
+  mcu <- MCU.runTests
+  ms  <- MS.runTests
+  s   <- S.runTests
+  o   <- O.runTests
+  gr  <- GR.runTests
 
-  return $ and [b,m,cu,ms,s,o]
+  return $ and [b,mca,mcu,ms,s,o,gr]

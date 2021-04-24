@@ -6,7 +6,7 @@ module MoveSelection.Tests where
 import Test.QuickCheck
 
 import Board
-import Moves
+import Moves.CheckAware
 import MoveSelection
 
 
@@ -73,10 +73,10 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
 -- TODO: escape from check
 
 prop_checkmate :: Bool
-prop_checkmate = and [makeMove d board `elem` moves | d <- [2..5]]
+prop_checkmate = and [makeMove d board `elem` moves | d <- [2..2]]
   where
     moves = [((0,4),(0,3)), ((4,2),(3,3))]
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♟       ♜     ♝ 0\n\
                   \1     ♞     ♛   ♝ 1\n\
                   \2       ♔ ♝       2\n\
@@ -87,9 +87,9 @@ prop_checkmate = and [makeMove d board `elem` moves | d <- [2..5]]
                   \7       ♜   ♞ ♖ ♝ 7\n\
                   \  0 1 2 3 4 5 6 7"
 
--- TODO: The above fails. move generation from needs to consider if in check
--- or not. Not enough with "at least 2 deep" because that reasoning applies
--- to all levels.
+-- TODO: The above fails. MiniMax doesn't realize it's checkmate because
+-- opponent has no moves, so evaluates current, but current should be
+-- maxBound because checkmate.
 
 
 

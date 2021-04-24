@@ -7,7 +7,7 @@ where
 import Data.Maybe
 
 import Board
-import Moves
+import Moves.CheckAware
 import MoveSelection.Score
 import Optimize
 

@@ -1,5 +1,5 @@
 
-module Moves
+module Moves.CheckAware
 ( movesForColor
 )
 where
