@@ -6,4 +6,4 @@ module Optimize.Score
 )
 where
 
-type Score a = (Ord a, Num a, Bounded a)
+type Score a = (Ord a, Bounded a)

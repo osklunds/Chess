@@ -73,10 +73,10 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
 -- TODO: escape from check
 
 prop_checkmate :: Bool
-prop_checkmate = and [makeMove d board `elem` moves | d <- [2..2]]
+prop_checkmate = and [makeMove d board `elem` moves | d <- [5..5]]
   where
     moves = [((0,4),(0,3)), ((4,2),(3,3))]
-board = read  "  0 1 2 3 4 5 6 7  \n\
+board     = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♟       ♜     ♝ 0\n\
                   \1     ♞     ♛   ♝ 1\n\
                   \2       ♔ ♝       2\n\
@@ -90,6 +90,10 @@ board = read  "  0 1 2 3 4 5 6 7  \n\
 -- TODO: The above fails. MiniMax doesn't realize it's checkmate because
 -- opponent has no moves, so evaluates current, but current should be
 -- maxBound because checkmate.
+
+-- TODO: Above fails because can make irrelevant move and
+-- later do the checkmate move
+-- Score needs to consider depth, include depth in genSts
 
 
 

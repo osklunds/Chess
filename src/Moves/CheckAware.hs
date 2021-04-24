@@ -10,7 +10,7 @@ import qualified Moves.CheckUnaware as CU
 
 movesForColor :: Color -> Board -> [((Int,Int),(Int,Int))]
 movesForColor color board = filter (isKingSafeAfterMove color board) $
-                            CU.movesForColor color board
+                                   CU.movesForColor color board
 
 isKingSafeAfterMove :: Color -> Board -> ((Int,Int),(Int,Int)) -> Bool
 isKingSafeAfterMove color board move = all (/= Piece color King) destSquares
