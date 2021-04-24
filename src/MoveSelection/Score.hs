@@ -8,10 +8,6 @@ import Board
 import GameResult
 
 
--- TODO: Need to add back FOldState. If no king, return maxBound, so that
--- eval algo know this is a branch that it has already won on.
--- TODO: CHheck if above needed
-
 scoreForColor :: Color -> Board -> Int
 scoreForColor color board
   | gameRes == Normal    = score
@@ -22,6 +18,7 @@ scoreForColor color board
     gameRes = gameResult (invert color) board
     score   = calculateScore color board
 
+-- By keeping track of if found kings, a speed improvement was observed
 data FoldState = FoldState { score :: Int
                            , foundKing :: Bool
                            , foundOtherKing :: Bool

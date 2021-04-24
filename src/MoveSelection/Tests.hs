@@ -88,7 +88,6 @@ prop_checkmate = and [makeMove d board `elem` moves | d <- [1..7]]
                   \7   ♜ ♟           7\n\
                   \  0 1 2 3 4 5 6 7"
 
--- TODO: Test performance with fold in score
 -- TODO: Test move that needs two steps ahead thinking
 
 prop_checkmateByMovingAwayPiece :: Bool

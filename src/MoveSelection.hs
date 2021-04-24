@@ -37,11 +37,16 @@ moveColor depth color board = fromJust $ reachBy nextState
 genStates :: State -> [State]
 genStates (State {board, turn, numberOfMoves}) = states
   where
-    moves  = movesForColor turn board
-    states = map (\move -> State { board         = applyMove move board
-                                 , reachBy       = Just move
-                                 , numberOfMoves = numberOfMoves + 1
-                                 , turn          = invert turn}) moves
+    hasKing = anyB (== (Piece turn King)) board
+    moves   = case hasKing of
+                True  -> movesForColor turn board
+                False -> []
+    -- Optimization. If "turn" has no king anyway, turn lost in a previous
+    -- state and there's no need to check moves now.
+    states  = map (\move -> State { board         = applyMove move board
+                                  , reachBy       = Just move
+                                  , numberOfMoves = numberOfMoves + 1
+                                  , turn          = invert turn}) moves
 
 evalState :: Color -> State -> Score
 evalState color (State {board, numberOfMoves}) =
