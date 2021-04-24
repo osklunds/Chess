@@ -88,6 +88,27 @@ prop_checkmate = and [makeMove d board `elem` moves | d <- [2..5]]
                   \7   ♜ ♟           7\n\
                   \  0 1 2 3 4 5 6 7"
 
+-- TODO: Test performance with fold in score
+-- TODO: Test more depths
+-- TODO: Test move that needs two steps ahead thinking
+
+prop_checkmateByMovingAwayPiece :: Bool
+prop_checkmateByMovingAwayPiece =
+  and [makeMove d board `elem` moves | d <- [2..5]]
+  where
+    moves = [((3,0),(1,2)), ((3,0),(5,2))]
+    -- The board looks like this to reduce the number of moves to speed up
+    board = read  "  0 1 2 3 4 5 6 7  \n\
+                  \0 ♔     ♟         0\n\
+                  \1       ♟         1\n\
+                  \2       ♟         2\n\
+                  \3 ♝     ♟         3\n\
+                  \4       ♟       ♚ 4\n\
+                  \5       ♟         5\n\
+                  \6       ♟         6\n\
+                  \7 ♜ ♜   ♟         7\n\
+                  \  0 1 2 3 4 5 6 7"
+
 
 --------------------------------------------------------------------------------
 -- Arbitrary
