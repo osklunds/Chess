@@ -75,16 +75,17 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
 prop_checkmate :: Bool
 prop_checkmate = and [makeMove d board `elem` moves | d <- [2..5]]
   where
-    moves = [((0,4),(0,3)), ((4,2),(3,3)), ((1,5),(1,4))]
+    moves = [((7,1),(7,0)), ((6,1),(6,0))]
+    -- The board looks like this to reduce the number of moves to speed up
     board = read  "  0 1 2 3 4 5 6 7  \n\
-                  \0 ♟       ♜     ♝ 0\n\
-                  \1     ♞     ♛   ♝ 1\n\
-                  \2       ♔ ♝       2\n\
-                  \3     ♜   ♙     ♙ 3\n\
-                  \4     ♛   ♖ ♟ ♗ ♚ 4\n\
-                  \5     ♖         ♜ 5\n\
-                  \6       ♘ ♞ ♟ ♝ ♟ 6\n\
-                  \7       ♜   ♞ ♖ ♝ 7\n\
+                  \0 ♔   ♟           0\n\
+                  \1     ♟           1\n\
+                  \2     ♟           2\n\
+                  \3     ♟           3\n\
+                  \4     ♟         ♚ 4\n\
+                  \5     ♟           5\n\
+                  \6   ♜ ♟           6\n\
+                  \7   ♜ ♟           7\n\
                   \  0 1 2 3 4 5 6 7"
 
 
