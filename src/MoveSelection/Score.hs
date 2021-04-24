@@ -5,37 +5,24 @@ module MoveSelection.Score
 where
 
 import Board
+import GameResult
 
-
-data FoldState = FoldState { score :: Int
-                           , foundKing :: Bool
-                           , foundOtherKing :: Bool
-                           }
 
 scoreForColor :: Color -> Board -> Int
 scoreForColor color board
-  | not $ foundKing finalState      = minBound
-  | not $ foundOtherKing finalState = maxBound
-  | otherwise                       = score finalState
+  | gameRes == Normal    = score
+  | gameRes == Check     = score
+  | gameRes == Checkmate = maxBound
+  | gameRes == Draw      = 0
   where
-    initState = FoldState { score = 0
-                          , foundKing = False
-                          , foundOtherKing = False }
-    finalState = foldB (foldFun color) initState board
-
-foldFun :: Color -> FoldState -> Square -> FoldState
-foldFun color state (Piece color' King)
-  | color == color' = state { foundKing = True }
-  | color /= color' = state { foundOtherKing = True }
-foldFun color state square = state { score = curScore + accScore }
-  where
-    curScore = scoreForSquare color square
-    accScore = score state
+    gameRes = gameResult (invert color) board
+    score   = foldB (\sc sq -> sc + scoreForSquare color sq) 0 board
 
 scoreForSquare :: Color -> Square -> Int
 scoreForSquare _color Empty = 0
 scoreForSquare color (Piece color' kind) = case kind of
                                               -- Kings are treated separately
+                                              King   -> 0
                                               Queen  -> 10*multiplier
                                               Rook   -> 5*multiplier
                                               Bishop -> 3*multiplier
