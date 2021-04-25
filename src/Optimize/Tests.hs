@@ -11,7 +11,6 @@ import Control.Parallel
 import Optimize.MiniMax as MM
 import Optimize.MiniMaxPar as MMP
 import Optimize.AlphaBeta as AB
-import Optimize.AlphaBetaSort as ABS
 
 
 --------------------------------------------------------------------------------
@@ -123,10 +122,7 @@ prop_equalsMiniMax seed = all (== (head optVals)) optVals
 -- Helper functions
 --------------------------------------------------------------------------------
 
-optFuns = [MM.optimizeWithSc,
-           MMP.optimizeWithSc,
-           AB.optimizeWithSc,
-           ABS.optimizeWithSc]
+optFuns = [MM.optimizeWithSc, MMP.optimizeWithSc, AB.optimizeWithSc]
 
 
 return []
