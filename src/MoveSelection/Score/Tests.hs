@@ -88,7 +88,9 @@ prop_scoreDraw = scoreForBoard board == 0
 --------------------------------------------------------------------------------
 
 scoreForBoard :: Board -> Int
-scoreForBoard = scoreForColor Black Black
+scoreForBoard = scoreForColor Black turn
+  where
+    turn = White
 
 
 return []
