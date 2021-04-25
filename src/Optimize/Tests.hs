@@ -37,14 +37,10 @@ import Optimize.AlphaBeta as AB
             aa  bb   cc dd   ee ff        gg hh         ii jj
             51  51   53 54   59 60        55 56         57 58
                                                        ----
-
-
 -}
 
 prop_fixed1 :: Bool
-prop_fixed1 = all check [MM.optimizeWithSc,
-                         AB.optimizeWithSc,
-                         MMP.optimizeWithSc]
+prop_fixed1 = all check optFuns
   where
     check optFun = optFun genSts evalSt 0 initSt == (10,"n") &&
                    optFun genSts evalSt 1 initSt == (21,"x") &&
@@ -110,18 +106,23 @@ genSts n st
 evalSt :: State -> Int
 evalSt state = (foldl (+) 0 state + foldl (*) 1 state)
 
-prop_alphaBetaEqualsMiniMax :: Int -> Bool
-prop_alphaBetaEqualsMiniMax seed = fst optMiniMax == fst optAlphaBeta
+prop_equalsMiniMax :: Int -> Bool
+prop_equalsMiniMax seed = all (== (head optVals)) optVals
   where
-    g            = mkStdGen seed
-    (n,g')       = uniformR (1 :: Int, 6) g
-    (d,_)        = uniformR (1 :: Int, 6) g'
-    initSt       = []
-    genF         = genSts n
-    evalF        = evalSt
+    g       = mkStdGen seed
+    (n,g')  = uniformR (1 :: Int, 6) g
+    (d,_)   = uniformR (1 :: Int, 6) g'
+    initSt  = []
+    genF    = genSts n
+    evalF   = evalSt
+    optVals = map (\optFun -> fst $ optFun genF evalF d initSt) optFuns
 
-    optMiniMax   = MM.optimizeWithSc genF evalF d initSt
-    optAlphaBeta = AB.optimizeWithSc genF evalF d initSt
+
+--------------------------------------------------------------------------------
+-- Helper functions
+--------------------------------------------------------------------------------
+
+optFuns = [MM.optimizeWithSc, MMP.optimizeWithSc, AB.optimizeWithSc]
 
 
 return []
