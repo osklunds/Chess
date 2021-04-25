@@ -10,7 +10,7 @@ import MoveSelection.Score
 
 
 prop_scoreNormal :: Bool
-prop_scoreNormal = scoreForColor Black board == score
+prop_scoreNormal = scoreForBoard board == score
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♟ ♕           ♝ 0\n\
@@ -33,7 +33,7 @@ prop_scoreNormal = scoreForColor Black board == score
                     +0+0+0+5+0+3-5+3
 
 prop_scoreCheck :: Bool
-prop_scoreCheck = scoreForColor Black board == score
+prop_scoreCheck = scoreForBoard board == score
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♟ ♕           ♝ 0\n\
@@ -56,7 +56,7 @@ prop_scoreCheck = scoreForColor Black board == score
                     +0+0+0+5+0+3-5+3
 
 prop_scoreCheckmate :: Bool
-prop_scoreCheckmate = scoreForColor Black board == maxBound
+prop_scoreCheckmate = scoreForBoard board == maxBound
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♟ ♕           ♝ 0\n\
@@ -70,7 +70,7 @@ prop_scoreCheckmate = scoreForColor Black board == maxBound
                   \  0 1 2 3 4 5 6 7"
 
 prop_scoreDraw :: Bool
-prop_scoreDraw = scoreForColor Black board == 0
+prop_scoreDraw = scoreForBoard board == 0
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♟[♛]          ♝ 0\n\
@@ -82,6 +82,13 @@ prop_scoreDraw = scoreForColor Black board == 0
                   \6         ♞ ♟ ♝ ♟ 6\n\
                   \7       ♜   ♞   ♝ 7\n\
                   \  0 1 2 3 4 5 6 7"
+
+--------------------------------------------------------------------------------
+-- Helper functions
+--------------------------------------------------------------------------------
+
+scoreForBoard :: Board -> Int
+scoreForBoard = scoreForColor Black Black
 
 
 return []

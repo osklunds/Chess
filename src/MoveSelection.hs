@@ -48,9 +48,10 @@ genStates (State {board, turn, numberOfMoves}) = states
                                   , numberOfMoves = numberOfMoves + 1
                                   , turn          = invert turn}) moves
 
+-- TODO: Perhaps score fun should take state?
 evalState :: Color -> State -> Score
-evalState color (State {board, numberOfMoves}) =
-  Score (scoreForColor color board, numberOfMoves)
+evalState color (State {board, numberOfMoves, turn}) =
+  Score (scoreForColor color turn board, numberOfMoves)
 
 instance Ord Score where
   compare (Score (numScore1,numMoves1)) (Score (numScore2,numMoves2))

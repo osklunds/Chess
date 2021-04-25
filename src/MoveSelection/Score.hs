@@ -8,14 +8,14 @@ import Board
 import GameResult
 
 
-scoreForColor :: Color -> Board -> Int
-scoreForColor color board
+scoreForColor :: Color -> Color -> Board -> Int
+scoreForColor color turn board
   | gameRes == Normal    = score
   | gameRes == Check     = score
   | gameRes == Checkmate = maxBound
   | gameRes == Draw      = 0
   where
-    gameRes = gameResult (invert color) board
+    gameRes = gameResult turn board
     score   = calculateScore color board
 
 -- By keeping track of if found kings, a speed improvement was observed
