@@ -7,7 +7,6 @@ where
 import Prelude as P
 
 import Board as B
-import Moves
 import MoveSelection
 import Game as G
 

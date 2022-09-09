@@ -17,11 +17,10 @@ build-type:          Simple
 extra-source-files:  README.md
 
 executable Chess
-  ghc-options:         -O3
-  main-is:             Main.hs
-  other-modules:       Board, Cli, Game, MoveSelection, Moves, Optimize,
-                       Optimize.AlphaBeta, Optimize.Score, Score
-  -- other-extensions:
-  build-depends:       base >=4.13 && <4.14, QuickCheck
-  hs-source-dirs:      src
-  default-language:    Haskell2010
+    main-is:             Main.hs
+    ghc-options:
+        -O3
+        -Wno-missing-home-modules
+    build-depends:       base >=4.13 && <4.14, QuickCheck
+    hs-source-dirs:      src
+    default-language:    Haskell2010

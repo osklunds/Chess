@@ -15,7 +15,7 @@ module Game
 where
 
 import Board as B
-import Moves
+import Moves.CheckAware
 
 
 data GameState = GameState { board    :: Board
