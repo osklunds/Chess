@@ -37,14 +37,14 @@ verifyCapturesPiece kind = verifyMakesMove ((5,5),pos) board'
     board' = setB pos piece board
 
 verifyMakesMove :: ((Int,Int),(Int,Int)) -> Board -> Bool
-verifyMakesMove move board = all f [1..7]
+verifyMakesMove move board = all f [1..6]
   where
     f depth = makeMove depth board == move
 
 prop_escape :: Bool
 prop_escape = and [verifyEscapesFromThreat d k | d <- depths, k <- kinds]
   where
-    depths = [2..5]
+    depths = [2..4]
     kinds  = [Queen, Rook, Bishop, Knight, Pawn]
 
 verifyEscapesFromThreat :: Int -> Kind -> Bool
@@ -85,11 +85,9 @@ prop_checkmate = and [makeMove d board `elem` moves | d <- [1..7]]
                   \7   ♜ ♟           7\n\
                   \  0 1 2 3 4 5 6 7"
 
--- TODO: Test move that needs two steps ahead thinking
-
 prop_checkmateByMovingAwayPiece :: Bool
 prop_checkmateByMovingAwayPiece =
-  and [makeMove d board `elem` moves | d <- [1..6]]
+  and [makeMove d board `elem` moves | d <- [1..5]]
   where
     moves = [((3,0),(1,2)), ((3,0),(5,2))]
     -- The board looks like this to reduce the number of moves to speed up
@@ -106,7 +104,7 @@ prop_checkmateByMovingAwayPiece =
 
 prop_escapeFromCheckEvenIfCanCheckmate :: Bool
 prop_escapeFromCheckEvenIfCanCheckmate =
-  and [isEmpty $ getB (4,4) (nextBoard d) | d <- [1..6]]
+  and [isEmpty $ getB (4,4) (nextBoard d) | d <- [1..5]]
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♔               0\n\
@@ -121,7 +119,7 @@ prop_escapeFromCheckEvenIfCanCheckmate =
     nextBoard d = applyMove (makeMove d board) board
 
 prop_doStalemateIfLosing :: Bool
-prop_doStalemateIfLosing = and [makeMove d board == ((6,5),(7,6)) | d <- [2..6]]
+prop_doStalemateIfLosing = and [makeMove d board == ((6,5),(7,6)) | d <- [2..5]]
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0       ♚         0\n\
@@ -140,20 +138,7 @@ prop_doStalemateIfLosing = and [makeMove d board == ((6,5),(7,6)) | d <- [2..6]]
 -- to win, but there's a possibility to create a draw and thus at least avoid
 -- losing.
 
-prop_avoidStalemateIfWinning :: Bool
-prop_avoidStalemateIfWinning = and [makeMove d board /= ((7,1),(7,7)) |
-                                    d <- [2..5]]
-  where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
-                  \0 ♜         ♘   ♔ 0\n\
-                  \1 ♜           ♘   1\n\
-                  \2             ♙   2\n\
-                  \3             ♙   3\n\
-                  \4 ♚           ♙   4\n\
-                  \5             ♙   5\n\
-                  \6             ♙   6\n\
-                  \7 ♝ ♜             7\n\ 
-                  \  0 1 2 3 4 5 6 7"
+-- TODO: Test move that needs two steps ahead thinking
 
 --------------------------------------------------------------------------------
 -- Arbitrary
