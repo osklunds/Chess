@@ -13,6 +13,8 @@ import MoveSelection
 import Game as G
 import GameResult as GR
 
+data UserAction = Move ((Int,Int),(Int,Int))
+                | Undo
 
 -- Player hard coded as White, computer as Black
 
@@ -37,7 +39,16 @@ playerTurn' gss@(curGs:_restGss) = do
     Nothing -> do
       putStrLn "Illegal syntax"
       playerTurn' gss
-    Just move -> do
+    Just Undo -> do
+        case gss of
+            (_curGs:_prevGs:newGs:newRest) -> do
+                putStrLn "Undoing one step"
+                printBoard newGs
+                playerTurn' (newGs:newRest)
+            [_curGs] -> do
+                putStrLn "Can't undo because at start"
+                playerTurn' gss
+    Just (Move move) -> do
       case validateMove move curGs of
         IllegalMove -> do
           putStrLn "Illegal move"
@@ -82,14 +93,15 @@ computerTurn gss@(curGs:_restGss) = do
 --------------------------------------------------------------------------------
 
 -- Input ex: a4 b6
-parseInput :: String -> Maybe ((Int,Int),(Int,Int))
+parseInput :: String -> Maybe UserAction
+parseInput "undo" = Just $ Undo
 parseInput [startCol,startRow,' ',destCol,destRow] = do
   startCol' <- parseCol startCol
   startRow' <- parseRow startRow
   destCol'  <- parseCol destCol
   destRow'  <- parseRow destRow
 
-  return ((startRow',startCol'),(destRow',destCol'))
+  return $ Move ((startRow',startCol'),(destRow',destCol'))
 parseInput _ = Nothing
 
 parseCol :: Char -> Maybe Int

@@ -4,7 +4,7 @@
 ## Ideas to work in
 
 - CLI
-    - Undo
+    - ~~Undo~~
     - Read board from file
     - Play as black too
     - Better UI
