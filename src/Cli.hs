@@ -61,7 +61,7 @@ playerTurn' gameState = do
 
 computerTurn :: GameState -> IO ()
 computerTurn gameState = do
-  let move = moveColor 4 Black $ board gameState
+  let move = moveColor 3 Black $ board gameState
   let (gameState',result) = G.applyMove move gameState
   printBoardWithMove move gameState'
 
