@@ -11,11 +11,11 @@ module Game
 , newGameState
 , ValidationResult(..)
 , validateMove
-, Result(..)
 , Game.applyMove
 )
 where
 
+import GameResult as GR
 import Board as B
 import Moves
 
@@ -26,8 +26,6 @@ data GameState = GameState { board    :: Board
                            }
 
 data ValidationResult = Ok | IllegalMove | WouldBeInCheck
-
-data Result = Normal | Check | Checkmate | Draw
 
 
 newGameState :: GameState
@@ -68,16 +66,4 @@ applyMove move (GameState {board, turn, captured}) = (nextGameState, result)
                               , captured = captured'}
 
     -- Determining result
-    oppMoves             = movesForColor opponent board'
-    oppMovesNotCheck     = filter moveNotCheck oppMoves
-    moveNotCheck oppMove =
-      not $ isKingThreatened opponent $ B.applyMove oppMove board'
-
-    oppCanMoveUnthreatened = not $ null oppMovesNotCheck
-    oppIsThreatened        = isKingThreatened opponent board'
-
-    result = case (oppCanMoveUnthreatened, oppIsThreatened) of
-                (True , True ) -> Check
-                (True , False) -> Normal
-                (False, True ) -> Checkmate
-                (False, False) -> Draw
+    result = GR.gameResult opponent board'

@@ -11,6 +11,7 @@ import Prelude as P
 import Board as B
 import MoveSelection
 import Game as G
+import GameResult as GR
 
 
 -- Player hard coded as White, computer as Black
