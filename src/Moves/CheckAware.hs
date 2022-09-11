@@ -1,4 +1,7 @@
 
+-- Generation of all possible moves, when taking into account that
+-- you may not be in check afterwards.
+
 module Moves.CheckAware
 ( movesForColor
 )

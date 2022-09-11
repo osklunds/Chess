@@ -1,4 +1,6 @@
 
+-- Types and operations for boards and pieces.
+
 {-# LANGUAGE LambdaCase #-}
 
 module Board

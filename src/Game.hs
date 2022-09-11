@@ -1,4 +1,6 @@
 
+-- Game state and actions on the game.
+
 {-# LANGUAGE NamedFieldPuns #-}
 
 module Game

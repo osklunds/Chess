@@ -1,4 +1,6 @@
 
+-- General function for optimization using Alpha Beta pruning.
+
 {-# LANGUAGE ConstraintKinds #-}
 
 module Optimize

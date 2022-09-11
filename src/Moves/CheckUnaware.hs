@@ -1,4 +1,6 @@
 
+-- Generation of all syntactially possible moves.
+
 module Moves.CheckUnaware
 ( movesForColor
 )

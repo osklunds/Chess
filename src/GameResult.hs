@@ -1,4 +1,6 @@
 
+-- Used for determining the result of a game.
+
 module GameResult
 ( Result(..) 
 , gameResult

@@ -1,4 +1,6 @@
 
+-- CLI interface for playing against the computer.
+
 module Cli
 ( start
 )

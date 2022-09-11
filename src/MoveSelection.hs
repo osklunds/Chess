@@ -1,4 +1,7 @@
 
+-- Selection of a move for a board using optimization. In other words,
+-- using Optimize for Board.
+
 {-# LANGUAGE NamedFieldPuns #-}
 
 module MoveSelection
