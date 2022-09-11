@@ -1,7 +1,9 @@
+
 {-# LANGUAGE ConstraintKinds #-}
 
 module Optimize.Score
-    ( Score
-    ) where
+( Score
+)
+where
 
 type Score a = (Ord a, Bounded a)

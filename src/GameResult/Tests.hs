@@ -1,18 +1,17 @@
+
 {-# LANGUAGE TemplateHaskell #-}
 
 module GameResult.Tests where
 
 import Test.QuickCheck
 
-import Board
 import GameResult
+import Board
 
 prop_resultNormal :: Bool
 prop_resultNormal = gameResult Black board == Normal
   where
-    board =
-        read
-            "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -26,9 +25,7 @@ prop_resultNormal = gameResult Black board == Normal
 prop_resultCheck :: Bool
 prop_resultCheck = gameResult Black board == Check
   where
-    board =
-        read
-            "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -42,9 +39,7 @@ prop_resultCheck = gameResult Black board == Check
 prop_resultCheckmate :: Bool
 prop_resultCheckmate = gameResult Black board == Checkmate
   where
-    board =
-        read
-            "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -58,9 +53,7 @@ prop_resultCheckmate = gameResult Black board == Checkmate
 prop_resultNotCheckmateCanCapture :: Bool
 prop_resultNotCheckmateCanCapture = gameResult Black board == Check
   where
-    board =
-        read
-            "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -74,9 +67,7 @@ prop_resultNotCheckmateCanCapture = gameResult Black board == Check
 prop_resultDraw :: Bool
 prop_resultDraw = gameResult Black board == Draw
   where
-    board =
-        read
-            "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -90,9 +81,7 @@ prop_resultDraw = gameResult Black board == Draw
 prop_resultNotDrawOtherCanMove :: Bool
 prop_resultNotDrawOtherCanMove = gameResult Black board == Normal
   where
-    board =
-        read
-            "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -103,6 +92,7 @@ prop_resultNotDrawOtherCanMove = gameResult Black board == Normal
                   \7               ♚ 7\n\
                   \  0 1 2 3 4 5 6 7"
 
-return []
 
+
+return []
 runTests = $quickCheckAll
