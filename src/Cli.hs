@@ -16,13 +16,24 @@ import GameResult as GR
 data UserAction = Move ((Int,Int),(Int,Int))
                 | Undo
 
--- Player hard coded as White, computer as Black
+start :: Color -> Maybe Board -> IO ()
+start playerColor maybeStartBoard = do
+    let startBoard = case maybeStartBoard of
+                        Nothing ->
+                            defaultBoard
+                        (Just board) ->
+                            board
 
-start :: IO ()
-start = do
-  let gameState = newGameState
-  printBoard gameState
-  playerTurn [gameState]
+    let gs = newGameState startBoard 
+    printBoard gs
+
+    -- TODO: Playing as black doesn't work yet. Need to pass it in state.
+    -- Use State monad?
+    case playerColor of
+        White ->
+            playerTurn [gs]
+        Black ->
+            computerTurn (B.invert platerColor) [gs]
 
 playerTurn :: [GameState] -> IO ()
 playerTurn gss = do

@@ -28,10 +28,8 @@ data GameState = GameState { board    :: Board
 data ValidationResult = Ok | IllegalMove | WouldBeInCheck
 
 
-newGameState :: GameState
-newGameState = GameState { board    = defaultBoard
-                         , turn     = White
-                         , captured = []}
+newGameState :: Board -> GameState
+newGameState board = GameState { board, turn = White, captured = []}
 
 validateMove :: ((Int,Int),(Int,Int)) -> GameState -> ValidationResult
 validateMove move (GameState {board, turn})
