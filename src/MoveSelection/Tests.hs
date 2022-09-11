@@ -149,7 +149,13 @@ prop_legalMove d board = not (null legalMoves) ==>
                          makeMove depth board `elem` legalMoves
   where
     legalMoves = movesForColor Black board
-    depth      = 1 + d `mod` 4
+    depth      = 1 + d `mod` 3
+
+prop_performance :: Board -> Property
+prop_performance board = not (null legalMoves) ==>
+                         makeMove 1 board `elem` legalMoves
+  where
+    legalMoves = movesForColor Black board
 
 -- TODO: escape from check
 
