@@ -8,7 +8,7 @@ module GameResult
 where
 
 import Board
-import Moves.CheckAware as CA
+import Moves as M
 import Moves.CheckUnaware as CU
 
 
@@ -22,7 +22,7 @@ gameResult player board = case (canMove, isThreatened) of
                             (False, True ) -> Checkmate
                             (False, False) -> Draw
   where
-    canMove      = not $ null $ CA.movesForColor player board
+    canMove      = not $ null $ M.movesForColor player board
     isThreatened = isKingThreatened player board
 
 isKingThreatened :: Color -> Board -> Bool

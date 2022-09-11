@@ -12,7 +12,7 @@ where
 import Data.Maybe
 
 import Board
-import Moves.CheckAware
+import Moves
 import MoveSelection.Score
 import Optimize
 

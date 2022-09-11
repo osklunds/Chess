@@ -6,7 +6,7 @@ module MoveSelection.Tests where
 import Test.QuickCheck
 
 import Board
-import Moves.CheckAware
+import Moves
 import MoveSelection
 
 
