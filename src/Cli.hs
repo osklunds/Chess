@@ -28,34 +28,46 @@ playerTurn :: [GameState] -> IO ()
 playerTurn gss = do
   putStrLn ""
   putStrLn "Your turn!"
-  playerTurn' gss
+  playerTurnAskInput gss
 
-playerTurn' :: [GameState] -> IO ()
-playerTurn' gss@(curGs:_restGss) = do
+playerTurnAskInput :: [GameState] -> IO ()
+playerTurnAskInput gss = do
   putStr "Enter your move: "
   input <- getLine
 
   case parseInput input of
     Nothing -> do
-      putStrLn "Illegal syntax"
-      playerTurn' gss
+        playerTurnParseError gss
     Just Undo -> do
-        case gss of
-            (_curGs:_prevGs:newGs:newRest) -> do
-                putStrLn "Undoing one step"
-                printBoard newGs
-                playerTurn' (newGs:newRest)
-            [_curGs] -> do
-                putStrLn "Can't undo because at start"
-                playerTurn' gss
+        playerTurnUndo gss
     Just (Move move) -> do
-      case validateMove move curGs of
+      playerTurnValidateMove gss move
+
+playerTurnParseError :: [GameState] -> IO ()
+playerTurnParseError gss = do
+    putStrLn "Illegal syntax"
+    playerTurnAskInput gss
+
+playerTurnUndo :: [GameState] -> IO ()
+playerTurnUndo gss = do
+    case gss of
+        (_curGs:_prevGs:newGs:newRest) -> do
+            putStrLn "Undoing one step"
+            printBoard newGs
+            playerTurnAskInput (newGs:newRest)
+        [_curGs] -> do
+            putStrLn "Can't undo because at start"
+            playerTurnAskInput gss
+
+playerTurnValidateMove :: [GameState] -> ((Int,Int),(Int,Int)) -> IO ()
+playerTurnValidateMove gss@(curGs:_restGss) move =
+    case validateMove move curGs of
         IllegalMove -> do
           putStrLn "Illegal move"
-          playerTurn' gss
+          playerTurnAskInput gss
         WouldBeInCheck -> do
           putStrLn "Doing that move would put you in check"
-          playerTurn' gss
+          playerTurnAskInput gss
         Ok -> do
           let (newGs,result) = G.applyMove move curGs
           printBoard newGs
