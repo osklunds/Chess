@@ -10,6 +10,17 @@ where
 import Data.Maybe
 import Optimize.Score
 
+type GenFun st = (st -> [st])
+
+type EvalFun st sc = (st -> sc)
+
+type SearchFun sc st d = GenFun st ->
+                         EvalFun st sc ->
+                         d ->
+                         sc ->
+                         sc ->
+                         [st] ->
+                         (sc,st)
 
 optimize :: (Score sc, Integral d) =>
             (st -> [st]) -> (st -> sc) -> d -> st -> st
@@ -20,18 +31,8 @@ optimizeWithSc :: (Score sc, Integral d) =>
 optimizeWithSc genF evalF d st =
   alphabeta genF evalF d minBound maxBound maxSearch st
 
-
-type SearchFun sc st d = (st -> [st]) ->
-                         (st -> sc) ->
-                         d ->
-                         sc ->
-                         sc ->
-                         [st] ->
-                         (sc,st)
-
-
-alphabeta :: (Score sc, Integral d) => (st -> [st]) ->
-                                       (st -> sc) ->
+alphabeta :: (Score sc, Integral d) => GenFun st ->
+                                       EvalFun st sc ->
                                        d ->
                                        sc ->
                                        sc ->
