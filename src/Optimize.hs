@@ -8,10 +8,12 @@ module Optimize
 )
 where
 
-import qualified Optimize.AlphaBeta as AB
-import qualified Optimize.MiniMax as MM
-import Optimize.Score
+import Optimize.Types
 
-optimize :: (Score sc, Integral d) =>
-            (st -> [st]) -> (st -> sc) -> d -> st -> st
-optimize = AB.optimize
+import qualified Optimize.AlphaBeta as AB
+import qualified Optimize.AlphaBetaMemo as ABM
+import qualified Optimize.MiniMax as MM
+import qualified Optimize.MiniMaxPar as MMP
+
+optimize :: (State st, Score sc, Integral d) => OptFun st sc d
+optimize genF evalF d st = snd $ AB.optimizeWithSc genF evalF d st

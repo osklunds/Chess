@@ -21,6 +21,7 @@ data State = State { board         :: Board
                    , reachBy       :: Maybe ((Int,Int),(Int,Int))
                    , numberOfMoves :: Int
                    , turn          :: Color }
+           deriving (Eq, Ord)
 
 newtype Score = Score (Int, -- Numerical score
                        Int) -- Number of moves to reach

@@ -2,17 +2,13 @@
 {-# LANGUAGE ConstraintKinds #-}
 
 module Optimize.AlphaBeta
-( optimize
-, optimizeWithSc
+( optimizeWithSc
 )
 where
 
 import Data.Maybe
-import Optimize.Score
 
-type GenFun st = (st -> [st])
-
-type EvalFun st sc = (st -> sc)
+import Optimize.Types
 
 type SearchFun sc st d = GenFun st ->
                          EvalFun st sc ->
@@ -22,12 +18,7 @@ type SearchFun sc st d = GenFun st ->
                          [st] ->
                          (sc,st)
 
-optimize :: (Score sc, Integral d) =>
-            (st -> [st]) -> (st -> sc) -> d -> st -> st
-optimize genF evalF d st = snd $ optimizeWithSc genF evalF d st
-
-optimizeWithSc :: (Score sc, Integral d) =>
-            (st -> [st]) -> (st -> sc) -> d -> st -> (sc,st)
+optimizeWithSc :: (State st, Score sc, Integral d) => OptFunSc st sc d
 optimizeWithSc genF evalF d st =
   alphabeta genF evalF d minBound maxBound maxSearch st
 

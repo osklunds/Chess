@@ -2,6 +2,7 @@
 module Memoization
 ( new
 , eval
+, Memo
 )
 where
 

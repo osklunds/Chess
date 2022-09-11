@@ -8,6 +8,7 @@ import System.Random
 import Data.List
 import Control.Parallel
 
+import Optimize.Types
 import Optimize.MiniMax as MM
 import Optimize.MiniMaxPar as MMP
 import Optimize.AlphaBeta as AB
@@ -97,14 +98,14 @@ prop_fixed1 = all check optFuns
 -- Arbitrary
 --------------------------------------------------------------------------------
 
-type State = [Int]
+type ArbState = [Int]
 
-genSts :: Int -> State -> [State]
+genSts :: Int -> ArbState -> [ArbState]
 genSts n st
   | evalSt st `mod` n == 0 = []
   | otherwise              = [(m:st) | m <- [1..n]]
 
-evalSt :: State -> Int
+evalSt :: ArbState -> Int
 evalSt state = (foldl (+) 0 state + foldl (*) 1 state)
 
 prop_equalsMiniMax :: Int -> Bool
@@ -123,6 +124,7 @@ prop_equalsMiniMax seed = all (== (head optVals)) optVals
 -- Helper functions
 --------------------------------------------------------------------------------
 
+optFuns :: (State st, Score sc, Integral d) => [OptFunSc st sc d]
 optFuns = [MM.optimizeWithSc,
            MMP.optimizeWithSc,
            AB.optimizeWithSc,

@@ -1,22 +1,16 @@
 
 module Optimize.MiniMaxPar
-( optimize
-, optimizeWithSc
+( optimizeWithSc
 )
 where
 
 import Control.Parallel
 import Data.List
 
-import Optimize.Score
+import Optimize.Types
 
 
-optimize :: (Score sc, Integral d) =>
-            (st -> [st]) -> (st -> sc) -> d -> st -> st
-optimize genF evalF d st = snd $ optimizeWithSc genF evalF d st
-
-optimizeWithSc :: (Score sc, Integral d) =>
-                  (st -> [st]) -> (st -> sc) -> d -> st -> (sc,st)
+optimizeWithSc :: (State st, Score sc, Integral d) => OptFunSc st sc d
 optimizeWithSc genF evalF d st = maxi genF evalF d st
 
 maxi :: (Score sc, Integral d) =>

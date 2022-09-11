@@ -46,15 +46,15 @@ import Test.QuickCheck.Gen
 --------------------------------------------------------------------------------
 
 newtype Board = Board [[Square]]
-              deriving (Eq)
+              deriving (Eq, Ord)
 
 data Square = Empty
             | Piece Color Kind
-            deriving (Eq)
+            deriving (Eq, Ord)
 
 data Color = Black
            | White
-           deriving (Eq, Show)
+           deriving (Eq, Show, Ord)
 
 data Kind = Pawn
           | Bishop
@@ -62,7 +62,7 @@ data Kind = Pawn
           | Rook
           | Queen
           | King
-          deriving (Eq, Show)
+          deriving (Eq, Show, Ord)
 
 
 --------------------------------------------------------------------------------
