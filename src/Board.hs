@@ -27,9 +27,6 @@ module Board
     , isKing
     ) where
 
--- Types
--- Board operations
--- Squares
 import Control.Monad
 import Data.Char
 import Test.QuickCheck.Arbitrary
