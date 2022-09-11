@@ -41,14 +41,7 @@ validateMove move (GameState {board, turn})
   where
     legalMoves       = movesForColor turn board
     newBoard         = B.applyMove move board
-    threatensCurKing = isKingThreatened turn newBoard
-
-isKingThreatened :: Color -> Board -> Bool
-isKingThreatened color board = any (== Piece color King) destSquares
-  where
-    movesOther  = movesForColor (invert color) board
-    dests       = map snd movesOther
-    destSquares = map (\dest -> getB dest board) dests
+    threatensCurKing = GR.isKingThreatened turn newBoard
 
 applyMove :: ((Int,Int),(Int,Int)) -> GameState -> (GameState, Result)
 applyMove move (GameState {board, turn, captured}) = (nextGameState, result)

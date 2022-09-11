@@ -4,6 +4,7 @@
 module GameResult
 ( Result(..) 
 , gameResult
+, isKingThreatened
 )
 where
 
