@@ -8,6 +8,7 @@ import MoveSelection.Tests as MS
 import MoveSelection.Score.Tests as S
 import Optimize.Tests as O
 import GameResult.Tests as GR
+import Memoization.Tests as M
 
 runAllTests :: IO Bool
 runAllTests = do
@@ -18,5 +19,6 @@ runAllTests = do
   s   <- S.runTests
   o   <- O.runTests
   gr  <- GR.runTests
+  m   <- M.runTests
 
-  return $ and [b,mca,mcu,ms,s,o,gr]
+  return $ and [b,mca,mcu,ms,s,o,gr,m]

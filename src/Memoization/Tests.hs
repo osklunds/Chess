@@ -40,14 +40,7 @@ prop_eval_twice arg1 arg2 = arg1 /= arg2 ==> monadicIO $ do
     assert $ ret2 == fun arg2
     assert $ ret3 == fun arg1
 
-
-
-
-
-
 fun arg = Return arg
-
-
 
 return []
 runTests = $quickCheckAll
