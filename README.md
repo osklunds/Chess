@@ -6,6 +6,8 @@
 - CLI
     - Undo
     - Read board from file
+    - Play as black too
+    - Better UI
 - Engine components
     - Optimizer
         - ~~Memoization in Alpha Beta~~

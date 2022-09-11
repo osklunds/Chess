@@ -20,58 +20,58 @@ start :: IO ()
 start = do
   let gameState = newGameState
   printBoard gameState
-  playerTurn gameState
+  playerTurn [gameState]
 
-playerTurn :: GameState -> IO ()
-playerTurn gameState = do
+playerTurn :: [GameState] -> IO ()
+playerTurn gss = do
   putStrLn ""
   putStrLn "Your turn!"
-  playerTurn' gameState
+  playerTurn' gss
 
-playerTurn' :: GameState -> IO ()
-playerTurn' gameState = do
+playerTurn' :: [GameState] -> IO ()
+playerTurn' gss@(curGs:_restGss) = do
   putStr "Enter your move: "
   input <- getLine
 
   case parseInput input of
     Nothing -> do
       putStrLn "Illegal syntax"
-      playerTurn' gameState
+      playerTurn' gss
     Just move -> do
-      case validateMove move gameState of
+      case validateMove move curGs of
         IllegalMove -> do
           putStrLn "Illegal move"
-          playerTurn' gameState
+          playerTurn' gss
         WouldBeInCheck -> do
           putStrLn "Doing that move would put you in check"
-          playerTurn' gameState
+          playerTurn' gss
         Ok -> do
-          let (gameState',result) = G.applyMove move gameState
-          printBoard gameState'
+          let (newGs,result) = G.applyMove move curGs
+          printBoard newGs
 
           case result of
             Normal ->
-              computerTurn gameState'
+              computerTurn (newGs:gss)
             Check -> do
               putStrLn "Computer is checked"
-              computerTurn gameState'
+              computerTurn (newGs:gss)
             Checkmate ->
               putStrLn "Checkmate! You win"
             Draw ->
               putStrLn "Draw!"
 
-computerTurn :: GameState -> IO ()
-computerTurn gameState = do
-  let move = moveColor 3 Black $ board gameState
-  let (gameState',result) = G.applyMove move gameState
-  printBoardWithMove move gameState'
+computerTurn :: [GameState] -> IO ()
+computerTurn gss@(curGs:_restGss) = do
+  let move = moveColor 3 Black $ board curGs
+  let (newGs,result) = G.applyMove move curGs
+  printBoardWithMove move newGs
 
   case result of
     Normal ->
-      playerTurn gameState'
+      playerTurn (newGs:gss)
     Check -> do
       putStrLn "You're checked"
-      playerTurn gameState'
+      playerTurn (newGs:gss)
     Checkmate ->
       putStrLn "Checkmate! Computer wins"
     Draw ->
