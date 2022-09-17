@@ -33,7 +33,7 @@ start playerColor maybeStartBoard = do
         White ->
             playerTurn [gs]
         Black ->
-            computerTurn (B.invert platerColor) [gs]
+            computerTurn [gs]
 
 playerTurn :: [GameState] -> IO ()
 playerTurn gss = do
