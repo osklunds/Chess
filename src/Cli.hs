@@ -1,6 +1,8 @@
 
 -- CLI interface for playing against the computer.
 
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Cli
 ( start
 )
@@ -16,6 +18,10 @@ import GameResult as GR
 data UserAction = Move ((Int,Int),(Int,Int))
                 | Undo
 
+data State = State { gameStates :: [GameState]
+                   , playerColor :: B.Color
+                   }
+
 start :: Color -> Maybe Board -> IO ()
 start playerColor maybeStartBoard = do
     let startBoard = case maybeStartBoard of
@@ -24,92 +30,98 @@ start playerColor maybeStartBoard = do
                         (Just board) ->
                             board
 
-    let gs = newGameState startBoard 
+    let gs = newGameState startBoard
     printBoard gs
 
-    -- TODO: Playing as black doesn't work yet. Need to pass it in state.
-    -- Use State monad?
+    let st = State { gameStates = [gs], playerColor }
+
     case playerColor of
         White ->
-            playerTurn [gs]
+            playerTurn st
         Black ->
-            computerTurn [gs]
+            computerTurn st
 
-playerTurn :: [GameState] -> IO ()
-playerTurn gss = do
-  putStrLn ""
-  putStrLn "Your turn!"
-  playerTurnAskInput gss
+playerTurn :: State -> IO ()
+playerTurn st = do
+    putStrLn ""
+    putStrLn "Your turn!"
+    playerTurnAskInput st
 
-playerTurnAskInput :: [GameState] -> IO ()
-playerTurnAskInput gss = do
-  putStr "Enter your move: "
-  input <- getLine
+playerTurnAskInput :: State -> IO ()
+playerTurnAskInput st = do
+    putStr "Enter your move: "
+    input <- getLine
 
-  case parseInput input of
-    Nothing -> do
-        playerTurnParseError gss
-    Just Undo -> do
-        playerTurnUndo gss
-    Just (Move move) -> do
-      playerTurnValidateMove gss move
+    case parseInput input of
+        Nothing -> do
+            playerTurnParseError st
+        Just Undo -> do
+            playerTurnUndo st
+        Just (Move move) -> do
+            playerTurnValidateMove st move
 
-playerTurnParseError :: [GameState] -> IO ()
-playerTurnParseError gss = do
+playerTurnParseError :: State -> IO ()
+playerTurnParseError st = do
     putStrLn "Illegal syntax"
-    playerTurnAskInput gss
+    playerTurnAskInput st
 
-playerTurnUndo :: [GameState] -> IO ()
-playerTurnUndo gss = do
+playerTurnUndo :: State -> IO ()
+playerTurnUndo st = do
+    let gss = gameStates st
     case gss of
         (_curGs:_prevGs:newGs:newRest) -> do
             putStrLn "Undoing one step"
             printBoard newGs
-            playerTurnAskInput (newGs:newRest)
+            let newGss = (newGs:newRest)
+            let newSt = st { gameStates = newGss }
+            playerTurnAskInput newSt
         [_curGs] -> do
             putStrLn "Can't undo because at start"
-            playerTurnAskInput gss
+            playerTurnAskInput st
 
-playerTurnValidateMove :: [GameState] -> ((Int,Int),(Int,Int)) -> IO ()
-playerTurnValidateMove gss@(curGs:_restGss) move =
+playerTurnValidateMove :: State -> ((Int,Int),(Int,Int)) -> IO ()
+playerTurnValidateMove st move = do
+    let gss@(curGs:_restGss) = gameStates st
     case validateMove move curGs of
         IllegalMove -> do
           putStrLn "Illegal move"
-          playerTurnAskInput gss
+          playerTurnAskInput st
         WouldBeInCheck -> do
           putStrLn "Doing that move would put you in check"
-          playerTurnAskInput gss
+          playerTurnAskInput st
         Ok -> do
           let (newGs,result) = G.applyMove move curGs
           printBoard newGs
 
           case result of
             Normal ->
-              computerTurn (newGs:gss)
+              computerTurn $ st { gameStates = (newGs:gss) }
             Check -> do
               putStrLn "Computer is checked"
-              computerTurn (newGs:gss)
+              computerTurn $ st { gameStates = (newGs:gss) }
             Checkmate ->
               putStrLn "Checkmate! You win"
             Draw ->
               putStrLn "Draw!"
 
-computerTurn :: [GameState] -> IO ()
-computerTurn gss@(curGs:_restGss) = do
-  let move = moveColor 3 Black $ board curGs
-  let (newGs,result) = G.applyMove move curGs
-  printBoardWithMove move newGs
+computerTurn :: State -> IO ()
+computerTurn st = do
+    let gss@(curGs:_restGss) = gameStates st
+    let computerColor = B.invert $ playerColor st
+    let move = moveColor 3 computerColor $ board curGs
+    let (newGs,result) = G.applyMove move curGs
+    printBoardWithMove move newGs
 
-  case result of
-    Normal ->
-      playerTurn (newGs:gss)
-    Check -> do
-      putStrLn "You're checked"
-      playerTurn (newGs:gss)
-    Checkmate ->
-      putStrLn "Checkmate! Computer wins"
-    Draw ->
-      putStrLn "Draw!"
+    case result of
+        Normal ->
+            playerTurn $ st { gameStates = (newGs:gss) }
+        Check -> do
+            putStrLn "You're checked"
+            playerTurn $ st { gameStates = (newGs:gss) }
+        Checkmate ->
+            putStrLn "Checkmate! Computer wins"
+        Draw ->
+            putStrLn "Draw!"
 
 --------------------------------------------------------------------------------
 -- Parsing

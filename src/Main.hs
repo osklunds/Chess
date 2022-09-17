@@ -5,7 +5,7 @@ import qualified Board as B
 main :: IO ()
 main = C.start playAs startBoard
 
-playAs = B.White
+playAs = B.Black
 
 -- Change comments to change what's used
 startBoard = Nothing

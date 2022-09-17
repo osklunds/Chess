@@ -5,8 +5,8 @@
 
 - CLI
     - ~~Undo~~
-    - Read board from file
-    - Play as black too
+    - ~~Read board from file~~
+    - ~~Play as black too~~
     - Better UI
 - Engine components
     - Optimizer
