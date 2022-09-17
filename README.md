@@ -16,6 +16,9 @@
         - Don't generate illegal moves from the start. https://peterellisjones.com/posts/generating-legal-chess-moves-efficiently/
     - Evaluator
         - Take position into account when calculating the score of a board
+- Tests
+    - Checkmate with King+Rook
+    - Checkmate with King+Queen
 - Rules
     - Castling
     - Promoting
