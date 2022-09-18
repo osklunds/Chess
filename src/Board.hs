@@ -40,6 +40,7 @@ module Board
 where
 
 import Control.Monad
+import Control.Exception
 import Data.Char
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
@@ -233,15 +234,21 @@ mapB f (Board rows) = Board $ map (\row -> map f row) rows
 anyB :: (Square -> Bool) -> Board -> Bool
 anyB f = foldB (\acc square -> acc || f square) False
 
-applyMove :: Move -> Board -> Maybe Board
+applyMove :: Move -> Board -> Board
 applyMove (NormalMove src dst) b = applyNormalMove src dst b
+applyMove (Promote p kind) b = applyPromote p kind b
 applyMove _otherMove _b = undefined
 
-applyNormalMove src dst b
-    | isEmpty atSrc = Nothing
-    | otherwise     = Just $ setB dst atSrc $ setB src Empty b
+applyNormalMove src dst b = assert (not $ isEmpty atSrc)
+                                   (setB dst atSrc $ setB src Empty b)
     where
         atSrc = getB src b
+
+applyPromote :: Pos -> Kind -> Board -> Board
+applyPromote p kind b = assert (isPawn atP) setB p newAtP b
+    where
+        atP    = getB p b
+        newAtP = Piece (color atP) kind
 
 --------------------------------------------------------------------------------
 -- Misc

@@ -55,18 +55,11 @@ prop_applyNormalMove (TwoDifferentPos src dst) b = condition ==> result
         result = equal && srcEmpty && dstIsOldSrc
 
         move = NormalMove src dst
-        b' = fromJust $ applyMove move b
+        b' = applyMove move b
 
         equal = equalExcept b b' [src, dst]
         srcEmpty = isEmpty $ getB src b'
         dstIsOldSrc = getB dst b' == getB src b
-
-prop_applyNormalMoveNoPieceAtSrc :: TwoDifferentPos -> Board -> Property
-prop_applyNormalMoveNoPieceAtSrc (TwoDifferentPos src dst) b =
-    isEmpty (getB src b) ==> isNothing b'
-    where
-        move = NormalMove src dst
-        b' = applyMove move b
 
 --------------------------------------------------------------------------------
 -- Helpers
