@@ -11,7 +11,7 @@ module Board
 , Square(..)
 , Color(..)
 , Kind(..)
-, Pos
+, Pos(..)
 , Move(..)
 
 -- Board operations
@@ -66,7 +66,8 @@ data Kind = Pawn
           | King
           deriving (Eq, Show, Ord)
 
-type Pos = (Int, Int)
+data Pos = Pos Int Int
+         deriving (Eq, Show, Ord)
 
 data Move = NormalMove Pos Pos
           | Promote Pos Kind   -- TODO
@@ -173,6 +174,12 @@ instance Arbitrary Square where
                       return $ Piece color kind
                     ]
 
+instance Arbitrary Pos where
+    arbitrary = do
+        row <- oneof $ map return [0..7]
+        col <- oneof $ map return [0..7]
+        return $ Pos row col
+
 instance Arbitrary Board where
   arbitrary = do
     rows <- replicateM 8 $ replicateM 8 arbitrary
@@ -188,8 +195,8 @@ instance Arbitrary Board where
                     True  -> (col2 + 1) `mod` 8
                     False -> col2
 
-    let blackKing = setB (row1,col1)  (Piece Black King) noKings
-    let whiteKing = setB (row2,col2') (Piece White King) blackKing
+    let blackKing = setB (Pos row1 col1)  (Piece Black King) noKings
+    let whiteKing = setB (Pos row2 col2') (Piece White King) blackKing
 
     return whiteKing
 
@@ -199,14 +206,14 @@ instance Arbitrary Board where
 --------------------------------------------------------------------------------
 
 getB :: Pos -> Board -> Square
-getB (row,col) (Board board) = (board !! row) !! col
+getB (Pos row col) (Board board) = (board !! row) !! col
 
 setB :: Pos -> Square -> Board -> Board
-setB (rowIndex,colIndex) sq (Board oldBoard) = Board newBoard
+setB (Pos rowIdx colIdx) sq (Board oldBoard) = Board newBoard
   where
-    oldRow = oldBoard !! rowIndex
-    newRow = replaceAt colIndex sq oldRow
-    newBoard = replaceAt rowIndex newRow oldBoard
+    oldRow = oldBoard !! rowIdx
+    newRow = replaceAt colIdx sq oldRow
+    newBoard = replaceAt rowIdx newRow oldBoard
 
 replaceAt :: Int -> a -> [a] -> [a]
 replaceAt i x xs = prefix ++ [x] ++ suffix

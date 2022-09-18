@@ -21,6 +21,7 @@ executable Chess
     ghc-options:
         -O3
         -Wno-missing-home-modules
+        -freverse-errors
     build-depends:       base >=4.13 && <4.14, QuickCheck, containers
     hs-source-dirs:      src
     default-language:    Haskell2010
