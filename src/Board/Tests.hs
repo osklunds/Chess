@@ -6,6 +6,7 @@ module Board.Tests where
 import System.Random
 import Test.QuickCheck
 import Data.Maybe
+import Test.QuickCheck.Arbitrary
 
 import TestLib
 import Board as B
@@ -44,13 +45,12 @@ prop_showRead board = board == read (show board)
 -- applyMove
 --------------------------------------------------------------------------------
 
-prop_applyNormalMove :: Pos -> Pos -> Board -> Property
-prop_applyNormalMove src dst b = condition ==> result
+prop_applyNormalMove :: TwoDifferentPos -> Board -> Property
+prop_applyNormalMove (TwoDifferentPos src dst) b = condition ==> result
     where
-        condition = srcOccupied && dstOccupied && srcDstDiffer
+        condition = srcOccupied && dstOccupied
         srcOccupied = isOccupied $ getB src b
         dstOccupied = isOccupied $ getB dst b
-        srcDstDiffer = src /= dst
 
         result = equal && srcEmpty && dstIsOldSrc
 
@@ -61,19 +61,12 @@ prop_applyNormalMove src dst b = condition ==> result
         srcEmpty = isEmpty $ getB src b'
         dstIsOldSrc = getB dst b' == getB src b
 
-prop_applyNormalMoveNoPieceAtSrc :: Pos -> Pos -> Board -> Property
-prop_applyNormalMoveNoPieceAtSrc src dst b = condition ==> result
+prop_applyNormalMoveNoPieceAtSrc :: TwoDifferentPos -> Board -> Property
+prop_applyNormalMoveNoPieceAtSrc (TwoDifferentPos src dst) b =
+    isEmpty (getB src b) ==> isNothing b'
     where
-        condition = srcEmpty && srcDstDiffer
-        srcEmpty = isEmpty $ getB src b
-        srcDstDiffer = src /= dst
-
         move = NormalMove src dst
         b' = applyMove move b
-
-        result = isNothing b'
-
-
 
 --------------------------------------------------------------------------------
 -- Helpers
@@ -85,6 +78,19 @@ equalExcept b1 b2 ps = all (\p -> getB p b1 == getB p b2) $ otherPositions ps
 otherPositions ps = [p | p <- allPositions, not $ p `elem` ps]
 
 allPositions = [Pos row col | row <- [0..7], col <- [0..7]]
+
+data TwoDifferentPos = TwoDifferentPos Pos Pos
+                     deriving (Show)
+
+instance Arbitrary TwoDifferentPos where
+    arbitrary = arbitraryTwoDifferentPos
+
+arbitraryTwoDifferentPos = do
+    p1 <- arbitrary
+    p2 <- arbitrary
+    case p1 == p2 of
+        True -> arbitraryTwoDifferentPos
+        False -> return $ TwoDifferentPos p1 p2
 
 return []
 runTests = $quickCheckAll
