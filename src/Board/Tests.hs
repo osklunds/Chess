@@ -6,6 +6,7 @@ module Board.Tests where
 import System.Random
 import Test.QuickCheck
 
+import TestLib
 import Board as B
 
 --------------------------------------------------------------------------------
@@ -27,17 +28,10 @@ prop_getMiddle = getB (Pos 4 4) defaultBoard == Empty
 
 prop_set :: Pos -> Square -> Board -> Bool
 prop_set pos sq board = getB pos newBoard == sq &&
-                        equalExcept board newBoard pos
+                        equalExcept board newBoard [pos]
   where
     newBoard = setB pos sq board
-
-equalExcept :: Board -> Board -> Pos -> Bool
-equalExcept board1 board2 pos =
-  all (\p -> getB p board1 == getB p board2) otherPositions
-  where
-    allPositions = [Pos row col | row <- [0..7], col <- [0..7]]
-    otherPositions = filter ((/=) pos) allPositions
-
+    
 --------------------------------------------------------------------------------
 -- Show and Read
 --------------------------------------------------------------------------------
@@ -49,13 +43,29 @@ prop_showRead board = board == read (show board)
 -- applyMove
 --------------------------------------------------------------------------------
 
-prop_applyMoveNormalMove :: Int -> Board -> Bool
-prop_applyMoveNormalMove seed board = undefined
+prop_applyMoveNormalMove :: Pos -> Pos -> Board -> Property
+prop_applyMoveNormalMove p1 p2 b = condition ==> result
+    where
+        condition = isOccupied (getB p1 b) && isOccupied (getB p1 b) && p1 /= p2
+        result = equal && p1Empty && p2OldP1
 
+        move = NormalMove p1 p2
+        b' = applyMove move b
 
-randomPos :: (RandomGen g) => g -> Board -> (Pos, g)
-randomPos g board = undefined
+        equal = equalExcept b b' [p1, p2]
+        p1Empty = isEmpty $ getB p1 b'
+        p2OldP1 = getB p2 b' == getB p1 b
 
+--------------------------------------------------------------------------------
+-- Helpers
+--------------------------------------------------------------------------------
+
+equalExcept :: Board -> Board -> [Pos] -> Bool
+equalExcept b1 b2 ps = all (\p -> getB p b1 == getB p b2) $ otherPositions ps
+
+otherPositions ps = [p | p <- allPositions, not $ p `elem` ps]
+
+allPositions = [Pos row col | row <- [0..7], col <- [0..7]]
 
 return []
 runTests = $quickCheckAll

@@ -27,6 +27,7 @@ module Board
 , color
 , invert
 , isEmpty
+, isOccupied
 , isColor
 , isOtherColor
 , isPawn
@@ -252,6 +253,9 @@ invert Black = White
 isEmpty :: Square -> Bool
 isEmpty Empty = True
 isEmpty _     = False
+
+isOccupied :: Square -> Bool
+isOccupied = not . isEmpty
 
 isColor :: Color -> Square -> Bool
 isColor _  Empty        = False
