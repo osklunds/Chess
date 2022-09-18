@@ -5,6 +5,7 @@ module Board.Tests where
 
 import System.Random
 import Test.QuickCheck
+import Data.Maybe
 
 import TestLib
 import Board as B
@@ -43,18 +44,36 @@ prop_showRead board = board == read (show board)
 -- applyMove
 --------------------------------------------------------------------------------
 
-prop_applyMoveNormalMove :: Pos -> Pos -> Board -> Property
-prop_applyMoveNormalMove p1 p2 b = condition ==> result
+prop_applyNormalMove :: Pos -> Pos -> Board -> Property
+prop_applyNormalMove src dst b = condition ==> result
     where
-        condition = isOccupied (getB p1 b) && isOccupied (getB p1 b) && p1 /= p2
-        result = equal && p1Empty && p2OldP1
+        condition = srcOccupied && dstOccupied && srcDstDiffer
+        srcOccupied = isOccupied $ getB src b
+        dstOccupied = isOccupied $ getB dst b
+        srcDstDiffer = src /= dst
 
-        move = NormalMove p1 p2
+        result = equal && srcEmpty && dstIsOldSrc
+
+        move = NormalMove src dst
+        b' = fromJust $ applyMove move b
+
+        equal = equalExcept b b' [src, dst]
+        srcEmpty = isEmpty $ getB src b'
+        dstIsOldSrc = getB dst b' == getB src b
+
+prop_applyNormalMoveNoPieceAtSrc :: Pos -> Pos -> Board -> Property
+prop_applyNormalMoveNoPieceAtSrc src dst b = condition ==> result
+    where
+        condition = srcEmpty && srcDstDiffer
+        srcEmpty = isEmpty $ getB src b
+        srcDstDiffer = src /= dst
+
+        move = NormalMove src dst
         b' = applyMove move b
 
-        equal = equalExcept b b' [p1, p2]
-        p1Empty = isEmpty $ getB p1 b'
-        p2OldP1 = getB p2 b' == getB p1 b
+        result = isNothing b'
+
+
 
 --------------------------------------------------------------------------------
 -- Helpers

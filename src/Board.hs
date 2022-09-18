@@ -233,11 +233,15 @@ mapB f (Board rows) = Board $ map (\row -> map f row) rows
 anyB :: (Square -> Bool) -> Board -> Bool
 anyB f = foldB (\acc square -> acc || f square) False
 
-applyMove :: Move -> Board -> Board
--- TODO: Other moves
-applyMove (NormalMove start dest) board = setB dest atStart $ setB start Empty board
-  where
-    atStart = getB start board
+applyMove :: Move -> Board -> Maybe Board
+applyMove (NormalMove src dst) b = applyNormalMove src dst b
+applyMove _otherMove _b = undefined
+
+applyNormalMove src dst b
+    | isEmpty atSrc = Nothing
+    | otherwise     = Just $ setB dst atSrc $ setB src Empty b
+    where
+        atSrc = getB src b
 
 --------------------------------------------------------------------------------
 -- Misc
