@@ -7,10 +7,12 @@ module Board
 ( 
 -- Types
   Board
+, defaultBoard
 , Square(..)
 , Color(..)
 , Kind(..)
-, defaultBoard
+, Pos
+, Move(..)
 
 -- Board operations
 , getB
@@ -64,6 +66,12 @@ data Kind = Pawn
           | King
           deriving (Eq, Show, Ord)
 
+type Pos = (Int, Int)
+
+data Move = NormalMove Pos Pos
+          | Promote Pos Kind   -- TODO
+          | Castle Pos         -- TODO
+          | EnPassant Pos Pos  -- TODO
 
 --------------------------------------------------------------------------------
 -- Default, Show and Read
