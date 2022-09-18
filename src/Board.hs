@@ -198,10 +198,10 @@ instance Arbitrary Board where
 -- Board operations
 --------------------------------------------------------------------------------
 
-getB :: (Int,Int) -> Board -> Square
+getB :: Pos -> Board -> Square
 getB (row,col) (Board board) = (board !! row) !! col
 
-setB :: (Int,Int) -> Square -> Board -> Board
+setB :: Pos -> Square -> Board -> Board
 setB (rowIndex,colIndex) sq (Board oldBoard) = Board newBoard
   where
     oldRow = oldBoard !! rowIndex
@@ -225,8 +225,9 @@ mapB f (Board rows) = Board $ map (\row -> map f row) rows
 anyB :: (Square -> Bool) -> Board -> Bool
 anyB f = foldB (\acc square -> acc || f square) False
 
-applyMove :: ((Int,Int),(Int,Int)) -> Board -> Board
-applyMove (start,dest) board = setB dest atStart $ setB start Empty board
+applyMove :: Move -> Board -> Board
+-- TODO: Other moves
+applyMove (NormalMove start dest) board = setB dest atStart $ setB start Empty board
   where
     atStart = getB start board
 
