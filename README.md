@@ -20,8 +20,8 @@
     - Checkmate with King+Rook
     - Checkmate with King+Queen
 - Rules
-    - Castling
     - Promoting
+    - Castling
     - En passant
     - 3 draw
     - 50 draw
