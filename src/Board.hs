@@ -247,6 +247,7 @@ applyNormalMove src dst b = assert (not $ isEmpty atSrc)
 applyPromote :: Pos -> Kind -> Board -> Board
 applyPromote p kind b = assert (isPawn atP) setB p newAtP b
     where
+        -- TODO: assert row+color, kind
         atP    = getB p b
         newAtP = Piece (color atP) kind
 

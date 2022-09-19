@@ -52,14 +52,38 @@ prop_applyNormalMove (TwoDifferentPos src dst) b = condition ==> result
         srcOccupied = isOccupied $ getB src b
         dstOccupied = isOccupied $ getB dst b
 
-        result = equal && srcEmpty && dstIsOldSrc
-
         move = NormalMove src dst
         b' = applyMove move b
 
+        result = equal && srcEmpty && dstIsOldSrc
         equal = equalExcept b b' [src, dst]
         srcEmpty = isEmpty $ getB src b'
         dstIsOldSrc = getB dst b' == getB src b
+
+prop_applyPromote :: Pos -> Color -> Kind -> Board -> Property
+prop_applyPromote p color kind b = condition ==> result
+    where
+        (Pos row _col) = p
+
+        condition = atTopOrBottom && notToPawnOrKing
+        atTopOrBottom = row == 0 || row == 7
+        notToPawnOrKing = kind /= Pawn && kind /= King
+
+        b' = setB p (Piece color Pawn) b
+        move = Promote p kind
+        b'' = applyMove move b'
+
+        result = equal && pHasNew
+        equal = equalExcept b' b'' [p]
+        pHasNew = getB p b'' == Piece color kind
+
+
+
+
+
+
+
+        
 
 --------------------------------------------------------------------------------
 -- Helpers
