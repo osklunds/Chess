@@ -63,19 +63,24 @@ prop_applyNormalMove (TwoDifferentPos src dst) b = condition ==> result
 prop_applyPromote :: Pos -> Color -> Kind -> Board -> Property
 prop_applyPromote p color kind b = condition ==> result
     where
-        (Pos row _col) = p
+        (Pos row col) = p
+        row' = if row <= 3
+                then 0
+                else 7
+        p' = (Pos row' col)
 
         condition = atTopOrBottom && notToPawnOrKing
-        atTopOrBottom = row == 0 || row == 7
+        atTopOrBottom = row' == 0 && color == White ||
+                        row' == 7 && color == Black
         notToPawnOrKing = kind /= Pawn && kind /= King
 
-        b' = setB p (Piece color Pawn) b
-        move = Promote p kind
+        b' = setB p' (Piece color Pawn) b
+        move = Promote p' kind
         b'' = applyMove move b'
 
         result = equal && pHasNew
-        equal = equalExcept b' b'' [p]
-        pHasNew = getB p b'' == Piece color kind
+        equal = equalExcept b' b'' [p']
+        pHasNew = getB p' b'' == Piece color kind
 
 
 
