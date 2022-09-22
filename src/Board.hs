@@ -7,12 +7,10 @@ module Board
 ( 
 -- Types
   Board
-, defaultBoard
 , Square(..)
 , Color(..)
 , Kind(..)
-, Pos(..)
-, Move(..)
+, defaultBoard
 
 -- Board operations
 , getB
@@ -27,7 +25,6 @@ module Board
 , color
 , invert
 , isEmpty
-, isOccupied
 , isColor
 , isOtherColor
 , isPawn
@@ -40,7 +37,6 @@ module Board
 where
 
 import Control.Monad
-import Control.Exception
 import Data.Char
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
@@ -68,13 +64,6 @@ data Kind = Pawn
           | King
           deriving (Eq, Show, Ord)
 
-data Pos = Pos Int Int
-         deriving (Eq, Show, Ord)
-
-data Move = NormalMove Pos Pos
-          | Promote Pos Kind   -- TODO
-          | Castle Pos         -- TODO
-          | EnPassant Pos Pos  -- TODO
 
 --------------------------------------------------------------------------------
 -- Default, Show and Read
@@ -176,12 +165,6 @@ instance Arbitrary Square where
                       return $ Piece color kind
                     ]
 
-instance Arbitrary Pos where
-    arbitrary = do
-        row <- oneof $ map return [0..7]
-        col <- oneof $ map return [0..7]
-        return $ Pos row col
-
 instance Arbitrary Board where
   arbitrary = do
     rows <- replicateM 8 $ replicateM 8 arbitrary
@@ -197,8 +180,8 @@ instance Arbitrary Board where
                     True  -> (col2 + 1) `mod` 8
                     False -> col2
 
-    let blackKing = setB (Pos row1 col1)  (Piece Black King) noKings
-    let whiteKing = setB (Pos row2 col2') (Piece White King) blackKing
+    let blackKing = setB (row1,col1)  (Piece Black King) noKings
+    let whiteKing = setB (row2,col2') (Piece White King) blackKing
 
     return whiteKing
 
@@ -207,15 +190,15 @@ instance Arbitrary Board where
 -- Board operations
 --------------------------------------------------------------------------------
 
-getB :: Pos -> Board -> Square
-getB (Pos row col) (Board board) = (board !! row) !! col
+getB :: (Int,Int) -> Board -> Square
+getB (row,col) (Board board) = (board !! row) !! col
 
-setB :: Pos -> Square -> Board -> Board
-setB (Pos rowIdx colIdx) sq (Board oldBoard) = Board newBoard
+setB :: (Int,Int) -> Square -> Board -> Board
+setB (rowIndex,colIndex) sq (Board oldBoard) = Board newBoard
   where
-    oldRow = oldBoard !! rowIdx
-    newRow = replaceAt colIdx sq oldRow
-    newBoard = replaceAt rowIdx newRow oldBoard
+    oldRow = oldBoard !! rowIndex
+    newRow = replaceAt colIndex sq oldRow
+    newBoard = replaceAt rowIndex newRow oldBoard
 
 replaceAt :: Int -> a -> [a] -> [a]
 replaceAt i x xs = prefix ++ [x] ++ suffix
@@ -234,29 +217,10 @@ mapB f (Board rows) = Board $ map (\row -> map f row) rows
 anyB :: (Square -> Bool) -> Board -> Bool
 anyB f = foldB (\acc square -> acc || f square) False
 
-applyMove :: Move -> Board -> Board
-applyMove (NormalMove src dst) b = applyNormalMove src dst b
-applyMove (Promote p kind) b = applyPromote p kind b
-applyMove _otherMove _b = undefined
-
-applyNormalMove src dst b = assert (not $ isEmpty atSrc)
-                                   (setB dst atSrc $ setB src Empty b)
-    where
-        atSrc = getB src b
-
-applyPromote :: Pos -> Kind -> Board -> Board
-applyPromote p kind b = assert condition setB p newAtP b
-    where
-        -- TODO: assert row+color, kind
-        atP    = getB p b
-        newAtP = Piece (color atP) kind
-
-        condition = pawnAtP && notToPawnOrKing && pAtTopOrBottom
-        pawnAtP = isPawn atP
-        notToPawnOrKing = kind /= Pawn && kind /= King
-        pAtTopOrBottom = row == 0 && color atP == White ||
-                         row == 7 && color atP == Black
-        (Pos row _col) = p
+applyMove :: ((Int,Int),(Int,Int)) -> Board -> Board
+applyMove (start,dest) board = setB dest atStart $ setB start Empty board
+  where
+    atStart = getB start board
 
 --------------------------------------------------------------------------------
 -- Misc
@@ -272,9 +236,6 @@ invert Black = White
 isEmpty :: Square -> Bool
 isEmpty Empty = True
 isEmpty _     = False
-
-isOccupied :: Square -> Bool
-isOccupied = not . isEmpty
 
 isColor :: Color -> Square -> Bool
 isColor _  Empty        = False
