@@ -6,26 +6,30 @@ module Moves.CheckUnaware
 )
 where
 
-import Board as B
+import Board as B hiding (getB)
+import qualified Board as B (getB)
 
 
-movesForColor :: Color -> Board -> [((Int,Int),(Int,Int))]
+movesForColor :: Color -> Board -> [Move]
 movesForColor color board = concat [movesFromPos (row,col) color board |
                                     row <- [0..7], col <- [0..7]]
 
-movesFromPos :: (Int,Int) -> Color -> Board -> [((Int,Int),(Int,Int))]
+movesFromPos :: (Int,Int) -> Color -> Board -> [Move]
 movesFromPos pos color board
-  | isColor color atPos = movesFun pos board
+  | isColor color atPos = normalMoves'
   | otherwise           = []
   where
     atPos = getB pos board
-    movesFun = case atPos of
+    normalMovesFun = case atPos of
                  (Piece _ King )  -> kingMoves
                  (Piece _ Queen)  -> queenMoves
                  (Piece _ Rook)   -> rookMoves
                  (Piece _ Bishop) -> bishopMoves
                  (Piece _ Knight) -> knightMoves
                  (Piece _ Pawn)   -> pawnMoves
+    normalMoves = normalMovesFun pos board
+    normalMoves' = [NormalMove (toPos src) (toPos dst) |
+                    (src,dst) <- normalMoves]
 
 kingMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
 kingMoves pos board = filter isOneStep $ queenMoves pos board
@@ -143,3 +147,9 @@ tupleMaxAbs (a,b) = max (abs a) (abs b)
 
 isWithinBoard :: (Int,Int) -> Bool
 isWithinBoard (row,col) = 0 <= row && row < 8 && 0 <= col && col < 8
+
+toPos :: (Int,Int) -> Pos
+toPos (r,c) = Pos r c
+
+getB :: (Int,Int) -> Board -> Square
+getB = B.getB . toPos
