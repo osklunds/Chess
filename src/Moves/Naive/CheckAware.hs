@@ -22,7 +22,3 @@ isKingSafeAfterMove color board move = all (/= Piece color King) destSquares
     movesOther  = CU.movesF (invert color) newBoard
     dests       = map moveToDest movesOther
     destSquares = map (\dest -> getB dest newBoard) dests
-
-moveToDest :: Move -> Pos
-moveToDest (NormalMove _src dst) = dst
-moveToDest (Promote pos _kind) = pos

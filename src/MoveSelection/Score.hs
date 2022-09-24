@@ -7,7 +7,14 @@ where
 import Board
 import GameResult
 
+-- By keeping track of if found kings, a speed improvement was observed
+data FoldState = FoldState { score :: Int
+                           , foundKing :: Bool
+                           , foundOtherKing :: Bool
+                           }
 
+-- TODO: Remove the need to check for game result. But first needs
+-- many tests in MoveSelection
 scoreForColor :: Color -> Color -> Board -> Int
 scoreForColor color turn board
   | gameRes == Normal    = score
@@ -17,12 +24,6 @@ scoreForColor color turn board
   where
     gameRes = gameResult turn board
     score   = calculateScore color board
-
--- By keeping track of if found kings, a speed improvement was observed
-data FoldState = FoldState { score :: Int
-                           , foundKing :: Bool
-                           , foundOtherKing :: Bool
-                           }
 
 calculateScore :: Color -> Board -> Int
 calculateScore color board

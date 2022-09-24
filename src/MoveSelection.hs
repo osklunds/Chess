@@ -1,6 +1,6 @@
 
 -- Selection of a move for a board using optimization. In other words,
--- using Optimize for Board.
+-- combining Optimize and Moves for use on Board.
 
 {-# LANGUAGE NamedFieldPuns #-}
 
@@ -18,7 +18,7 @@ import Optimize
 
 
 data State = State { board         :: Board
-                   , reachBy       :: Maybe ((Int,Int),(Int,Int))
+                   , reachBy       :: Maybe Move
                    , numberOfMoves :: Int
                    , turn          :: Color }
            deriving (Eq, Ord)
@@ -29,7 +29,7 @@ newtype Score = Score (Int, -- Numerical score
 
 
 -- depth must be 2 or larger in order to detect check and checkmate
-moveColor :: Int -> Color -> Board -> ((Int,Int),(Int,Int))
+moveColor :: Int -> Color -> Board -> Move
 moveColor depth color board = fromJust $ reachBy nextState
   where
     initialState = State { board         = board
@@ -43,7 +43,7 @@ genStates (State {board, turn, numberOfMoves}) = states
   where
     hasKing = anyB (== (Piece turn King)) board
     moves   = case hasKing of
-                True  -> movesForColor turn board
+                True  -> movesF turn board
                 False -> []
     -- Optimization. If "turn" has no king anyway, turn lost in a previous
     -- state and there's no need to check moves now.
