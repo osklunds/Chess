@@ -10,12 +10,13 @@ where
 
 import Prelude as P
 
-import Board as B
+import Board as B hiding (Move)
+import qualified Board as B
 import MoveSelection
 import Game as G
 import GameResult as GR
 
-data UserAction = Move ((Int,Int),(Int,Int))
+data UserAction = Move B.Move
                 | Undo
 
 data State = State { gameStates :: [GameState]
@@ -79,7 +80,7 @@ playerTurnUndo st = do
             putStrLn "Can't undo because at start"
             playerTurnAskInput st
 
-playerTurnValidateMove :: State -> ((Int,Int),(Int,Int)) -> IO ()
+playerTurnValidateMove :: State -> B.Move -> IO ()
 playerTurnValidateMove st move = do
     let gss@(curGs:_restGss) = gameStates st
     case validateMove move curGs of
@@ -131,12 +132,19 @@ computerTurn st = do
 parseInput :: String -> Maybe UserAction
 parseInput "undo" = Just $ Undo
 parseInput [startCol,startRow,' ',destCol,destRow] = do
-  startCol' <- parseCol startCol
-  startRow' <- parseRow startRow
-  destCol'  <- parseCol destCol
-  destRow'  <- parseRow destRow
-
-  return $ Move ((startRow',startCol'),(destRow',destCol'))
+    startCol' <- parseCol startCol
+    startRow' <- parseRow startRow
+    let start = (Pos startRow' startCol')
+    destCol'  <- parseCol destCol
+    destRow'  <- parseRow destRow
+    let dest = (Pos destRow' destCol')
+    return $ Move $ NormalMove start dest
+parseInput [col,row,' ',kind] = do
+    col' <- parseCol col
+    row' <- parseRow row
+    let pos = Pos row' col'
+    kind' <- parseKind kind
+    return $ Move $ Promote pos kind'
 parseInput _ = Nothing
 
 parseCol :: Char -> Maybe Int
@@ -161,6 +169,13 @@ parseRow '2' = Just 6
 parseRow '1' = Just 7
 parseRow _   = Nothing
 
+parseKind :: Char -> Maybe Kind
+parseKind 'q' = Just Queen
+parseKind 'r' = Just Rook
+parseKind 'b' = Just Bishop
+parseKind 'k' = Just Knight
+
+
 --------------------------------------------------------------------------------
 -- Showing
 --------------------------------------------------------------------------------
@@ -168,10 +183,13 @@ parseRow _   = Nothing
 printBoard :: GameState -> IO ()
 printBoard = putStrLn . (showBoardWithMarkers []) . board
 
-printBoardWithMove :: ((Int,Int),(Int,Int)) -> GameState -> IO ()
-printBoardWithMove (start,dest) = putStrLn .
-                                  (showBoardWithMarkers [start,dest]) .
-                                  board
+printBoardWithMove :: B.Move -> GameState -> IO ()
+printBoardWithMove move = putStrLn . (showBoardWithMarkers markers) . board
+    where
+        markersAsPos = case move of
+                    (NormalMove src dst) -> [src, dst]
+                    (Promote dst _kind) -> [dst]
+        markers = [(r,c) | (Pos r c) <- markersAsPos]
 
 showBoardWithMarkers :: [(Int,Int)] -> Board -> String
 showBoardWithMarkers markers board =
@@ -203,9 +221,9 @@ betweenCharForPosition posList (row,col)
   | otherwise                                                = " "
 
 squareCharForPosition :: (Int,Int) -> Board -> String
-squareCharForPosition pos@(row,col) board
+squareCharForPosition (row,col) board
   | square /= Empty = show square
   | even $ row+col  = " "
   | odd  $ row+col  = "■"
   where
-    square = getB pos board
+    square = getB (Pos row col) board

@@ -31,21 +31,21 @@ data ValidationResult = Ok | IllegalMove | WouldBeInCheck
 newGameState :: Board -> GameState
 newGameState board = GameState { board, turn = White, captured = []}
 
-validateMove :: ((Int,Int),(Int,Int)) -> GameState -> ValidationResult
+validateMove :: Move -> GameState -> ValidationResult
 validateMove move (GameState {board, turn})
   | not $ move `elem` legalMoves = IllegalMove
   | threatensCurKing             = WouldBeInCheck
   | otherwise                    = Ok
   where
-    legalMoves       = movesForColor turn board
+    legalMoves       = movesF turn board
     newBoard         = B.applyMove move board
     threatensCurKing = GR.isKingThreatened turn newBoard
 
-applyMove :: ((Int,Int),(Int,Int)) -> GameState -> (GameState, Result)
+applyMove :: Move -> GameState -> (GameState, Result)
 applyMove move (GameState {board, turn, captured}) = (nextGameState, result)
   where
     -- Next game state
-    atDest    = getB (snd move) board
+    atDest    = getB (moveToDest move) board -- TODO: Fix when not normal
     captured' = case atDest of
                   Empty -> captured
                   _else -> atDest:captured
