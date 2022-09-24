@@ -140,20 +140,7 @@ prop_fixedBoardCapturesThreat = verifyMoves White board moves
                   \  0 1 2 3 4 5 6 7"
     moves = movesFrom (0,5) [(5,0)]
 
-verifyMoves :: Color -> Board -> [((Int,Int),(Int,Int))] -> Property
-verifyMoves color board expectedMoves =
-  counterexample errorString verificationResult
-  where
-    expectedMoves'     = sort expectedMoves
-    actualMoves        = sort $ movesForColor color board
-    verificationResult = expectedMoves' == actualMoves
-    actualMissing      = expectedMoves' \\ actualMoves
-    actualExtra        = actualMoves    \\ expectedMoves'
-    errorString        = show board ++ "\n" ++
-                         "Expected moves: " ++ show expectedMoves' ++ "\n" ++
-                         "Actual moves:   " ++ show actualMoves ++ "\n" ++
-                         "Actual is missing: " ++ show actualMissing ++ "\n" ++
-                         "Actual has these extra: " ++ show actualExtra
+
 
 movesFrom :: (Int,Int) -> [(Int,Int)] -> [((Int,Int),(Int,Int))]
 movesFrom start ends = map (\end -> (start, end)) ends

@@ -14,7 +14,7 @@ module Board
 , Pos(..)
 , Move(..)
 
--- Board operations
+-- Board
 , getB
 , setB
 , foldB
@@ -22,8 +22,9 @@ module Board
 , mapB
 , anyB
 , applyMove
+, arbitraryBoard
 
--- Squares
+-- Square
 , color
 , invert
 , isEmpty
@@ -75,7 +76,7 @@ data Move = NormalMove Pos Pos
           | Promote Pos Kind   -- TODO
           | Castle Pos         -- TODO
           | EnPassant Pos Pos  -- TODO
-          deriving (Eq)
+          deriving (Eq, Ord, Show)
 
 --------------------------------------------------------------------------------
 -- Default, Show and Read
@@ -205,7 +206,7 @@ instance Arbitrary Board where
 
 
 --------------------------------------------------------------------------------
--- Board operations
+-- Board
 --------------------------------------------------------------------------------
 
 getB :: Pos -> Board -> Square
@@ -258,6 +259,9 @@ applyPromote p kind b = assert condition setB p newAtP b
         pAtTopOrBottom = row == 0 && color atP == White ||
                          row == 7 && color atP == Black
         (Pos row _col) = p
+
+arbitraryBoard :: IO Board
+arbitraryBoard = generate arbitrary
 
 --------------------------------------------------------------------------------
 -- Misc
