@@ -1,11 +1,11 @@
 
 module Moves.Naive
-( moves
+( movesForColor
 )
 where
 
 import Moves.Common
 import qualified Moves.Naive.CheckAware
 
-moves :: MovesFun
-moves = Moves.Naive.CheckAware.movesForColor
+movesForColor :: MovesFun
+movesForColor = Moves.Naive.CheckAware.movesForColor
