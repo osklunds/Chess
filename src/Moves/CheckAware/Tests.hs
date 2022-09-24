@@ -7,8 +7,10 @@ import Data.List
 import Test.QuickCheck
 
 import Board
-import Moves.CheckAware
+import qualified Moves.CheckAware as CA
 import qualified Moves.CheckUnaware as CU
+import qualified Moves.TestLib as MTL
+import Lib
 
 
 --------------------------------------------------------------------------------
@@ -16,7 +18,7 @@ import qualified Moves.CheckUnaware as CU
 --------------------------------------------------------------------------------
 
 prop_fixedBoard1 :: Property
-prop_fixedBoard1 = verifyMoves Black board moves
+prop_fixedBoard1 = verifyMoves moves Black board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♟             ♝ 0\n\
@@ -26,7 +28,7 @@ prop_fixedBoard1 = verifyMoves Black board moves
                   \4     ♛   ♖ ♟ ♗ ♚ 4\n\
                   \5     ♖         ♜ 5\n\
                   \6       ♘ ♞ ♟ ♝ ♟ 6\n\
-                  \7       ♜   ♞ ♖ ♝ 7\n\
+                  \7   ♟   ♜   ♞ ♖ ♝ 7\n\
                   \  0 1 2 3 4 5 6 7"
     moves = -- King at (4,7)
             (movesFrom (4,7) [(3,6), (4,6)]) ++
@@ -62,7 +64,7 @@ prop_fixedBoard1 = verifyMoves Black board moves
             (movesFrom (4,5) [(5,5)]) ++
 
             -- Rook at (7,3)
-            (movesFrom (7,3) [(7,4), (7,2), (7,1), (6,3), (7,0)]) ++
+            (movesFrom (7,3) [(7,4), (7,2), (6,3)]) ++
 
             -- Rook at (5,7)
             (movesFrom (5,7) [(5,6), (5,5), (5,4), (5,3), (5,2)]) ++
@@ -78,10 +80,13 @@ prop_fixedBoard1 = verifyMoves Black board moves
             (movesFrom (7,5) [(5,6), (5,4), (6,3)]) ++
 
             -- Knight at (6,4)
-            (movesFrom (6,4) [(4,3), (5,6), (7,6), (7,2), (5,2)])
+            (movesFrom (6,4) [(4,3), (5,6), (7,6), (7,2), (5,2)]) ++
+
+            -- Pawn at (7,1)
+            promoteAt (Pos 7 1)
 
 prop_fixedBoardAllKindsPreventMove :: Property
-prop_fixedBoardAllKindsPreventMove = verifyMoves White board moves
+prop_fixedBoardAllKindsPreventMove = verifyMoves moves White board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
@@ -96,11 +101,11 @@ prop_fixedBoardAllKindsPreventMove = verifyMoves White board moves
     moves = movesFrom (5,3) [(6,4)]
 
 prop_fixedBoardMovesAwayIfIsChecked :: Property
-prop_fixedBoardMovesAwayIfIsChecked = verifyMoves White board moves
+prop_fixedBoardMovesAwayIfIsChecked = verifyMoves moves White board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
-                  \0                 0\n\
-                  \1                 1\n\
+                  \0       ♙         0\n\
+                  \1 ♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟ 1\n\
                   \2                 2\n\
                   \3                 3\n\
                   \4                 4\n\
@@ -111,11 +116,11 @@ prop_fixedBoardMovesAwayIfIsChecked = verifyMoves White board moves
     moves = movesFrom (5,3) [(4,2), (4,3), (4,4), (6,2), (6,3), (6,4)]
 
 prop_fixedBoardBlocksWithOther :: Property
-prop_fixedBoardBlocksWithOther = verifyMoves White board moves
+prop_fixedBoardBlocksWithOther = verifyMoves moves White board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
-                  \0 ♚               0\n\
-                  \1                 1\n\
+                  \0 ♚     ♘     ♙   0\n\
+                  \1 ♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟ 1\n\
                   \2                 2\n\
                   \3               ♛ 3\n\
                   \4             ♜ ♝ 4\n\
@@ -126,10 +131,10 @@ prop_fixedBoardBlocksWithOther = verifyMoves White board moves
     moves = movesFrom (6,3) [(5,3)]
 
 prop_fixedBoardCapturesThreat :: Property
-prop_fixedBoardCapturesThreat = verifyMoves White board moves
+prop_fixedBoardCapturesThreat = verifyMoves moves White board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
-                  \0 ♚         ♗     0\n\
+                  \0 ♚   ♘   ♙ ♗     0\n\
                   \1                 1\n\
                   \2                 2\n\
                   \3               ♛ 3\n\
@@ -140,11 +145,19 @@ prop_fixedBoardCapturesThreat = verifyMoves White board moves
                   \  0 1 2 3 4 5 6 7"
     moves = movesFrom (0,5) [(5,0)]
 
+verifyMoves :: [Move] -> Color -> Board -> Property
+verifyMoves expMoves color board =
+    MTL.verifyMoves expMoves color board CA.movesForColor
 
 
-movesFrom :: (Int,Int) -> [(Int,Int)] -> [((Int,Int),(Int,Int))]
-movesFrom start ends = map (\end -> (start, end)) ends
+movesFrom :: (Int,Int) -> [(Int,Int)] -> [Move]
+movesFrom start ends = map (\end -> NormalMove (toPos start) (toPos end)) ends
 
+promoteAt :: Pos -> [Move]
+promoteAt p = [Promote p k | k <- [Rook, Bishop, Knight, Queen]]
+
+toPos :: (Int,Int) -> Pos
+toPos (row,col) = Pos row col
 
 --------------------------------------------------------------------------------
 -- Arbitrary boards
@@ -154,7 +167,7 @@ prop_movesIsSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
 prop_movesIsSubsetOfCheckUnawareMoves color board =
   moves `isSubsetOf` movesCheckUnaware
   where
-    moves             = movesForColor color board
+    moves             = CA.movesForColor color board
     movesCheckUnaware = CU.movesForColor color board
 
 
