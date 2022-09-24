@@ -1,13 +1,15 @@
 
 {-# LANGUAGE TemplateHaskell #-}
 
-module Moves.CheckUnaware.Tests where
+module Moves.NormalMoves.Tests where
 
 import Test.QuickCheck
 import Data.List
 
-import Board
-import Moves.CheckUnaware
+import Board as B hiding (getB, setB)
+import qualified Board as B
+import Moves.NormalMoves
+import Moves.NormalMoves.Lib
 
 
 --------------------------------------------------------------------------------
@@ -490,34 +492,14 @@ emptyBetweenStartAndDest board (start,dest) =
 isSubsetOf :: (Eq a) => [a] -> [a] -> Bool
 xs `isSubsetOf` ys = null $ xs \\ ys
 
-tupleAdd :: (Int,Int) -> (Int,Int) -> (Int,Int)
-tupleAdd (a,b) (c,d) = (a+c,b+d)
-
-tupleSub :: (Int,Int) -> (Int,Int) -> (Int,Int)
-tupleSub (a,b) (c,d) = (a-c,b-d)
-
-tupleMul :: (Int,Int) -> Int -> (Int,Int)
-tupleMul (a,b) c = (a*c,b*c)
-
-tupleSignum :: (Int,Int) -> (Int,Int)
-tupleSignum (a,b) = (signum a,signum b)
-
-tupleMaxAbs :: (Int,Int) -> Int
-tupleMaxAbs (a,b) = max (abs a) (abs b)
-
-withinizePos :: (Int,Int) -> (Int,Int)
-withinizePos (row,col) = (row `mod` 8, col `mod` 8)
-
-isWithinBoard :: (Int,Int) -> Bool
-isWithinBoard (row,col) = 0 <= row && row < 8 && 0 <= col && col < 8
-
 isMoveOneStep :: ((Int,Int),(Int,Int)) -> Bool
 isMoveOneStep (start,dest) = tupleMaxAbs (dest `tupleSub` start) <= 1
 
 isMoveFrom :: (Int,Int) -> ((Int,Int),(Int,Int)) -> Bool
 isMoveFrom pos (start,_dest) = pos == start
 
-
+withinizePos :: (Int,Int) -> (Int,Int)
+withinizePos (row,col) = (row `mod` 8, col `mod` 8)
 
 return []
 runTests = $quickCheckAll
