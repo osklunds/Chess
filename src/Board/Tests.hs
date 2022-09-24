@@ -8,7 +8,6 @@ import Test.QuickCheck
 import Data.Maybe
 import Test.QuickCheck.Arbitrary
 
-import TestLib
 import Board as B
 
 --------------------------------------------------------------------------------

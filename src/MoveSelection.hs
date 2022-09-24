@@ -1,6 +1,6 @@
 
 -- Selection of a move for a board using optimization. In other words,
--- combining Optimize and Moves for use on Board.
+-- applying Score and Moves with Optimize.
 
 {-# LANGUAGE NamedFieldPuns #-}
 
