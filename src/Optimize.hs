@@ -16,4 +16,4 @@ import qualified Optimize.MiniMax as MM
 import qualified Optimize.MiniMaxPar as MMP
 
 optimize :: (State st, Score sc, Integral d) => OptFun st sc d
-optimize genF evalF d st = snd $ AB.optimizeWithSc genF evalF d st
+optimize genF evalF d st = snd $ ABM.optimizeWithSc genF evalF d st

@@ -7,7 +7,6 @@
 
 module MoveSelection
 ( moveColor
-, runTests
 )
 where
 
@@ -69,16 +68,6 @@ instance Bounded Score where
   minBound = Score (minBound,maxBound)
   maxBound = Score (maxBound,minBound)
 
-prop_score :: Bool
-prop_score = t1 && t2
-    where
-        t1 = Score (3,4) > Score (2,1)
-        t2 = Score (7,2) > Score (7,3)
-
-
 -- TODO: GameState should be extended with e.g. last moves (to detect 3 draw),
 -- if player has move king and rooks, no capture for 50 turns etc, and let
 -- move selection take this into account.
-
-return []
-runTests = $quickCheckAll

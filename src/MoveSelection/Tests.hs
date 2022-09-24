@@ -154,8 +154,8 @@ prop_promote = and [makeMove d board == expMove | d <- depths]
                       \  0 1 2 3 4 5 6 7"
         expMove = Promote (Pos 7 4) Queen
 
-prop_promote_to_knight :: Bool
-prop_promote_to_knight = and [makeMove d board == expMove | d <- depths]
+prop_promoteToKnight :: Bool
+prop_promoteToKnight = and [makeMove d board == expMove | d <- depths]
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0               ♚ 0\n\
@@ -169,8 +169,8 @@ prop_promote_to_knight = and [makeMove d board == expMove | d <- depths]
                       \  0 1 2 3 4 5 6 7"
         expMove = Promote (Pos 7 4) Knight
 
-prop_do_not_promote1 :: Bool
-prop_do_not_promote1 = and [makeMove d board == expMove | d <- depths]
+prop_doNotPromote1 :: Bool
+prop_doNotPromote1 = and [makeMove d board == expMove | d <- depths]
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0   ♜           ♚ 0\n\
@@ -183,6 +183,22 @@ prop_do_not_promote1 = and [makeMove d board == expMove | d <- depths]
                       \7         ♟       7\n\
                       \  0 1 2 3 4 5 6 7"
         expMove = NormalMove (Pos 1 2) (Pos 1 0)
+
+prop_doNotPromote2 :: Bool
+prop_doNotPromote2 = and [makeMove d board == expMove | d <- depths]
+    where
+        board = read  "  0 1 2 3 4 5 6 7  \n\
+                      \0               ♚ 0\n\
+                      \1       ♟         1\n\
+                      \2     ♕           2\n\
+                      \3                 3\n\
+                      \4                 4\n\
+                      \5 ♔               5\n\
+                      \6                 6\n\
+                      \7             ♟   7\n\
+                      \  0 1 2 3 4 5 6 7"
+        expMove = NormalMove (Pos 1 3) (Pos 2 2)
+
 
 
 
