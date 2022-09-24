@@ -1,13 +1,13 @@
 
 -- Generation of all syntactially possible moves.
 
-module Moves.CheckUnaware
+module Moves.Naive.CheckUnaware
 ( movesForColor
 )
 where
 
 import Board
-import qualified Moves.NormalMoves as NM
+import qualified Moves.Naive.NormalMoves as NM
 
 movesForColor :: Color -> Board -> [Move]
 movesForColor c b = normalMoves c b ++ promotes c b

@@ -1,17 +1,13 @@
 
 -- Generation of all possible moves.
 
--- The long term goal is that this module is so fast that CheckUnaware is
--- not needed.
-
 module Moves
-( movesForColor
+( moves
 )
 where
 
-import Board
-import qualified Moves.CheckAware
+import Moves.Common
+import qualified Moves.Naive as N
 
-
-movesForColor :: Color -> Board -> [((Int,Int),(Int,Int))]
-movesForColor = Moves.CheckAware.movesForColor
+moves :: MovesFun
+moves = N.moves

@@ -2,13 +2,13 @@
 -- Generation of all possible moves, when taking into account that
 -- you may not be in check afterwards.
 
-module Moves.CheckAware
+module Moves.Naive.CheckAware
 ( movesForColor
 )
 where
 
 import Board
-import qualified Moves.CheckUnaware as CU
+import qualified Moves.Naive.CheckUnaware as CU
 
 
 movesForColor :: Color -> Board -> [Move]

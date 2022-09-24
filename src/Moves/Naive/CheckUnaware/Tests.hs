@@ -1,15 +1,15 @@
 
 {-# LANGUAGE TemplateHaskell #-}
 
-module Moves.CheckUnaware.Tests where
+module Moves.Naive.CheckUnaware.Tests where
 
 import Test.QuickCheck
 
 import Lib
-import qualified Moves.TestLib as MTL
+import qualified Moves.Naive.TestLib as MTL
 import Board
-import qualified Moves.CheckUnaware as CU
-import qualified Moves.NormalMoves as NM
+import qualified Moves.Naive.CheckUnaware as CU
+import qualified Moves.Naive.NormalMoves as NM
 
 --------------------------------------------------------------------------------
 -- Fixed boards

@@ -1,15 +1,15 @@
 
 {-# LANGUAGE TemplateHaskell #-}
 
-module Moves.NormalMoves.Tests where
+module Moves.Naive.NormalMoves.Tests where
 
 import Test.QuickCheck
 import Data.List
 
 import Board as B hiding (getB, setB)
 import qualified Board as B
-import Moves.NormalMoves
-import Moves.NormalMoves.Lib
+import Moves.Naive.NormalMoves
+import Moves.Naive.NormalMoves.Lib
 
 
 --------------------------------------------------------------------------------

@@ -1,14 +1,14 @@
 
 -- Generation of all syntactially possible normal moves.
 
-module Moves.NormalMoves
+module Moves.Naive.NormalMoves
 ( movesForColor
 )
 where
 
 import Board as B hiding (getB)
 import qualified Board as B
-import Moves.NormalMoves.Lib
+import Moves.Naive.NormalMoves.Lib
 
 
 movesForColor :: Color -> Board -> [((Int,Int),(Int,Int))]

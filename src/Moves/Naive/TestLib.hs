@@ -1,5 +1,5 @@
 
-module Moves.TestLib
+module Moves.Naive.TestLib
 ( verifyMoves
 )
 where

@@ -1,5 +1,5 @@
 
-module Moves.NormalMoves.Lib
+module Moves.Naive.NormalMoves.Lib
 ( tupleAdd
 , tupleSub
 , tupleMul
