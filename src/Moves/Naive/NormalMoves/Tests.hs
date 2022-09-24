@@ -107,7 +107,7 @@ verifyMoves color board expectedMoves =
   counterexample errorString verificationResult
   where
     expectedMoves'     = sort expectedMoves
-    actualMoves        = sort $ movesForColor color board
+    actualMoves        = sort $ movesF color board
     verificationResult = expectedMoves' == actualMoves
     actualMissing      = expectedMoves' \\ actualMoves
     actualExtra        = actualMoves    \\ expectedMoves'
@@ -146,44 +146,44 @@ movesAreSubsetOfMoves kind1 kind2 board pos = movesKind1 `isSubsetOf`
     boardKind1 = setB pos' (Piece Black kind1) board
     boardKind2 = setB pos' (Piece Black kind2) board
 
-    movesKind1 = movesForColor Black boardKind1
-    movesKind2 = movesForColor Black boardKind2
+    movesKind1 = movesF Black boardKind1
+    movesKind2 = movesF Black boardKind2
 
 --------------------------------------------------------------------------------
 -- All pieces (-)
 --------------------------------------------------------------------------------
 
 prop_noNonMoves :: Board -> Bool
-prop_noNonMoves board = all isMove $ movesForColor Black board
+prop_noNonMoves board = all isMove $ movesF Black board
   where
     isMove (start,dest) = start /= dest
 
 prop_destinationIsWithinBoard :: Board -> Bool
 prop_destinationIsWithinBoard board = all pred moves
   where
-    moves = movesForColor Black board
+    moves = movesF Black board
     pred (_start,(row,col)) = 0 <= row && row < 8 && 0 <= col && col < 8
 
 prop_destinationIsNotSameColor :: Board -> Bool
 prop_destinationIsNotSameColor board = all pred moves
   where
-    moves              = movesForColor Black board
+    moves              = movesF Black board
     pred (_start,dest) = not (isColor Black (getB dest board))
 
 prop_startIsSameColor :: Board -> Bool
 prop_startIsSameColor board = all pred moves
   where
-    moves              = movesForColor Black board
+    moves              = movesF Black board
     pred (start,_dest) = isColor Black (getB start board)
 
 -- TODO: Move to CheckAware (too)
 prop_blackAndWhiteGiveSameMoves :: Board -> Bool
 prop_blackAndWhiteGiveSameMoves board = blackMoves `eqMoves` mirroredWhiteMoves
   where
-    blackMoves         = movesForColor Black board
+    blackMoves         = movesF Black board
     swappedColors      = swapColors board
     mirroredBoard      = mirrorBoard swappedColors
-    whiteMoves         = movesForColor White mirroredBoard
+    whiteMoves         = movesF White mirroredBoard
     mirroredWhiteMoves = map mirrorMove whiteMoves
 
 swapColors :: Board -> Board
@@ -473,7 +473,7 @@ placePieceAndGetMoves board pos kind = (board', pos', movesPlaced)
   where
     pos'        = withinizePos pos
     board'      = setB pos' (Piece Black kind) board
-    moves       = movesForColor Black board'
+    moves       = movesF Black board'
     movesPlaced = filter (isMoveFrom pos') moves
 
 emptyBetweenStartAndDest :: Board -> ((Int,Int),(Int,Int)) -> Bool

@@ -2,7 +2,7 @@
 -- Generation of all syntactially possible normal moves.
 
 module Moves.Naive.NormalMoves
-( movesForColor
+( movesF
 )
 where
 
@@ -11,9 +11,9 @@ import qualified Board as B
 import Moves.Naive.NormalMoves.Lib
 
 
-movesForColor :: Color -> Board -> [((Int,Int),(Int,Int))]
-movesForColor color board = concat [movesFromPos (row,col) color board |
-                                    row <- [0..7], col <- [0..7]]
+movesF :: Color -> Board -> [((Int,Int),(Int,Int))]
+movesF color board = concat [movesFromPos (row,col) color board |
+                             row <- [0..7], col <- [0..7]]
 
 movesFromPos :: (Int,Int) -> Color -> Board -> [((Int,Int),(Int,Int))]
 movesFromPos pos color board

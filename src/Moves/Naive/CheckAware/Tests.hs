@@ -161,7 +161,7 @@ prop_fixedBoardCapturesThreat = verifyMoves moves White board
 
 verifyMoves :: [Move] -> Color -> Board -> Property
 verifyMoves expMoves color board =
-    MTL.verifyMoves expMoves color board CA.movesForColor
+    MTL.verifyMoves expMoves color board CA.movesF
 
 normalMovesFrom :: Pos -> [Pos] -> [Move]
 normalMovesFrom src dsts = map (NormalMove src) dsts
@@ -177,8 +177,8 @@ prop_movesIsSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
 prop_movesIsSubsetOfCheckUnawareMoves color board =
   moves `isSubsetOf` movesCheckUnaware
   where
-    moves             = CA.movesForColor color board
-    movesCheckUnaware = CU.movesForColor color board
+    moves             = CA.movesF color board
+    movesCheckUnaware = CU.movesF color board
 
 
 return []

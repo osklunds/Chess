@@ -51,9 +51,9 @@ promotesAt ps = [Promote p k | p <- ps, k <- [Rook, Bishop, Knight, Queen]]
 
 verifyMoves :: [Move] -> Color -> Board -> Property
 verifyMoves expMoves color board =
-    MTL.verifyMoves allExpMoves color board CU.movesForColor
+    MTL.verifyMoves allExpMoves color board CU.movesF
     where
-        expNormalMoves = normalMovesForColor color board
+        expNormalMoves = normalmovesF color board
         allExpMoves = expMoves ++ expNormalMoves
 
 --------------------------------------------------------------------------------
@@ -64,15 +64,15 @@ prop_movesIsSupersetOfNormalMoves :: Color -> Board -> Bool
 prop_movesIsSupersetOfNormalMoves color board =
     normalMoves `isSubsetOf` moves
     where
-        moves        = CU.movesForColor color board
-        normalMoves  = normalMovesForColor color board
+        moves        = CU.movesF color board
+        normalMoves  = normalmovesF color board
 
 --------------------------------------------------------------------------------
 -- Helpers
 --------------------------------------------------------------------------------
 
-normalMovesForColor :: Color -> Board -> [Move]
-normalMovesForColor c b = map toNormalMove $ NM.movesForColor c b
+normalmovesF :: Color -> Board -> [Move]
+normalmovesF c b = map toNormalMove $ NM.movesF c b
     where
         toNormalMove ((rowS,colS),(rowD,colD)) =
             (NormalMove (Pos rowS colS) (Pos rowD colD))
