@@ -60,6 +60,16 @@ evalState :: Color -> State -> Score
 evalState color (State {board, numberOfMoves, turn}) =
   Score (scoreForColor color turn board, numberOfMoves)
 
+-- TODO: Need to make it more advanced so that
+-- M1,M2 is better than M2,M1, where M1 is promote, and M2 is a dummy move
+-- In the end, the order doesn't matter if just evaluating score and num moves
+-- to reach there, but if they are equal, it should be better to get a higher
+-- score earlier in the game.
+
+-- The solution could be that store board score for each level/depth. The
+-- score at the deepest depth is what is prio, but if that is equal,
+-- compared the second deepest, and so on.
+
 instance Ord Score where
   compare (Score (numScore1,numMoves1)) (Score (numScore2,numMoves2))
     = compare (numScore1,numMoves2) (numScore2,numMoves1)
