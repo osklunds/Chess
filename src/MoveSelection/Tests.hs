@@ -139,6 +139,28 @@ prop_doStalemateIfLosing = and [makeMove d board == expMove | d <- nonOneDepths]
 -- to win, but there's a possibility to create a draw and thus at least avoid
 -- losing.
 
+prop_promote :: Bool
+prop_promote = and [makeMove d board == expMove | d <- nonOneDepths]
+    where
+        board = read  "  0 1 2 3 4 5 6 7  \n\
+                      \0         ♙     ♚ 0\n\
+                      \1                 1\n\
+                      \2                 2\n\
+                      \3                 3\n\
+                      \4                 4\n\
+                      \5     ♔           5\n\
+                      \6                 6\n\
+                      \7         ♟       7\n\
+                      \  0 1 2 3 4 5 6 7"
+        expMove = Promote (Pos 7 4) Queen
+
+
+
+
+
+
+
+
 -- TODO: Test move that needs two steps ahead thinking
 
 -- TODO: Promote to non-queen

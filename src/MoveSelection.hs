@@ -3,13 +3,16 @@
 -- applying Score and Moves with Optimize.
 
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module MoveSelection
 ( moveColor
+, runTests
 )
 where
 
 import Data.Maybe
+import Test.QuickCheck
 
 import Board
 import Moves
@@ -47,6 +50,7 @@ genStates (State {board, turn, numberOfMoves}) = states
                 False -> []
     -- Optimization. If "turn" has no king anyway, turn lost in a previous
     -- state and there's no need to check moves now.
+    -- TODO: Move that to movesF
     states  = map (\move -> State { board         = applyMove move board
                                   , reachBy       = Just move
                                   , numberOfMoves = numberOfMoves + 1
@@ -65,7 +69,16 @@ instance Bounded Score where
   minBound = Score (minBound,maxBound)
   maxBound = Score (maxBound,minBound)
 
+prop_score :: Bool
+prop_score = t1 && t2
+    where
+        t1 = Score (3,4) > Score (2,1)
+        t2 = Score (7,2) > Score (7,3)
+
 
 -- TODO: GameState should be extended with e.g. last moves (to detect 3 draw),
 -- if player has move king and rooks, no capture for 50 turns etc, and let
 -- move selection take this into account.
+
+return []
+runTests = $quickCheckAll
