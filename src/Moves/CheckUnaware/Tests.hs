@@ -67,6 +67,9 @@ prop_movesIsSupersetOfNormalMoves color board =
         moves        = CU.movesForColor color board
         normalMoves  = normalMovesForColor color board
 
+--------------------------------------------------------------------------------
+-- Helpers
+--------------------------------------------------------------------------------
 
 normalMovesForColor :: Color -> Board -> [Move]
 normalMovesForColor c b = map toNormalMove $ NM.movesForColor c b
