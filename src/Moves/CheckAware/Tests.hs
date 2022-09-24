@@ -170,9 +170,6 @@ prop_movesIsSubsetOfCheckUnawareMoves color board =
     moves             = movesForColor color board
     movesCheckUnaware = CU.movesForColor color board
 
-isSubsetOf :: (Eq a) => [a] -> [a] -> Bool
-xs `isSubsetOf` ys = null $ xs \\ ys
-
 
 return []
 runTests = $quickCheckAll

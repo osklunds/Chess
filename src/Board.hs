@@ -75,6 +75,7 @@ data Move = NormalMove Pos Pos
           | Promote Pos Kind   -- TODO
           | Castle Pos         -- TODO
           | EnPassant Pos Pos  -- TODO
+          deriving (Eq)
 
 --------------------------------------------------------------------------------
 -- Default, Show and Read
