@@ -15,8 +15,7 @@ import MoveSelection
 --------------------------------------------------------------------------------
 
 prop_capture :: Bool
-prop_capture = all verifyCapturesPiece
-                   [Queen, Rook, Bishop, Knight, Pawn]
+prop_capture = all verifyCapturesPiece nonKingKinds
 
 verifyCapturesPiece :: Kind -> Bool
 verifyCapturesPiece kind = verifyMakesMove move board'
@@ -39,15 +38,13 @@ verifyCapturesPiece kind = verifyMakesMove move board'
     board' = setB dst piece board
 
 verifyMakesMove :: Move -> Board -> Bool
-verifyMakesMove move board = all f [1..5]
+verifyMakesMove move board = all f depths
   where
     f depth = makeMove depth board == move
 
 prop_escape :: Bool
-prop_escape = and [verifyEscapesFromThreat d k | d <- depths, k <- kinds]
-  where
-    depths = [2..4]
-    kinds  = [Queen, Rook, Bishop, Knight, Pawn]
+prop_escape = and [verifyEscapesFromThreat d k |
+                   d <- nonOneDepths, k <- nonKingKinds]
 
 verifyEscapesFromThreat :: Int -> Kind -> Bool
 verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'') 
@@ -73,7 +70,7 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
     board'' = applyMove move board'
 
 prop_checkmate :: Bool
-prop_checkmate = and [makeMove d board `elem` moves | d <- [1..5]]
+prop_checkmate = and [makeMove d board `elem` moves | d <- depths]
   where
     moves = [NormalMove (Pos 7 1) (Pos 7 0), NormalMove (Pos 6 1) (Pos 6 0)]
     -- The board looks like this to reduce the number of moves to speed up
@@ -90,7 +87,7 @@ prop_checkmate = and [makeMove d board `elem` moves | d <- [1..5]]
 
 prop_checkmateByMovingAwayPiece :: Bool
 prop_checkmateByMovingAwayPiece =
-  and [makeMove d board `elem` moves | d <- [1..5]]
+  and [makeMove d board `elem` moves | d <- depths]
   where
     moves = [NormalMove (Pos 3 0) (Pos 1 2), NormalMove (Pos 3 0) (Pos 5 2)]
     -- The board looks like this to reduce the number of moves to speed up
@@ -107,7 +104,7 @@ prop_checkmateByMovingAwayPiece =
 
 prop_escapeFromCheckEvenIfCanCheckmate :: Bool
 prop_escapeFromCheckEvenIfCanCheckmate =
-  and [isEmpty $ getB (Pos 4 4) (nextBoard d) | d <- [1..5]]
+  and [isEmpty $ getB (Pos 4 4) (nextBoard d) | d <- depths]
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♔               0\n\
@@ -122,7 +119,7 @@ prop_escapeFromCheckEvenIfCanCheckmate =
     nextBoard d = applyMove (makeMove d board) board
 
 prop_doStalemateIfLosing :: Bool
-prop_doStalemateIfLosing = and [makeMove d board == expMove | d <- [2..5]]
+prop_doStalemateIfLosing = and [makeMove d board == expMove | d <- nonOneDepths]
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0       ♚         0\n\
@@ -150,18 +147,11 @@ prop_doStalemateIfLosing = and [makeMove d board == expMove | d <- [2..5]]
 -- Arbitrary
 --------------------------------------------------------------------------------
 
-prop_legalMove :: Int -> Board -> Property
-prop_legalMove d board = not (null legalMoves) ==>
-                         makeMove depth board `elem` legalMoves
-  where
-    legalMoves = movesF Black board
-    depth      = 1 + d `mod` 3
-
-prop_performance :: Board -> Property
-prop_performance board = not (null legalMoves) ==>
-                         makeMove 1 board `elem` legalMoves
-  where
-    legalMoves = movesF Black board
+prop_legalMove :: Board -> Property
+prop_legalMove board = not (null legalMoves) ==> result
+    where
+        legalMoves = movesF Black board
+        result = and [makeMove d board `elem` legalMoves | d <- depths]
 
 -- TODO: escape from check
 
@@ -171,6 +161,16 @@ prop_performance board = not (null legalMoves) ==>
 
 makeMove :: Int -> Board -> Move
 makeMove depth board = moveColor depth Black board
+
+depths :: [Int]
+depths = [1..3]
+
+nonOneDepths :: [Int]
+nonOneDepths = [2..3]
+
+nonKingKinds :: [Kind]
+nonKingKinds = [Queen, Rook, Bishop, Knight, Pawn]
+
 
 
 return []
