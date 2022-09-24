@@ -49,7 +49,6 @@ import Test.QuickCheck.Gen
 -- Types
 --------------------------------------------------------------------------------
 
--- TODO: Let this type contain if kings and rooks have moved
 newtype Board = Board [[Square]]
               deriving (Eq, Ord)
 
