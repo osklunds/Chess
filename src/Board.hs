@@ -76,6 +76,9 @@ data Kind = Pawn
 data Pos = Pos Int Int
          deriving (Eq, Show, Ord)
 
+-- Idea: KingMove, QueenMove, etc
+-- So that syntactically invalid moves are impossible to create, or
+-- are asserted (the latter for e.g. empty squares during castling).
 data Move = NormalMove Pos Pos
           | Promote Pos Kind
           | Castle Color Side
