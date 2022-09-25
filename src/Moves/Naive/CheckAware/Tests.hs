@@ -180,42 +180,8 @@ prop_movesIsSubsetOfCheckUnawareMoves color board =
     movesCheckUnaware = CU.movesF color board
 
 prop_blackAndWhiteGiveSameMoves :: Board -> Bool
-prop_blackAndWhiteGiveSameMoves board = blackMoves `listEq` mirroredWhiteMoves
-  where
-    blackMoves         = movesF Black board
-    swappedColors      = swapColors board
-    mirroredBoard      = mirrorBoard swappedColors
-    whiteMoves         = movesF White mirroredBoard
-    mirroredWhiteMoves = map mirrorMove whiteMoves
-
-swapColors :: Board -> Board
-swapColors = mapB swapColor
-
-swapColor :: Square -> Square
-swapColor Empty = Empty
-swapColor (Piece White kind) = Piece Black kind
-swapColor (Piece Black kind) = Piece White kind
-
-mirrorBoard :: Board -> Board
-mirrorBoard board = foldl mirrorBoardAtPos
-                          board
-                          [Pos row col | row <- [0..3], col <- [0..7]]
-
-mirrorBoardAtPos :: Board -> Pos -> Board
-mirrorBoardAtPos board pos = setB pos atMirroredPos $
-                             setB mirroredPos atPos $ board
-    where
-        mirroredPos   = mirrorPos pos
-        atPos         = getB pos board
-        atMirroredPos = getB mirroredPos board
-
-mirrorPos :: Pos -> Pos
-mirrorPos (Pos row col) = Pos (7 - row) col
-
-mirrorMove :: Move -> Move
-mirrorMove (NormalMove src dst) = NormalMove (mirrorPos src) (mirrorPos dst)
-mirrorMove (Promote pos kind) = Promote (mirrorPos pos) kind
-
+prop_blackAndWhiteGiveSameMoves =
+    MTL.prop_blackAndWhiteGiveSameMoves movesF
 
 return []
 runTests = $quickCheckAll
