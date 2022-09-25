@@ -166,44 +166,14 @@ prop_startIsSameColor board = all pred moves
     pred (start,_dest) = isColor Black (getB start board)
 
 prop_blackAndWhiteGiveSameMoves :: Board -> Bool
-prop_blackAndWhiteGiveSameMoves board = blackMoves `eqMoves` mirroredWhiteMoves
-  where
-    blackMoves         = movesF Black board
-    swappedColors      = swapColors board
-    mirroredBoard      = mirrorBoard swappedColors
-    whiteMoves         = movesF White mirroredBoard
-    mirroredWhiteMoves = map mirrorMove whiteMoves
+prop_blackAndWhiteGiveSameMoves =
+    MTL.prop_blackAndWhiteGiveSameMoves movesF'
+    where
+        movesF' color board = map toNormalMove $ movesF color board
 
-swapColors :: Board -> Board
-swapColors = mapB swapColor
-
-swapColor :: Square -> Square
-swapColor Empty = Empty
-swapColor (Piece White kind) = Piece Black kind
-swapColor (Piece Black kind) = Piece White kind
-
-mirrorBoard :: Board -> Board
-mirrorBoard board = foldl mirrorPos
-                          board
-                          [(row,col) | row <- [0..3], col <- [0..7]]
-
-mirrorPos :: Board -> (Int,Int) -> Board
-mirrorPos board pos@(row,col) = setB pos atMirroredPos $
-                                setB mirroredPos atPos $ board
-  where
-    mirroredRow   = 7-row
-    mirroredPos   = (mirroredRow,col)
-    atPos         = getB pos board
-    atMirroredPos = getB mirroredPos board
-
-mirrorMove :: ((Int,Int),(Int,Int)) -> ((Int,Int),(Int,Int))
-mirrorMove ((rowS,colS),(rowD,colD)) = ((rowS',colS),(rowD',colD))
-  where
-    rowS' = 7-rowS
-    rowD' = 7-rowD
-
-eqMoves :: [((Int,Int),(Int,Int))] -> [((Int,Int),(Int,Int))] -> Bool
-eqMoves moves1 moves2 = sort moves1 == sort moves2
+toNormalMove :: ((Int,Int),(Int,Int)) -> Move
+toNormalMove ((rowS,colS),(rowD,colD)) =
+    NormalMove (Pos rowS colS) (Pos rowD colD)
 
 
 --------------------------------------------------------------------------------

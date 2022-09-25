@@ -38,7 +38,7 @@ verifyMoves movesF expMoves' color board =
 
 prop_blackAndWhiteGiveSameMoves :: MovesFun -> Board -> Bool
 prop_blackAndWhiteGiveSameMoves movesF board =
-        blackMoves `listEq` mirroredWhiteMoves
+    blackMoves `listEq` mirroredWhiteMoves
     where
         blackMoves         = movesF Black board
         swappedColors      = swapColors board
