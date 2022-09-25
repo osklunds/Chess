@@ -10,8 +10,9 @@ import Data.List
 import Board
 import Moves.Common
 
-verifyMoves :: [Move] -> Color -> Board -> MovesFun -> Property
-verifyMoves expMoves' color board movesF =
+verifyMoves :: (Ord move, Show move, Show board) =>
+              (color -> board -> [move]) -> [move] -> color -> board -> Property
+verifyMoves movesF expMoves' color board =
     counterexample errorString verificationResult
     where
         expMoves           = sort expMoves'

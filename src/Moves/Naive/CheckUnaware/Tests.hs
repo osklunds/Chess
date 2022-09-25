@@ -53,7 +53,7 @@ verifyMoves :: [Move] -> Color -> Board -> Property
 verifyMoves expMoves color board =
     MTL.verifyMoves allExpMoves color board CU.movesF
     where
-        expNormalMoves = normalmovesF color board
+        expNormalMoves = normalMovesF color board
         allExpMoves = expMoves ++ expNormalMoves
 
 --------------------------------------------------------------------------------
@@ -65,14 +65,14 @@ prop_movesIsSupersetOfNormalMoves color board =
     normalMoves `isSubsetOf` moves
     where
         moves        = CU.movesF color board
-        normalMoves  = normalmovesF color board
+        normalMoves  = normalMovesF color board
 
 --------------------------------------------------------------------------------
 -- Helpers
 --------------------------------------------------------------------------------
 
-normalmovesF :: Color -> Board -> [Move]
-normalmovesF c b = map toNormalMove $ NM.movesF c b
+normalMovesF :: Color -> Board -> [Move]
+normalMovesF c b = map toNormalMove $ NM.movesF c b
     where
         toNormalMove ((rowS,colS),(rowD,colD)) =
             (NormalMove (Pos rowS colS) (Pos rowD colD))

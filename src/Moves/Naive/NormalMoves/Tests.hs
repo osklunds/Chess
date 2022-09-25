@@ -10,6 +10,7 @@ import Board as B hiding (getB, setB)
 import qualified Board as B
 import Moves.Naive.NormalMoves
 import Moves.Naive.NormalMoves.Lib
+import qualified Moves.Naive.TestLib as MTL
 
 
 --------------------------------------------------------------------------------
@@ -17,7 +18,7 @@ import Moves.Naive.NormalMoves.Lib
 --------------------------------------------------------------------------------
 
 prop_fixedBoard1 :: Property
-prop_fixedBoard1 = verifyMoves Black board moves
+prop_fixedBoard1 = verifyMoves moves Black board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♟         ♚   ♝ 0\n\
@@ -84,7 +85,7 @@ prop_fixedBoard1 = verifyMoves Black board moves
             (movesFrom (6,4) [(4,3), (5,6), (7,6), (7,2), (5,2)])
 
 prop_fixedBoard2 :: Property
-prop_fixedBoard2 = verifyMoves White board moves
+prop_fixedBoard2 = verifyMoves moves White board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
@@ -102,20 +103,8 @@ prop_fixedBoard2 = verifyMoves White board moves
             -- Pawn at (6,3)
             (movesFrom (6,3) [(5,3), (4,3), (5,4)])
 
-verifyMoves :: Color -> Board -> [((Int,Int),(Int,Int))] -> Property
-verifyMoves color board expectedMoves =
-  counterexample errorString verificationResult
-  where
-    expectedMoves'     = sort expectedMoves
-    actualMoves        = sort $ movesF color board
-    verificationResult = expectedMoves' == actualMoves
-    actualMissing      = expectedMoves' \\ actualMoves
-    actualExtra        = actualMoves    \\ expectedMoves'
-    errorString        = show board ++ "\n" ++
-                         "Expected moves: " ++ show expectedMoves' ++ "\n" ++
-                         "Actual moves:   " ++ show actualMoves ++ "\n" ++
-                         "Actual is missing: " ++ show actualMissing ++ "\n" ++
-                         "Actual has these extra: " ++ show actualExtra
+verifyMoves :: [((Int,Int),(Int,Int))] -> Color -> Board -> Property
+verifyMoves = MTL.verifyMoves movesF
 
 movesFrom :: (Int,Int) -> [(Int,Int)] -> [((Int,Int),(Int,Int))]
 movesFrom start ends = map (\end -> (start, end)) ends
