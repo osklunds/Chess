@@ -8,8 +8,10 @@ where
 
 import Board
 import qualified Moves.Naive.NormalMoves as NM
+import Moves.Common
 
-movesF :: Color -> Board -> [Move]
+
+movesF :: MovesFun
 movesF c b = normalMoves c b ++ promotes c b
 
 normalMoves :: Color -> Board -> [Move]

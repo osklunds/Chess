@@ -9,9 +9,10 @@ where
 
 import Board
 import qualified Moves.Naive.CheckUnaware as CU
+import Moves.Common
 
 
-movesF :: Color -> Board -> [Move]
+movesF :: MovesFun
 movesF color board = filter (isKingSafeAfterMove color board) $
                             CU.movesF color board
 
