@@ -60,12 +60,16 @@ verifyMoves expMoves color board =
 -- Arbitrary boards
 --------------------------------------------------------------------------------
 
-prop_movesIsSupersetOfNormalMoves :: Color -> Board -> Bool
-prop_movesIsSupersetOfNormalMoves color board =
+prop_movesAreSupersetOfNormalMoves :: Color -> Board -> Bool
+prop_movesAreSupersetOfNormalMoves color board =
     normalMoves `isSubsetOf` moves
     where
         moves        = movesF color board
         normalMoves  = normalMovesF color board
+
+prop_blackAndWhiteGiveSameMoves :: Board -> Bool
+prop_blackAndWhiteGiveSameMoves =
+    MTL.prop_blackAndWhiteGiveSameMoves movesF
 
 --------------------------------------------------------------------------------
 -- Helpers
