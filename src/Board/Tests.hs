@@ -81,7 +81,41 @@ prop_applyPromote p color kind b = condition ==> result
         equal = equalExcept b' b'' [p']
         pHasNew = getB p' b'' == Piece color kind
 
+prop_applyCastleWhiteKingSide :: Board -> Bool
+prop_applyCastleWhiteKingSide board = emptyAtOldKingP &&
+                                      kingAtNewP &&
+                                      emptyAtOldRookP &&
+                                      rookAtNewP &&
+                                      restSame
+    where
+        kingP = Pos 7 4
+        newRookP = Pos 7 5
+        newKingP = Pos 7 6
+        rookP = Pos 7 7
+        emptyPs = [newRookP, newKingP]
 
+        board' = setB kingP (Piece White King) $
+                 setEmpty emptyPs $
+                 setB rookP (Piece White Rook) $
+                 removeKing White board
+        
+        move = Castle White KingSide
+        board'' = applyMove move board'
+
+        emptyAtOldKingP = isEmpty $ getB kingP board''
+        kingAtNewP = getB newKingP board'' == Piece White King
+        emptyAtOldRookP = isEmpty $ getB rookP board''
+        rookAtNewP = getB newRookP board'' == Piece White Rook
+        restSame = equalExcept board' board'' [kingP, newRookP, newKingP, rookP]
+
+removeKing :: Color -> Board -> Board
+removeKing color = mapB f
+    where
+        f square = if square == Piece color King then Empty else square
+
+setEmpty :: [Pos] -> Board -> Board
+setEmpty [] b = b
+setEmpty (p:ps) b = setEmpty ps $ setB p Empty b
 
 
 

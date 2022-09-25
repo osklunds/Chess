@@ -13,6 +13,7 @@ module Board
 , Kind(..)
 , Pos(..)
 , Move(..)
+, Side(..)
 
 -- Board
 , getB
@@ -76,9 +77,13 @@ data Pos = Pos Int Int
          deriving (Eq, Show, Ord)
 
 data Move = NormalMove Pos Pos
-          | Promote Pos Kind   -- TODO
-          | Castle Pos         -- TODO
+          | Promote Pos Kind
+          | Castle Color Side
           | EnPassant Pos Pos  -- TODO
+          deriving (Eq, Ord, Show)
+
+data Side = KingSide
+          | QueenSide
           deriving (Eq, Ord, Show)
 
 --------------------------------------------------------------------------------
@@ -207,6 +212,9 @@ instance Arbitrary Board where
 
     return whiteKing
 
+instance Arbitrary Side where
+    arbitrary = oneof $ map return [KingSide, QueenSide]
+
 
 --------------------------------------------------------------------------------
 -- Board
@@ -240,9 +248,9 @@ anyB :: (Square -> Bool) -> Board -> Bool
 anyB f = foldB (\acc square -> acc || f square) False
 
 applyMove :: Move -> Board -> Board
-applyMove (NormalMove src dst) b = applyNormalMove src dst b
-applyMove (Promote p kind) b = applyPromote p kind b
-applyMove _otherMove _b = undefined
+applyMove (NormalMove src dst) = applyNormalMove src dst
+applyMove (Promote p kind) = applyPromote p kind
+applyMove (Castle color side) = applyCastle color side
 
 applyNormalMove src dst b = assert (not $ isEmpty atSrc)
                                    (setB dst atSrc $ setB src Empty b)
@@ -262,6 +270,21 @@ applyPromote p kind b = assert condition setB p newAtP b
         pAtTopOrBottom = row == 0 && color atP == White ||
                          row == 7 && color atP == Black
         (Pos row _col) = p
+
+applyCastle :: Color -> Side -> Board -> Board
+applyCastle color side board = board'
+    where
+        row = case color of
+                White -> 7
+                Black -> 0
+        kingCol = 4
+        (rookCol,newRookCol,newKingCol) = case side of
+                                            KingSide -> (7,5,6)
+                                            QueenSide -> (0,3,2)
+        board' = setB (Pos row kingCol)    Empty $
+                 setB (Pos row newKingCol) (Piece color King) $
+                 setB (Pos row rookCol)    Empty $
+                 setB (Pos row newRookCol) (Piece color Rook) board
 
 arbitraryBoard :: IO Board
 arbitraryBoard = generate arbitrary
