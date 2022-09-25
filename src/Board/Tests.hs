@@ -9,6 +9,7 @@ import Data.Maybe
 import Test.QuickCheck.Arbitrary
 
 import Board as B
+import TestLib
 
 --------------------------------------------------------------------------------
 -- get
@@ -142,15 +143,6 @@ applyCastle side rookC newRookC newKingC color row board =
         emptyAtOldRookP = isEmpty $ getB rookP board''
         rookAtNewP = getB newRookP board'' == Piece color Rook
         restSame = equalExcept board' board'' [kingP, newRookP, newKingP, rookP]
-
-removeKing :: Color -> Board -> Board
-removeKing color = mapB f
-    where
-        f square = if square == Piece color King then Empty else square
-
-setEmpty :: [Pos] -> Board -> Board
-setEmpty [] b = b
-setEmpty (p:ps) b = setEmpty ps $ setB p Empty b
 
 --------------------------------------------------------------------------------
 -- Helpers

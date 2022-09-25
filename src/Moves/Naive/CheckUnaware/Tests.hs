@@ -10,9 +10,10 @@ import qualified Moves.Naive.TestLib as MTL
 import Board
 import Moves.Naive.CheckUnaware
 import qualified Moves.Naive.NormalMoves as NM
+import TestLib
 
 --------------------------------------------------------------------------------
--- Fixed boards for promotes
+-- Promotes
 --------------------------------------------------------------------------------
 
 prop_fixedBoardPromotes1 :: Property
@@ -49,11 +50,11 @@ promotesAt :: [Pos] -> [Move]
 promotesAt ps = [Promote p k | p <- ps, k <- [Rook, Bishop, Knight, Queen]]
 
 --------------------------------------------------------------------------------
--- Fixed boards for castling
+-- Castling
 --------------------------------------------------------------------------------
 
-prop_fixedBoardCastlingBoth :: Property
-prop_fixedBoardCastlingBoth = verifyMoves expMoves White board
+prop_castlingBoth :: Property
+prop_castlingBoth = verifyMoves expMoves White board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0         ♜     ♗ 0\n\
@@ -67,8 +68,8 @@ prop_fixedBoardCastlingBoth = verifyMoves expMoves White board
                       \  0 1 2 3 4 5 6 7"
         expMoves = [Castle White QueenSide, Castle White KingSide]
 
-prop_fixedBoardCastlingKingSide :: Property
-prop_fixedBoardCastlingKingSide = verifyMoves expMoves Black board
+prop_castlingKingSide :: Property
+prop_castlingKingSide = verifyMoves expMoves Black board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0 ♜   ♘   ♚     ♜ 0\n\
@@ -82,8 +83,8 @@ prop_fixedBoardCastlingKingSide = verifyMoves expMoves Black board
                       \  0 1 2 3 4 5 6 7"
         expMoves = [Castle Black KingSide]
 
-prop_fixedBoardCastlingQueenSide :: Property
-prop_fixedBoardCastlingQueenSide = verifyMoves expMoves Black board
+prop_castlingQueenSide :: Property
+prop_castlingQueenSide = verifyMoves expMoves Black board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0 ♜       ♚       0\n\
@@ -97,11 +98,28 @@ prop_fixedBoardCastlingQueenSide = verifyMoves expMoves Black board
                       \  0 1 2 3 4 5 6 7"
         expMoves = [Castle Black QueenSide]
 
--- TODO: Board with normal + castle + promote + all others
+prop_noCastlingOtherRow :: Board -> Int -> Color -> Bool
+prop_noCastlingOtherRow board row color
+    | row' == homeRow = all (`elem` moves) castlings -- Sanity check
+    | row' /= homeRow = not $ any (`elem` moves) castlings
+    where
+        row' = row `mod` 7
+        homeRow = if color == White then 7 else 0
+
+        board' = setB (Pos row' 0) (Piece color Rook) $
+                 setB (Pos row' 7) (Piece color Rook) $
+                 setB (Pos row' 4) (Piece color King) $
+                 removeKing color $ 
+                 setEmpty [Pos row' col | col <- [0..7]] board
+
+        moves = movesF color board'
+        castlings = [Castle color KingSide, Castle color QueenSide]
 
 --------------------------------------------------------------------------------
--- Arbitrary boards
+-- General
 --------------------------------------------------------------------------------
+
+-- TODO: Board with normal + castle + promote + all others
 
 prop_movesAreSupersetOfNormalMoves :: Color -> Board -> Bool
 prop_movesAreSupersetOfNormalMoves color board =
