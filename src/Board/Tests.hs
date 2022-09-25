@@ -82,30 +82,36 @@ prop_applyPromote p color kind b = condition ==> result
         pHasNew = getB p' b'' == Piece color kind
 
 prop_applyCastleWhiteKingSide :: Board -> Bool
-prop_applyCastleWhiteKingSide board = emptyAtOldKingP &&
+prop_applyCastleWhiteKingSide = applyCastleKingSide White 7
+
+prop_applyCastleBlackKingSide :: Board -> Bool
+prop_applyCastleBlackKingSide = applyCastleKingSide Black 0
+
+applyCastleKingSide :: Color -> Int -> Board -> Bool
+applyCastleKingSide color row board = emptyAtOldKingP &&
                                       kingAtNewP &&
                                       emptyAtOldRookP &&
                                       rookAtNewP &&
                                       restSame
     where
-        kingP = Pos 7 4
-        newRookP = Pos 7 5
-        newKingP = Pos 7 6
-        rookP = Pos 7 7
+        kingP = Pos row 4
+        newRookP = Pos row 5
+        newKingP = Pos row 6
+        rookP = Pos row 7
         emptyPs = [newRookP, newKingP]
 
-        board' = setB kingP (Piece White King) $
+        board' = setB kingP (Piece color King) $
                  setEmpty emptyPs $
-                 setB rookP (Piece White Rook) $
-                 removeKing White board
+                 setB rookP (Piece color Rook) $
+                 removeKing color board
         
-        move = Castle White KingSide
+        move = Castle color KingSide
         board'' = applyMove move board'
 
         emptyAtOldKingP = isEmpty $ getB kingP board''
-        kingAtNewP = getB newKingP board'' == Piece White King
+        kingAtNewP = getB newKingP board'' == Piece color King
         emptyAtOldRookP = isEmpty $ getB rookP board''
-        rookAtNewP = getB newRookP board'' == Piece White Rook
+        rookAtNewP = getB newRookP board'' == Piece color Rook
         restSame = equalExcept board' board'' [kingP, newRookP, newKingP, rookP]
 
 removeKing :: Color -> Board -> Board
