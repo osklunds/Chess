@@ -70,6 +70,8 @@ evalState color (State {board, numberOfMoves, turn}) =
 -- score at the deepest depth is what is prio, but if that is equal,
 -- compared the second deepest, and so on.
 
+-- Or to use move evaluation in the optimization algorithm
+
 instance Ord Score where
   compare (Score (numScore1,numMoves1)) (Score (numScore2,numMoves2))
     = compare (numScore1,numMoves2) (numScore2,numMoves1)
