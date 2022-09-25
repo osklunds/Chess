@@ -18,12 +18,11 @@ prop_capture :: Bool
 prop_capture = all verifyCapturesPiece nonKingKinds
 
 verifyCapturesPiece :: Kind -> Bool
-verifyCapturesPiece kind = verifyMakesMove move board'
+verifyCapturesPiece kind = verifyMakesMove expMove board'
   where
-    src    = Pos 5 5
-    dst    = Pos 6 4
-    move   = NormalMove src dst
-    piece  = Piece White kind
+    src = Pos 5 5
+    dst = Pos 6 4
+    expMove = NormalMove src dst
 
     board  = read  "  0 1 2 3 4 5 6 7  \n\
                    \0                 0\n\
@@ -35,16 +34,11 @@ verifyCapturesPiece kind = verifyMakesMove move board'
                    \6        [ ]      6\n\
                    \7                 7\n\
                    \  0 1 2 3 4 5 6 7"
+    piece  = Piece White kind
     board' = setB dst piece board
 
-verifyMakesMove :: Move -> Board -> Bool
-verifyMakesMove move board = all f depths
-  where
-    f depth = makeMove depth board == move
-
 prop_escape :: Bool
-prop_escape = and [verifyEscapesFromThreat d k |
-                   d <- nonOneDepths, k <- nonKingKinds]
+prop_escape = and [verifyEscapesFromThreat d k | d <- depths, k <- nonKingKinds]
 
 verifyEscapesFromThreat :: Int -> Kind -> Bool
 verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'') 
@@ -70,9 +64,9 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
     board'' = applyMove move board'
 
 prop_checkmate :: Bool
-prop_checkmate = and [makeMove d board `elem` moves | d <- depths]
+prop_checkmate = verifyMakesOneOfMoves expMoves board
   where
-    moves = [NormalMove (Pos 7 1) (Pos 7 0), NormalMove (Pos 6 1) (Pos 6 0)]
+    expMoves = [NormalMove (Pos 7 1) (Pos 7 0), NormalMove (Pos 6 1) (Pos 6 0)]
     -- The board looks like this to reduce the number of moves to speed up
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♔   ♟           0\n\
@@ -86,10 +80,9 @@ prop_checkmate = and [makeMove d board `elem` moves | d <- depths]
                   \  0 1 2 3 4 5 6 7"
 
 prop_checkmateByMovingAwayPiece :: Bool
-prop_checkmateByMovingAwayPiece =
-  and [makeMove d board `elem` moves | d <- depths]
+prop_checkmateByMovingAwayPiece = verifyMakesOneOfMoves expMoves board
   where
-    moves = [NormalMove (Pos 3 0) (Pos 1 2), NormalMove (Pos 3 0) (Pos 5 2)]
+    expMoves = [NormalMove (Pos 3 0) (Pos 1 2), NormalMove (Pos 3 0) (Pos 5 2)]
     -- The board looks like this to reduce the number of moves to speed up
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♔     ♟         0\n\
@@ -119,7 +112,7 @@ prop_escapeFromCheckEvenIfCanCheckmate =
     nextBoard d = applyMove (makeMove d board) board
 
 prop_doStalemateIfLosing :: Bool
-prop_doStalemateIfLosing = and [makeMove d board == expMove | d <- nonOneDepths]
+prop_doStalemateIfLosing = verifyMakesMove expMove board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0       ♚         0\n\
@@ -140,7 +133,7 @@ prop_doStalemateIfLosing = and [makeMove d board == expMove | d <- nonOneDepths]
 -- losing.
 
 prop_promote :: Bool
-prop_promote = and [makeMove d board == expMove | d <- depths]
+prop_promote = verifyMakesMove expMove board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0         ♙     ♚ 0\n\
@@ -155,7 +148,7 @@ prop_promote = and [makeMove d board == expMove | d <- depths]
         expMove = Promote (Pos 7 4) Queen
 
 prop_promoteToKnight :: Bool
-prop_promoteToKnight = and [makeMove d board == expMove | d <- depths]
+prop_promoteToKnight = verifyMakesMove expMove board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0               ♚ 0\n\
@@ -170,7 +163,7 @@ prop_promoteToKnight = and [makeMove d board == expMove | d <- depths]
         expMove = Promote (Pos 7 4) Knight
 
 prop_doNotPromote1 :: Bool
-prop_doNotPromote1 = and [makeMove d board == expMove | d <- depths]
+prop_doNotPromote1 = verifyMakesMove expMove board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0   ♜           ♚ 0\n\
@@ -185,7 +178,7 @@ prop_doNotPromote1 = and [makeMove d board == expMove | d <- depths]
         expMove = NormalMove (Pos 1 2) (Pos 1 0)
 
 prop_doNotPromote2 :: Bool
-prop_doNotPromote2 = and [makeMove d board == expMove | d <- depths]
+prop_doNotPromote2 = verifyMakesMove expMove board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0               ♚ 0\n\
@@ -229,15 +222,18 @@ makeMove :: Int -> Board -> Move
 makeMove depth board = moveColor depth Black board
 
 depths :: [Int]
-depths = [1..3]
-
-nonOneDepths :: [Int]
-nonOneDepths = [2..3]
+depths = [2..3]
 
 nonKingKinds :: [Kind]
 nonKingKinds = [Queen, Rook, Bishop, Knight, Pawn]
 
+verifyMakesMove :: Move -> Board -> Bool
+verifyMakesMove expMove = verifyMakesOneOfMoves [expMove]
 
+verifyMakesOneOfMoves :: [Move] -> Board -> Bool
+verifyMakesOneOfMoves expMoves board = all pred depths
+  where
+    pred depth = makeMove depth board `elem` expMoves
 
 return []
 runTests = $quickCheckAll
