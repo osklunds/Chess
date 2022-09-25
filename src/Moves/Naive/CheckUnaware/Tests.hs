@@ -128,6 +128,8 @@ prop_movesAreSupersetOfNormalMoves color board =
         moves        = movesF color board
         normalMoves  = normalMovesF color board
 
+-- TODO: Make castling possibilities appear more often
+-- Some probability that rook and king appear, and that between disappear
 prop_blackAndWhiteGiveSameMoves :: Board -> Bool
 prop_blackAndWhiteGiveSameMoves =
     MTL.prop_blackAndWhiteGiveSameMoves movesF

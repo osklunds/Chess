@@ -12,24 +12,27 @@ import Moves.Common
 
 
 movesF :: MovesFun
-movesF c b = normalMoves c b ++ promotes c b ++ castlings c b
+movesF = concatApply [normalMoves, promotes, castlings]
 
-normalMoves :: Color -> Board -> [Move]
+concatApply :: [MovesFun] -> MovesFun
+concatApply fs c b = concat [f c b | f <- fs]
+
+normalMoves :: MovesFun
 normalMoves c b = map f $  NM.movesF c b
     where
         f ((rowS,colS),(rowD,colD)) = NormalMove (Pos rowS colS) (Pos rowD colD)
 
-promotes :: Color -> Board -> [Move]
+promotes :: MovesFun
 promotes c b = [Promote p k | p <- withPawn, k <- [Rook, Bishop, Knight, Queen]]
     where
         r = if c == White then 0 else 7
         ps = [Pos r c | c <- [0..7]]
         withPawn = [p | p <- ps, let atP = getB p b, isPawn atP, isColor c atP]
 
-castlings :: Color -> Board -> [Move]
-castlings c b = kingSideCastle c b ++ queenSideCastle c b
+castlings :: MovesFun
+castlings = concatApply [kingSideCastle, queenSideCastle]
 
-kingSideCastle :: Color -> Board -> [Move]
+kingSideCastle :: MovesFun
 kingSideCastle c b
     | getBL [Pos row col | col <- [4..7]] b == lane = [Castle c KingSide]
     | otherwise                                     = []
@@ -37,7 +40,7 @@ kingSideCastle c b
         row = homeRow c
         lane = [Piece c King, Empty, Empty, Piece c Rook]
 
-queenSideCastle :: Color -> Board -> [Move]
+queenSideCastle :: MovesFun
 queenSideCastle c b
     | getBL [Pos row col | col <- [0..4]] b == lane = [Castle c QueenSide]
     | otherwise                                     = []
