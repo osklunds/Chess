@@ -165,7 +165,6 @@ prop_startIsSameColor board = all pred moves
     moves              = movesF Black board
     pred (start,_dest) = isColor Black (getB start board)
 
--- TODO: Move to CheckAware (too)
 prop_blackAndWhiteGiveSameMoves :: Board -> Bool
 prop_blackAndWhiteGiveSameMoves board = blackMoves `eqMoves` mirroredWhiteMoves
   where
