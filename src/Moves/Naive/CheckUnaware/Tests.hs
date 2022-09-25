@@ -12,11 +12,11 @@ import Moves.Naive.CheckUnaware
 import qualified Moves.Naive.NormalMoves as NM
 
 --------------------------------------------------------------------------------
--- Fixed boards
+-- Fixed boards for promotes
 --------------------------------------------------------------------------------
 
-prop_fixedBoard1 :: Property
-prop_fixedBoard1 = verifyMoves expMoves Black board
+prop_fixedBoardPromotes1 :: Property
+prop_fixedBoardPromotes1 = verifyMoves expMoves Black board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0 ♗   ♘   ♙     ♞ 0\n\
@@ -30,8 +30,8 @@ prop_fixedBoard1 = verifyMoves expMoves Black board
                       \  0 1 2 3 4 5 6 7"
         expMoves = promotesAt [Pos 7 3, Pos 7 6]
 
-prop_fixedBoard2 :: Property
-prop_fixedBoard2 = verifyMoves expMoves White board
+prop_fixedBoardPromotes2 :: Property
+prop_fixedBoardPromotes2 = verifyMoves expMoves White board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0 ♙ ♙ ♙ ♛     ♟ ♙ 0\n\
@@ -45,16 +45,8 @@ prop_fixedBoard2 = verifyMoves expMoves White board
                       \  0 1 2 3 4 5 6 7"
         expMoves = promotesAt [Pos 0 0, Pos 0 1, Pos 0 2, Pos 0 7]
 
-
 promotesAt :: [Pos] -> [Move]
 promotesAt ps = [Promote p k | p <- ps, k <- [Rook, Bishop, Knight, Queen]]
-
-verifyMoves :: [Move] -> Color -> Board -> Property
-verifyMoves expMoves color board =
-    MTL.verifyMoves movesF allExpMoves color board
-    where
-        expNormalMoves = normalMovesF color board
-        allExpMoves = expMoves ++ expNormalMoves
 
 --------------------------------------------------------------------------------
 -- Arbitrary boards
@@ -74,6 +66,13 @@ prop_blackAndWhiteGiveSameMoves =
 --------------------------------------------------------------------------------
 -- Helpers
 --------------------------------------------------------------------------------
+
+verifyMoves :: [Move] -> Color -> Board -> Property
+verifyMoves expMoves color board =
+    MTL.verifyMoves movesF allExpMoves color board
+    where
+        expNormalMoves = normalMovesF color board
+        allExpMoves = expMoves ++ expNormalMoves
 
 normalMovesF :: Color -> Board -> [Move]
 normalMovesF c b = map toNormalMove $ NM.movesF c b
