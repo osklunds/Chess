@@ -176,15 +176,7 @@ prop_blackAndWhiteGiveSameMoves board = blackMoves `eqMoves` mirroredWhiteMoves
     mirroredWhiteMoves = map mirrorMove whiteMoves
 
 swapColors :: Board -> Board
-swapColors board = foldl swapColorPos
-                         board
-                         [(row,col) | row <- [0..7], col <- [0..7]]
-
-swapColorPos :: Board -> (Int,Int) -> Board
-swapColorPos board pos = setB pos newAtPos board
-  where
-    atPos    = getB pos board
-    newAtPos = swapColor atPos
+swapColors = mapB swapColor
 
 swapColor :: Square -> Square
 swapColor Empty = Empty
