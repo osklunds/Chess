@@ -116,11 +116,8 @@ applyCastleQueenSide = applyCastle QueenSide rookC newRookC newKingC
         newKingC = 2
 
 applyCastle :: Side -> Int -> Int -> Int -> Color -> Int -> Board -> Bool
-applyCastle side rookC newRookC newKingC color row board = emptyAtOldKingP &&
-                                                           kingAtNewP &&
-                                                           emptyAtOldRookP &&
-                                                           rookAtNewP &&
-                                                           restSame
+applyCastle side rookC newRookC newKingC color row board =
+    emptyAtOldKingP && kingAtNewP && emptyAtOldRookP && rookAtNewP && restSame
     where
         kingC = 4
         kingP = Pos row kingC
