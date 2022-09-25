@@ -82,6 +82,23 @@ prop_fixedBoardCastlingKingSide = verifyMoves expMoves Black board
                       \  0 1 2 3 4 5 6 7"
         expMoves = [Castle Black KingSide]
 
+prop_fixedBoardCastlingQueenSide :: Property
+prop_fixedBoardCastlingQueenSide = verifyMoves expMoves Black board
+    where
+        board = read  "  0 1 2 3 4 5 6 7  \n\
+                      \0 ♜       ♚       0\n\
+                      \1         ♜ ♝     1\n\
+                      \2 ♖ ♕     ♞ ♕     2\n\
+                      \3     ♔   ♟       3\n\
+                      \4 ♛ ♕   ♕ ♖ ♟     4\n\
+                      \5 ♜     ♖ ♜ ♝ ♜ ♜ 5\n\
+                      \6 ♘   ♛   ♗ ♘   ♞ 6\n\
+                      \7           ♘   ♚ 7\n\
+                      \  0 1 2 3 4 5 6 7"
+        expMoves = [Castle Black QueenSide]
+
+-- TODO: Board with normal + castle + promote + all others
+
 --------------------------------------------------------------------------------
 -- Arbitrary boards
 --------------------------------------------------------------------------------
