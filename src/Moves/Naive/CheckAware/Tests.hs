@@ -7,7 +7,7 @@ import Data.List
 import Test.QuickCheck
 
 import Board
-import qualified Moves.Naive.CheckAware as CA
+import Moves.Naive.CheckAware
 import qualified Moves.Naive.CheckUnaware as CU
 import qualified Moves.Naive.TestLib as MTL
 import Lib
@@ -160,8 +160,7 @@ prop_fixedBoardCapturesThreat = verifyMoves moves White board
     moves = normalMovesFrom (Pos 0 5) [(Pos 5 0)]
 
 verifyMoves :: [Move] -> Color -> Board -> Property
-verifyMoves expMoves color board =
-    MTL.verifyMoves expMoves color board CA.movesF
+verifyMoves = MTL.verifyMoves movesF
 
 normalMovesFrom :: Pos -> [Pos] -> [Move]
 normalMovesFrom src dsts = map (NormalMove src) dsts
@@ -177,7 +176,7 @@ prop_movesIsSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
 prop_movesIsSubsetOfCheckUnawareMoves color board =
   moves `isSubsetOf` movesCheckUnaware
   where
-    moves             = CA.movesF color board
+    moves             = movesF color board
     movesCheckUnaware = CU.movesF color board
 
 

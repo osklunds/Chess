@@ -8,7 +8,7 @@ import Test.QuickCheck
 import Lib
 import qualified Moves.Naive.TestLib as MTL
 import Board
-import qualified Moves.Naive.CheckUnaware as CU
+import Moves.Naive.CheckUnaware
 import qualified Moves.Naive.NormalMoves as NM
 
 --------------------------------------------------------------------------------
@@ -51,7 +51,7 @@ promotesAt ps = [Promote p k | p <- ps, k <- [Rook, Bishop, Knight, Queen]]
 
 verifyMoves :: [Move] -> Color -> Board -> Property
 verifyMoves expMoves color board =
-    MTL.verifyMoves allExpMoves color board CU.movesF
+    MTL.verifyMoves movesF allExpMoves color board
     where
         expNormalMoves = normalMovesF color board
         allExpMoves = expMoves ++ expNormalMoves
@@ -64,7 +64,7 @@ prop_movesIsSupersetOfNormalMoves :: Color -> Board -> Bool
 prop_movesIsSupersetOfNormalMoves color board =
     normalMoves `isSubsetOf` moves
     where
-        moves        = CU.movesF color board
+        moves        = movesF color board
         normalMoves  = normalMovesF color board
 
 --------------------------------------------------------------------------------
