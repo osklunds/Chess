@@ -114,6 +114,35 @@ applyCastleKingSide color row board = emptyAtOldKingP &&
         rookAtNewP = getB newRookP board'' == Piece color Rook
         restSame = equalExcept board' board'' [kingP, newRookP, newKingP, rookP]
 
+prop_applyCastleWhiteQueenSide :: Board -> Bool
+prop_applyCastleWhiteQueenSide board = emptyAtOldKingP &&
+                                      kingAtNewP &&
+                                      emptyAtOldRookP &&
+                                      rookAtNewP &&
+                                      restSame
+    where
+        row = 7
+        color = White
+        kingP = Pos row 4
+        newRookP = Pos row 3
+        newKingP = Pos row 2
+        rookP = Pos row 0
+        emptyPs = [Pos row col | col <- [0..4]]
+
+        board' = setB kingP (Piece color King) $
+                 setEmpty emptyPs $
+                 setB rookP (Piece color Rook) $
+                 removeKing color board
+        
+        move = Castle color QueenSide
+        board'' = applyMove move board'
+
+        emptyAtOldKingP = isEmpty $ getB kingP board''
+        kingAtNewP = getB newKingP board'' == Piece color King
+        emptyAtOldRookP = isEmpty $ getB rookP board''
+        rookAtNewP = getB newRookP board'' == Piece color Rook
+        restSame = equalExcept board' board'' [kingP, newRookP, newKingP, rookP]
+
 removeKing :: Color -> Board -> Board
 removeKing color = mapB f
     where
