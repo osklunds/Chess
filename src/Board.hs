@@ -26,7 +26,7 @@ module Board
 , mapB
 , anyB
 , applyMove
-, arbitraryBoard
+, generateBoard
 , sampleBoard
 
 -- Square
@@ -195,29 +195,80 @@ instance Arbitrary Square where
 
 instance Arbitrary Pos where
     arbitrary = do
-        row <- oneof $ map return [0..7]
-        col <- oneof $ map return [0..7]
+        row <- elements [0..7]
+        col <- elements [0..7]
         return $ Pos row col
 
 instance Arbitrary Board where
-  arbitrary = do
+    arbitrary = arbitraryBoard
+
+arbitraryBoard :: Gen Board
+arbitraryBoard = do
     rows <- replicateM 8 $ replicateM 8 arbitrary
 
-    let board   = Board rows
-    let noKings = mapB (\case
-                           (Piece _color King) -> Empty
-                           square              -> square
-                       ) board
-    positions <- replicateM 4 $ arbitrary
-    let [row1,col1,row2,col2] = map (`mod` 8) positions
-    let col2' = case (row1,col1) == (row2,col2) of
-                    True  -> (col2 + 1) `mod` 8
-                    False -> col2
+    let board = Board rows
+    let noKings = mapB (\sq -> if isKing sq then Empty else sq) board
+    
+    castle <- oneIn 4
+    afterCastle <- case castle of
+                        True ->
+                            adjustForCastle noKings
+                        False ->
+                            return noKings
 
-    let blackKing = setB (Pos row1 col1)  (Piece Black King) noKings
-    let whiteKing = setB (Pos row2 col2') (Piece White King) blackKing
+    blackKing <- ensureKing Black afterCastle
+    whiteKing <- ensureKing White blackKing
 
     return whiteKing
+
+ensureKing :: Color -> Board -> Gen Board
+ensureKing color board = do
+    let king = Piece color King
+    case anyB (== king) board of
+        True ->
+            return board
+        False -> do
+            pos <- arbitrary
+            case isKing (getB pos board) of
+                True ->
+                    ensureKing color board
+                False ->
+                    return $ setB pos king board
+
+adjustForCastle :: Board -> Gen Board
+adjustForCastle board = do
+    let foldlFun b (pos,sq) = maybeChangeTo pos sq b
+    let blackCastleRow = (castleRow Black 0)
+    afterBlack <- foldM foldlFun board blackCastleRow
+    let whiteCastleRow = (castleRow White 7)
+    foldM foldlFun afterBlack whiteCastleRow
+
+maybeChangeTo :: Pos -> Square -> Board -> Gen Board
+maybeChangeTo pos square board = do
+    change <- fmap not $ oneIn 4
+    return $ case change of
+                True ->
+                    setB pos square board
+                False ->
+                    board
+
+castleRow :: Color -> Int -> [(Pos,Square)]
+castleRow color row = zip posList pieces
+    where
+        posList = [Pos row col | col <- [0..7]]
+        pieces = [Piece color Rook,
+                  Empty,
+                  Empty,
+                  Empty,
+                  Piece color King,
+                  Empty,
+                  Empty,
+                  Piece color Rook]
+
+oneIn :: Int -> Gen Bool
+oneIn n = do
+    n' <- elements [1..n]
+    return $ n == n'
 
 instance Arbitrary Side where
     arbitrary = oneof $ map return [KingSide, QueenSide]
@@ -293,8 +344,8 @@ applyCastle color side board = board'
                  setB (Pos row rookCol)    Empty $
                  setB (Pos row newRookCol) (Piece color Rook) board
 
-arbitraryBoard :: IO Board
-arbitraryBoard = generate arbitrary
+generateBoard :: IO Board
+generateBoard = generate arbitrary
 
 sampleBoard :: IO ()
 sampleBoard = sample (arbitrary :: Gen Board)

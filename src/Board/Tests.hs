@@ -149,6 +149,15 @@ applyCastle side rookC newRookC newKingC color row board =
 -- Arbitrary
 --------------------------------------------------------------------------------
 
+prop_oneOfEachKing :: Board -> Bool
+prop_oneOfEachKing b = foldB f (0,0) b == (1,1)
+    where
+        f (numBlack, numWhite) sq =
+                case sq of
+                    (Piece Black King) -> (numBlack + 1, numWhite)
+                    (Piece White King) -> (numBlack, numWhite + 1)
+                    _pos               -> (numBlack, numWhite)
+
 prop_promoteDistribution :: Board -> Property
 prop_promoteDistribution = moveDistribution pred
     where
