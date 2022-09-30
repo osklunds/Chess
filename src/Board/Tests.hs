@@ -10,6 +10,7 @@ import Test.QuickCheck.Arbitrary
 
 import Board as B
 import TestLib
+import Moves.Naive.CheckUnaware
 
 --------------------------------------------------------------------------------
 -- get
@@ -143,6 +144,28 @@ applyCastle side rookC newRookC newKingC color row board =
         emptyAtOldRookP = isEmpty $ getB rookP board''
         rookAtNewP = getB newRookP board'' == Piece color Rook
         restSame = equalExcept board' board'' [kingP, newRookP, newKingP, rookP]
+
+--------------------------------------------------------------------------------
+-- Arbitrary
+--------------------------------------------------------------------------------
+
+prop_promoteDistribution :: Board -> Property
+prop_promoteDistribution = moveDistribution pred
+    where
+        pred (Promote _pos _kind) = True
+        pred _otherMove = False
+
+prop_castleDistribution :: Board -> Property
+prop_castleDistribution = moveDistribution pred
+    where
+        pred = (`elem` [Castle Black QueenSide, Castle Black KingSide])
+
+moveDistribution :: (Move -> Bool) -> Board -> Property
+moveDistribution pred b = collect moveAvailable True
+    where
+        moves = movesF Black b
+        moveAvailable = any (pred) moves
+
 
 --------------------------------------------------------------------------------
 -- Helpers

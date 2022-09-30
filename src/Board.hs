@@ -1,6 +1,9 @@
 
 -- Types and operations for boards and pieces.
 
+-- TODO: Make this module DataTypes or something, and sub-module for
+-- Color, Board, Move etc
+
 {-# LANGUAGE LambdaCase #-}
 
 module Board
@@ -24,6 +27,7 @@ module Board
 , anyB
 , applyMove
 , arbitraryBoard
+, sampleBoard
 
 -- Square
 , color
@@ -291,6 +295,9 @@ applyCastle color side board = board'
 
 arbitraryBoard :: IO Board
 arbitraryBoard = generate arbitrary
+
+sampleBoard :: IO ()
+sampleBoard = sample (arbitrary :: Gen Board)
 
 --------------------------------------------------------------------------------
 -- Square
