@@ -73,3 +73,4 @@ mirrorPos (Pos row col) = Pos (7 - row) col
 mirrorMove :: Move -> Move
 mirrorMove (NormalMove src dst) = NormalMove (mirrorPos src) (mirrorPos dst)
 mirrorMove (Promote pos kind) = Promote (mirrorPos pos) kind
+mirrorMove (Castle color side) = Castle (invert color) side
