@@ -1,6 +1,8 @@
 
 # Chess
 
+Chess AI written in Haskell.
+
 ## Ideas to work in
 
 - CLI
