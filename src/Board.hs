@@ -42,9 +42,6 @@ module Board
 , isRook
 , isQueen
 , isKing
-
--- Move
-, moveToDest
 )
 where
 
@@ -399,11 +396,3 @@ isQueen _               = False
 isKing :: Square -> Bool
 isKing (Piece _ King) = True
 isKing _              = False
-
---------------------------------------------------------------------------------
--- Move
---------------------------------------------------------------------------------
-
-moveToDest :: Move -> Pos
-moveToDest (NormalMove _src dst) = dst
-moveToDest (Promote pos _kind) = pos

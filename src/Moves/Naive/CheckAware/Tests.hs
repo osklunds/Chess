@@ -168,6 +168,8 @@ normalMovesFrom src dsts = map (NormalMove src) dsts
 promotesAt :: Pos -> [Move]
 promotesAt p = [Promote p k | k <- [Rook, Bishop, Knight, Queen]]
 
+-- TODO: Castling
+
 --------------------------------------------------------------------------------
 -- Arbitrary boards
 --------------------------------------------------------------------------------
