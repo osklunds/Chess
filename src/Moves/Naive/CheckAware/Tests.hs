@@ -205,6 +205,21 @@ prop_fixedBoardNoCastlingKingInCheck = verifyCastlingMoves moves White board
                       \  0 1 2 3 4 5 6 7"
         moves = []
 
+prop_fixedBoardNoCastlingDestAttacked :: Property
+prop_fixedBoardNoCastlingDestAttacked = verifyCastlingMoves moves Black board
+    where
+        board = read  "  0 1 2 3 4 5 6 7  \n\
+                      \0 ♜       ♚     ♜ 0\n\
+                      \1           ♝     1\n\
+                      \2   ♛     ♝   ♖   2\n\
+                      \3 ♙           ♝   3\n\
+                      \4   ♖ ♛ ♝     ♝ ♔ 4\n\
+                      \5 ♙     ♞         5\n\
+                      \6   ♟   ♜ ♘ ♕     6\n\
+                      \7   ♖ ♜   ♗   ♙ ♜ 7\n\
+                      \  0 1 2 3 4 5 6 7"
+        moves = [Castle Black QueenSide]
+
 -- TODO: Castling scenarios: king checked now, king would pass attacked square,
 -- king would land on attacked square
 
@@ -218,12 +233,7 @@ verifyMoves = MTL.verifyMoves movesF
 verifyCastlingMoves :: [Move] -> Color -> Board -> Property
 verifyCastlingMoves = MTL.verifyMoves movesF'
     where
-        movesF' color board = filter isCastling $ movesF color board
-
-isCastling :: Move -> Bool
-isCastling (Castle _color _side) = True
-isCastling _OtherMove = False
-
+        movesF' color board = filter isCastle $ movesF color board
 
 normalMovesFrom :: Pos -> [Pos] -> [Move]
 normalMovesFrom src dsts = map (NormalMove src) dsts
