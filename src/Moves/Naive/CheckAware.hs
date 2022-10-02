@@ -51,9 +51,8 @@ castleToKingPoss color side = [Pos row (kingCol `op` delta) | delta <- [0..2]]
 isKingThreatened :: Color -> Board -> Bool
 isKingThreatened color board = any (== Piece color King) destSquares
     where
-        movesOther  = CU.movesF (invert color) board
-        dests       = concatMap moveToDests movesOther
-        destSquares = map (\dest -> getB dest board) dests
+        attPoss = attackedPositions (invert color) board
+        destSquares = map (\dest -> getB dest board) attPoss
 
 moveToDests :: Move -> [Pos]
 moveToDests (NormalMove _src dst) = [dst]
