@@ -15,20 +15,21 @@ import Control.Exception
 
 
 movesF :: MovesFun
-movesF color board = filter (isMoveAllowed color board) $
+movesF color board = filter (isMoveAllowed color board attPoss) $
                             CU.movesF color board
+    where
+        attPoss = attackedPositions (invert color) board
 
-isMoveAllowed :: Color -> Board -> Move -> Bool
-isMoveAllowed c b m@(Castle _color _side) = isCastleAllowed c b m
-isMoveAllowed color board move = not $ isKingThreatened color newBoard
+isMoveAllowed :: Color -> Board -> [Pos] -> Move -> Bool
+isMoveAllowed c _b aps m@(Castle _color _side) = isCastleAllowed c m aps
+isMoveAllowed color board _aps move = not $ isKingThreatened color newBoard
     where
         newBoard = applyMove move board
 
-isCastleAllowed :: Color -> Board -> Move -> Bool
-isCastleAllowed color board (Castle color' side) =
+isCastleAllowed :: Color -> Move -> [Pos] -> Bool
+isCastleAllowed color (Castle color' side) attPoss =
         assert (color == color') allowed
     where
-        attPoss = attackedPositions (invert color) board
         kingPoss = castleToKingPoss color side
         allowed = not $ any (`elem` kingPoss) attPoss
 
