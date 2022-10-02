@@ -18,9 +18,7 @@ concatApply :: [MovesFun] -> MovesFun
 concatApply fs c b = concat [f c b | f <- fs]
 
 normalMoves :: MovesFun
-normalMoves c b = map f $  NM.movesF c b
-    where
-        f ((rowS,colS),(rowD,colD)) = NormalMove (Pos rowS colS) (Pos rowD colD)
+normalMoves = NM.movesF
 
 promotes :: MovesFun
 promotes c b = [Promote p k | p <- withPawn, k <- [Rook, Bishop, Knight, Queen]]

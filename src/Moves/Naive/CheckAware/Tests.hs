@@ -9,7 +9,9 @@ import Test.QuickCheck
 import Board
 import Moves.Naive.CheckAware
 import qualified Moves.Naive.CheckUnaware as CU
+import qualified Moves.Naive.NormalMoves as NM
 import qualified Moves.Naive.TestLib as MTL
+import Moves.Common
 import Lib
 
 
@@ -159,14 +161,20 @@ prop_fixedBoardCapturesThreat = verifyMoves moves White board
                   \  0 1 2 3 4 5 6 7"
     moves = normalMovesFrom (Pos 0 5) [(Pos 5 0)]
 
-verifyMoves :: [Move] -> Color -> Board -> Property
-verifyMoves = MTL.verifyMoves movesF
-
-normalMovesFrom :: Pos -> [Pos] -> [Move]
-normalMovesFrom src dsts = map (NormalMove src) dsts
-
-promotesAt :: Pos -> [Move]
-promotesAt p = [Promote p k | k <- [Rook, Bishop, Knight, Queen]]
+prop_fixedBoardCastling :: Property
+prop_fixedBoardCastling = verifyMoves moves White board
+    where
+        board = read  "  0 1 2 3 4 5 6 7  \n\
+                      \0 ♚   ♘   ♙ ♗     0\n\
+                      \1                 1\n\
+                      \2                 2\n\
+                      \3               ♛ 3\n\
+                      \4             ♜ ♝ 4\n\
+                      \5 ♜             ♔ 5\n\
+                      \6             ♜ ♝ 6\n\
+                      \7               ♛ 7\n\
+                      \  0 1 2 3 4 5 6 7"
+        moves = normalMovesFrom (Pos 0 5) [(Pos 5 0)]
 
 -- TODO: Castling
 
@@ -184,6 +192,20 @@ prop_movesIsSubsetOfCheckUnawareMoves color board =
 prop_blackAndWhiteGiveSameMoves :: Board -> Bool
 prop_blackAndWhiteGiveSameMoves =
     MTL.prop_blackAndWhiteGiveSameMoves movesF
+
+--------------------------------------------------------------------------------
+-- Helpers
+--------------------------------------------------------------------------------
+
+verifyMoves :: [Move] -> Color -> Board -> Property
+verifyMoves = MTL.verifyMoves movesF
+
+normalMovesFrom :: Pos -> [Pos] -> [Move]
+normalMovesFrom src dsts = map (NormalMove src) dsts
+
+promotesAt :: Pos -> [Move]
+promotesAt p = [Promote p k | k <- [Rook, Bishop, Knight, Queen]]
+
 
 return []
 runTests = $quickCheckAll
