@@ -16,7 +16,7 @@ import Lib
 
 
 --------------------------------------------------------------------------------
--- Fixed boards
+-- General
 --------------------------------------------------------------------------------
 
 prop_fixedBoard1 :: Property
@@ -161,8 +161,22 @@ prop_fixedBoardCapturesThreat = verifyMoves moves White board
                   \  0 1 2 3 4 5 6 7"
     moves = normalMovesFrom (Pos 0 5) [(Pos 5 0)]
 
-prop_fixedBoardCastling :: Property
-prop_fixedBoardCastling = verifyCastlingMoves moves White board
+prop_movesIsSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
+prop_movesIsSubsetOfCheckUnawareMoves color board =
+  moves `isSubsetOf` movesCheckUnaware
+  where
+    moves             = movesF color board
+    movesCheckUnaware = CU.movesF color board
+
+prop_blackAndWhiteGiveSameMoves :: Board -> Bool
+prop_blackAndWhiteGiveSameMoves = MTL.prop_blackAndWhiteGiveSameMoves movesF
+
+--------------------------------------------------------------------------------
+-- Castling
+--------------------------------------------------------------------------------
+
+prop_fixedBoardNoCastlingKingWouldPass :: Property
+prop_fixedBoardNoCastlingKingWouldPass = verifyCastlingMoves moves White board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0 ♟ ♜ ♚   ♟ ♖ ♘   0\n\
@@ -176,22 +190,23 @@ prop_fixedBoardCastling = verifyCastlingMoves moves White board
                       \  0 1 2 3 4 5 6 7"
         moves = [Castle White KingSide]
 
+prop_fixedBoardNoCastlingKingInCheck :: Property
+prop_fixedBoardNoCastlingKingInCheck = verifyCastlingMoves moves White board
+    where
+        board = read  "  0 1 2 3 4 5 6 7  \n\
+                      \0 ♜         ♚   ♜ 0\n\
+                      \1 ♟   ♘     ♗ ♘   1\n\
+                      \2   ♕   ♙ ♗   ♟ ♞ 2\n\
+                      \3 ♘ ♗         ♙   3\n\
+                      \4         ♞   ♟   4\n\
+                      \5   ♗     ♗ ♙     5\n\
+                      \6       ♙   ♝ ♘   6\n\
+                      \7 ♖       ♔     ♖ 7\n\
+                      \  0 1 2 3 4 5 6 7"
+        moves = []
+
 -- TODO: Castling scenarios: king checked now, king would pass attacked square,
 -- king would land on attacked square
-
---------------------------------------------------------------------------------
--- Arbitrary boards
---------------------------------------------------------------------------------
-
-prop_movesIsSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
-prop_movesIsSubsetOfCheckUnawareMoves color board =
-  moves `isSubsetOf` movesCheckUnaware
-  where
-    moves             = movesF color board
-    movesCheckUnaware = CU.movesF color board
-
-prop_blackAndWhiteGiveSameMoves :: Board -> Bool
-prop_blackAndWhiteGiveSameMoves = MTL.prop_blackAndWhiteGiveSameMoves movesF
 
 --------------------------------------------------------------------------------
 -- Helpers
