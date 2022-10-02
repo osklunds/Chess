@@ -15,29 +15,32 @@ import Control.Exception
 
 
 movesF :: MovesFun
-movesF color board = filter (isMoveAllowed color board attPoss) $
-                            CU.movesF color board
+movesF color board = filter isAllowed $ CU.movesF color board
     where
         attPoss = attackedPositions (invert color) board
+        isAllowed move = isMoveAllowed move color board attPoss
 
-isMoveAllowed :: Color -> Board -> [Pos] -> Move -> Bool
-isMoveAllowed c _b aps m@(Castle _color _side) = isCastleAllowed c m aps
-isMoveAllowed color board _aps move = not $ isKingThreatened color newBoard
-    where
-        newBoard = applyMove move board
+isMoveAllowed :: Move -> Color -> Board -> [Pos] -> Bool
+isMoveAllowed (Castle color side) = isCastleAllowed color side
+isMoveAllowed move                = isOtherAllowed move
 
-isCastleAllowed :: Color -> Move -> [Pos] -> Bool
-isCastleAllowed color (Castle color' side) attPoss =
-        assert (color == color') allowed
+isCastleAllowed :: Color -> Side -> Color -> Board -> [Pos] -> Bool
+isCastleAllowed castleColor side moveColor _board attPoss =
+    assert (castleColor == moveColor) allowed
     where
-        kingPoss = castleToKingPoss color side
+        kingPoss = castleToKingPoss moveColor side
         allowed = not $ any (`elem` kingPoss) attPoss
 
 attackedPositions :: Color -> Board -> [Pos]
 attackedPositions color board = dests
     where
         moves = CU.movesF color board
-        dests = concatMap moveToDests moves
+        dests = concatMap moveToCapturedPoss moves
+
+moveToCapturedPoss :: Move -> [Pos]
+moveToCapturedPoss (NormalMove _src dst) = [dst]
+moveToCapturedPoss (Promote pos _kind) = [pos]
+moveToCapturedPoss (Castle _color _side) = []
 
 castleToKingPoss :: Color -> Side -> [Pos]
 castleToKingPoss color side = [Pos row (kingCol `op` delta) | delta <- [0..2]]
@@ -48,13 +51,13 @@ castleToKingPoss color side = [Pos row (kingCol `op` delta) | delta <- [0..2]]
                     KingSide -> (+)
                     QueenSide -> (-)
 
+isOtherAllowed :: Move -> Color -> Board -> [Pos] -> Bool
+isOtherAllowed move color board _attPoss = not $ isKingThreatened color newBoard
+    where
+        newBoard = applyMove move board
+
 isKingThreatened :: Color -> Board -> Bool
 isKingThreatened color board = any (== Piece color King) destSquares
     where
         attPoss = attackedPositions (invert color) board
         destSquares = map (\dest -> getB dest board) attPoss
-
-moveToDests :: Move -> [Pos]
-moveToDests (NormalMove _src dst) = [dst]
-moveToDests (Promote pos _kind) = [pos]
-moveToDests (Castle _color _side) = [] -- TODO
