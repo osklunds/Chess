@@ -18,7 +18,6 @@ movesF :: MovesFun
 movesF color board = filter (isMoveAllowed color board) $
                             CU.movesF color board
 
--- Idea: check this for all sqaures the king passes
 isMoveAllowed :: Color -> Board -> Move -> Bool
 isMoveAllowed c b m@(Castle _color _side) = isCastleAllowed c b m
 isMoveAllowed color board move = not $ isKingThreatened color newBoard
@@ -40,10 +39,13 @@ attackedPositions color board = dests
         dests = concatMap moveToDests moves
 
 castleToKingPoss :: Color -> Side -> [Pos]
-castleToKingPoss Black KingSide  = [Pos 0 4, Pos 0 5, Pos 0 6]
-castleToKingPoss Black QueenSide = [Pos 0 4, Pos 0 3, Pos 0 2]
-castleToKingPoss White KingSide  = [Pos 7 4, Pos 7 5, Pos 7 6]
-castleToKingPoss White QueenSide = [Pos 7 4, Pos 7 3, Pos 7 2]
+castleToKingPoss color side = [Pos row (kingCol `op` delta) | delta <- [0..2]]
+    where
+        row = homeRow color
+        kingCol = 4
+        op = case side of
+                    KingSide -> (+)
+                    QueenSide -> (-)
 
 isKingThreatened :: Color -> Board -> Bool
 isKingThreatened color board = any (== Piece color King) destSquares

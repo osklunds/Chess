@@ -46,9 +46,5 @@ queenSideCastle c b
         row = homeRow c
         lane = [Piece c Rook, Empty, Empty, Empty, Piece c King]
 
-homeRow :: Color -> Int
-homeRow White = 7
-homeRow Black = 0
-
 getBL :: [Pos] -> Board -> [Square]
 getBL ps b = [getB p b | p <- ps]

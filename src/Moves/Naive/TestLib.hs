@@ -16,7 +16,8 @@ import Lib
 -- Misc
 --------------------------------------------------------------------------------
 
-verifyMoves :: MovesFun -> [Move] -> Color -> Board -> Property
+verifyMoves :: (Ord move, Show move, Show board) =>
+              (color -> board -> [move]) -> [move] -> color -> board -> Property
 verifyMoves movesF expMoves' color board =
     counterexample errorString verificationResult
     where

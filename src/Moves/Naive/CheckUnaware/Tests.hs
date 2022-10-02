@@ -100,11 +100,10 @@ prop_castlingQueenSide = verifyMoves expMoves Black board
 
 prop_noCastlingOtherRow :: Board -> Int -> Color -> Bool
 prop_noCastlingOtherRow board row color
-    | row' == homeRow = all (`elem` moves) castlings -- Sanity check
-    | row' /= homeRow = not $ any (`elem` moves) castlings
+    | row' == homeRow color = all (`elem` moves) castlings -- Sanity check
+    | row' /= homeRow color = not $ any (`elem` moves) castlings
     where
         row' = row `mod` 7
-        homeRow = if color == White then 7 else 0
 
         board' = setB (Pos row' 0) (Piece color Rook) $
                  setB (Pos row' 7) (Piece color Rook) $

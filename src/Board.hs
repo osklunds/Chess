@@ -28,6 +28,7 @@ module Board
 , applyMove
 , generateBoard
 , sampleBoard
+, homeRow
 
 -- Square
 , color
@@ -349,6 +350,10 @@ generateBoard = generate arbitrary
 
 sampleBoard :: IO ()
 sampleBoard = sample (arbitrary :: Gen Board)
+
+homeRow :: Color -> Int
+homeRow White = 7
+homeRow Black = 0
 
 --------------------------------------------------------------------------------
 -- Square
