@@ -42,6 +42,9 @@ module Board
 , isRook
 , isQueen
 , isKing
+
+-- Move
+, isCastle
 )
 where
 
@@ -396,3 +399,11 @@ isQueen _               = False
 isKing :: Square -> Bool
 isKing (Piece _ King) = True
 isKing _              = False
+
+--------------------------------------------------------------------------------
+-- Move
+--------------------------------------------------------------------------------
+
+isCastle :: Move -> Bool
+isCastle (Castle _color _side) = True
+isCastle _                     = False

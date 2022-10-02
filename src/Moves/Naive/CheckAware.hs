@@ -11,16 +11,39 @@ where
 import Board
 import qualified Moves.Naive.CheckUnaware as CU
 import Moves.Common
+import Control.Exception
 
 
 movesF :: MovesFun
-movesF color board = filter (isKingSafeAfterMove color board) $
+movesF color board = filter (isMoveAllowed color board) $
                             CU.movesF color board
 
-isKingSafeAfterMove :: Color -> Board -> Move -> Bool
-isKingSafeAfterMove color board move = not $ isKingThreatened color newBoard
+-- Idea: check this for all sqaures the king passes
+isMoveAllowed :: Color -> Board -> Move -> Bool
+isMoveAllowed c b m@(Castle _color _side) = isCastleAllowed c b m
+isMoveAllowed color board move = not $ isKingThreatened color newBoard
     where
         newBoard = applyMove move board
+
+isCastleAllowed :: Color -> Board -> Move -> Bool
+isCastleAllowed color board (Castle color' side) =
+        assert (color == color') allowed
+    where
+        attPoss = attackedPositions (invert color) board
+        kingPoss = castleToKingPoss color side
+        allowed = not $ any (`elem` kingPoss) attPoss
+
+attackedPositions :: Color -> Board -> [Pos]
+attackedPositions color board = dests
+    where
+        moves = CU.movesF color board
+        dests = concatMap moveToDests moves
+
+castleToKingPoss :: Color -> Side -> [Pos]
+castleToKingPoss Black KingSide  = [Pos 0 4, Pos 0 5, Pos 0 6]
+castleToKingPoss Black QueenSide = [Pos 0 4, Pos 0 3, Pos 0 2]
+castleToKingPoss White KingSide  = [Pos 7 4, Pos 7 5, Pos 7 6]
+castleToKingPoss White QueenSide = [Pos 7 4, Pos 7 3, Pos 7 2]
 
 isKingThreatened :: Color -> Board -> Bool
 isKingThreatened color board = any (== Piece color King) destSquares
