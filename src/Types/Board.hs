@@ -67,32 +67,14 @@ instance Read Board where
 
 fromString :: String -> Board
 fromString board = Board $ map f rows''
-  where
-    rows   = lines board
-    rows'  = tail rows
-    rows'' = init rows'
+    where
+        rows   = lines board
+        rows'  = tail rows
+        rows'' = init rows'
 
-    f row  = [fromChar c | (c,i) <- rowWithIndexes,
-                           not (isDigit c),
-                           even i]
-      where
-        rowWithIndexes = zip row [0..]
-
-fromChar :: Char -> Square
-fromChar ' ' = Empty
-fromChar '♟' = Piece Black Pawn
-fromChar '♝' = Piece Black Bishop
-fromChar '♞' = Piece Black Knight
-fromChar '♜' = Piece Black Rook
-fromChar '♛' = Piece Black Queen
-fromChar '♚' = Piece Black King
-fromChar '♙' = Piece White Pawn
-fromChar '♗' = Piece White Bishop
-fromChar '♘' = Piece White Knight
-fromChar '♖' = Piece White Rook
-fromChar '♕' = Piece White Queen
-fromChar '♔' = Piece White King
-
+        f row  = [read [c] | (c,i) <- rowWithIndexes, not (isDigit c), even i]
+            where
+                rowWithIndexes = zip row [0..]
 
 --------------------------------------------------------------------------------
 -- Arbitrary

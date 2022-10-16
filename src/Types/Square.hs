@@ -65,6 +65,28 @@ showSquare (Piece White Queen)  = "♕"
 showSquare (Piece White King)   = "♔"
 
 --------------------------------------------------------------------------------
+-- Read
+--------------------------------------------------------------------------------
+
+instance Read Square where
+    readsPrec _ str = [(fromString str, "")]
+
+fromString :: String -> Square
+fromString " " = Empty
+fromString "♟" = Piece Black Pawn
+fromString "♝" = Piece Black Bishop
+fromString "♞" = Piece Black Knight
+fromString "♜" = Piece Black Rook
+fromString "♛" = Piece Black Queen
+fromString "♚" = Piece Black King
+fromString "♙" = Piece White Pawn
+fromString "♗" = Piece White Bishop
+fromString "♘" = Piece White Knight
+fromString "♖" = Piece White Rook
+fromString "♕" = Piece White Queen
+fromString "♔" = Piece White King
+
+--------------------------------------------------------------------------------
 -- Arbitrary
 --------------------------------------------------------------------------------
 
