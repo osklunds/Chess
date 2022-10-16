@@ -8,7 +8,7 @@ module Moves.Naive.CheckAware
 )
 where
 
-import Board
+import Types
 import qualified Moves.Naive.CheckUnaware as CU
 import Moves.Common
 import Control.Exception

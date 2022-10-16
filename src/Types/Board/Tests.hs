@@ -8,7 +8,10 @@ import Test.QuickCheck
 import Data.Maybe
 import Test.QuickCheck.Arbitrary
 
-import Board as B
+import Types.Board
+import Types.Pos
+import Types.Square
+import Types.Move
 import TestLib
 import Moves.Naive.CheckUnaware
 

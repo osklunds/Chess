@@ -12,8 +12,8 @@ module Moves.Naive.NormalMoves.Lib
 )
 where
 
-import Board as B hiding (getB, setB)
-import qualified Board as B
+import Types as T hiding (getB, setB)
+import qualified Types as T
 
 tupleAdd :: (Int,Int) -> (Int,Int) -> (Int,Int)
 tupleAdd (a,b) (c,d) = (a+c,b+d)
@@ -34,10 +34,10 @@ isWithinBoard :: (Int,Int) -> Bool
 isWithinBoard (row,col) = 0 <= row && row < 8 && 0 <= col && col < 8
 
 getB :: (Int,Int) -> Board -> Square
-getB = B.getB . toPos
+getB = T.getB . toPos
 
 setB :: (Int,Int) -> Square -> Board -> Board
-setB = B.setB . toPos
+setB = T.setB . toPos
 
 toPos :: (Int,Int) -> Pos
 toPos (row,col) = Pos row col

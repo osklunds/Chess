@@ -4,7 +4,7 @@ module MoveSelection.Score
 )
 where
 
-import Board
+import Types
 import GameResult
 
 -- By keeping track of if found kings, a speed improvement was observed

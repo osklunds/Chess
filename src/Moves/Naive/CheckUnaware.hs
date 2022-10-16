@@ -6,7 +6,7 @@ module Moves.Naive.CheckUnaware
 )
 where
 
-import Board
+import Types
 import qualified Moves.Naive.NormalMoves as NM
 import Moves.Common
 

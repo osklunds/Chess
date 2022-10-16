@@ -6,7 +6,7 @@ module GameResult.Tests where
 import Test.QuickCheck
 
 import GameResult
-import Board
+import Types
 
 prop_resultNormal :: Bool
 prop_resultNormal = gameResult Black board == Normal

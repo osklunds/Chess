@@ -7,7 +7,7 @@ import Test.QuickCheck
 
 import Lib
 import qualified Moves.Naive.TestLib as MTL
-import Board
+import Types
 import Moves.Naive.CheckUnaware
 import qualified Moves.Naive.NormalMoves as NM
 import TestLib

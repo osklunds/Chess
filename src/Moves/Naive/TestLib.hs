@@ -8,7 +8,7 @@ where
 import Test.QuickCheck
 import Data.List
 
-import Board
+import Types
 import Moves.Common
 import Lib
 

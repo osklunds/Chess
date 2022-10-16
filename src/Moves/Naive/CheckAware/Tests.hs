@@ -6,7 +6,7 @@ module Moves.Naive.CheckAware.Tests where
 import Data.List
 import Test.QuickCheck
 
-import Board
+import Types
 import Moves.Naive.CheckAware
 import qualified Moves.Naive.CheckUnaware as CU
 import qualified Moves.Naive.NormalMoves as NM

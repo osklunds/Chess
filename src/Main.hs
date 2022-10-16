@@ -1,14 +1,14 @@
 
-import qualified Cli as C
-import qualified Board as B
+import Cli
+import Types
 
 main :: IO ()
-main = C.start playAs startBoard
+main = start playAs startBoard
 
-playAs = B.White
+playAs = White
 
 -- Change comments to change what's used
-startBoard = B.defaultBoard
+startBoard = defaultBoard
 -- startBoard = read  "  0 1 2 3 4 5 6 7  \n\
 --                      \0             ♙   0\n\
 --                      \1 ♔               1\n\

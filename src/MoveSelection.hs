@@ -13,7 +13,7 @@ where
 import Data.Maybe
 import Test.QuickCheck
 
-import Board
+import Types
 import Moves
 import MoveSelection.Score
 import Optimize

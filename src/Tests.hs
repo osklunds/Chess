@@ -1,7 +1,7 @@
 
 module Tests where
 
-import Board.Tests as B
+import Types.Board.Tests as B
 import Moves.Naive.CheckAware.Tests as MNCA
 import Moves.Naive.CheckUnaware.Tests as MNCU
 import Moves.Naive.NormalMoves.Tests as MNN

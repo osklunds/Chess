@@ -5,7 +5,7 @@ module MoveSelection.Score.Tests where
 
 import Test.QuickCheck
 
-import Board
+import Types
 import MoveSelection.Score
 
 

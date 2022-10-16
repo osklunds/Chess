@@ -16,7 +16,7 @@ module Game
 where
 
 import GameResult as GR
-import Board as B
+import Types as T
 import Moves
 
 
@@ -38,7 +38,7 @@ validateMove move (GameState {board, turn})
   | otherwise                    = Ok
   where
     legalMoves       = movesF turn board
-    newBoard         = B.applyMove move board
+    newBoard         = T.applyMove move board
     threatensCurKing = GR.isKingThreatened turn newBoard
 
 applyMove :: Move -> GameState -> (GameState, Result)
@@ -49,7 +49,7 @@ applyMove move (GameState {board, turn, captured}) = (nextGameState, result)
     captured' = case capturedThisTurn of
                   Empty -> captured
                   _else -> capturedThisTurn:captured
-    board'    = B.applyMove move $ board
+    board'    = T.applyMove move $ board
     opponent  = invert turn
 
     nextGameState = GameState { board    = board'

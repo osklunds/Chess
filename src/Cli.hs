@@ -10,17 +10,17 @@ where
 
 import Prelude as P
 
-import Board as B hiding (Move)
-import qualified Board as B
+import Types as T hiding (Move)
+import qualified Types as T
 import MoveSelection
 import Game as G
 import GameResult as GR
 
-data UserAction = Move B.Move
+data UserAction = Move T.Move
                 | Undo
 
 data State = State { gameStates :: [GameState]
-                   , playerColor :: B.Color
+                   , playerColor :: T.Color
                    }
 
 start :: Color -> Board -> IO ()
@@ -76,7 +76,7 @@ playerTurnUndo st = do
             putStrLn "Can't undo because at start"
             playerTurnAskInput st
 
-playerTurnValidateMove :: State -> B.Move -> IO ()
+playerTurnValidateMove :: State -> T.Move -> IO ()
 playerTurnValidateMove st move = do
     let gss@(curGs:_restGss) = gameStates st
     case validateMove move curGs of
@@ -104,7 +104,7 @@ playerTurnValidateMove st move = do
 computerTurn :: State -> IO ()
 computerTurn st = do
     let gss@(curGs:_restGss) = gameStates st
-    let computerColor = B.invert $ playerColor st
+    let computerColor = T.invert $ playerColor st
     let move = moveColor 3 computerColor $ board curGs
     let (newGs,result) = G.applyMove move curGs
     printBoardWithMove move newGs
@@ -190,7 +190,7 @@ parseKind 'k' = Just Knight
 printBoard :: GameState -> IO ()
 printBoard = putStrLn . (showBoardWithMarkers []) . board
 
-printBoardWithMove :: B.Move -> GameState -> IO ()
+printBoardWithMove :: T.Move -> GameState -> IO ()
 printBoardWithMove move = putStrLn . (showBoardWithMarkers markers) . board
     where
         markersAsPos = case move of

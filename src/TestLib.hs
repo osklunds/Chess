@@ -5,7 +5,7 @@ module TestLib
 )
 where
 
-import Board
+import Types
 
 setEmpty :: [Pos] -> Board -> Board
 setEmpty [] b = b

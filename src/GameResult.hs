@@ -8,7 +8,7 @@ module GameResult
 )
 where
 
-import Board
+import Types
 import Moves as M
 import Moves.Naive.CheckAware
 

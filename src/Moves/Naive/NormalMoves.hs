@@ -7,8 +7,8 @@ module Moves.Naive.NormalMoves
 )
 where
 
-import Board as B hiding (getB)
-import qualified Board as B
+import Types as T hiding (getB)
+import qualified Types as T
 import Moves.Naive.NormalMoves.Lib
 import Moves.Common
 
@@ -53,7 +53,7 @@ movesFromDirs :: [(Int,Int)] -> (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
 movesFromDirs dirs start board = concatMap movesFun dirs
   where
     atPos         = getB start board
-    color         = B.color atPos
+    color         = T.color atPos
     movesFun diff = movesFromColorAndDiff color diff start board
 
 movesFromColorAndDiff :: Color ->
@@ -110,7 +110,7 @@ knightDiffs = [(2,1),  -- L
 pawnMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
 pawnMoves start board = [(start,dest) | dest <- dests]
   where
-    color       = B.color $ getB start board
+    color       = T.color $ getB start board
     forwardDir  = case color of
                     Black -> 1
                     White -> (-1)

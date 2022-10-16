@@ -6,8 +6,7 @@ module Moves.Naive.NormalMoves.Tests where
 import Test.QuickCheck
 import Data.List
 
-import Board as B hiding (getB, setB)
-import qualified Board as B
+import Types as T hiding (getB, setB)
 import Moves.Naive.NormalMoves
 import Moves.Naive.NormalMoves.Lib
 import qualified Moves.Naive.TestLib as MTL
