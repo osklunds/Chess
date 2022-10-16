@@ -53,7 +53,9 @@ playerTurnAskInput st = do
     putStr "Enter your move: "
     input <- getLine
 
-    case parseInput input of
+    let color = playerColor st
+
+    case parseInput input color of
         Nothing -> do
             playerTurnParseError st
         Just Undo -> do
@@ -129,12 +131,12 @@ computerTurn st = do
 --------------------------------------------------------------------------------
 
 -- Input ex: a4 b6
-parseInput :: String -> Maybe UserAction
+parseInput :: String -> Color -> Maybe UserAction
 -- Undo
-parseInput "undo" = Just $ Undo
+parseInput "undo" _c = Just $ Undo
 
 -- NormalMove
-parseInput [startCol,startRow,' ',destCol,destRow] = do
+parseInput [startCol,startRow,' ',destCol,destRow] _c = do
     startCol' <- parseCol startCol
     startRow' <- parseRow startRow
     let start = (Pos startRow' startCol')
@@ -144,7 +146,7 @@ parseInput [startCol,startRow,' ',destCol,destRow] = do
     return $ Move $ NormalMove start dest
 
 -- Promote
-parseInput [col,row,' ',kind] = do
+parseInput [col,row,' ',kind] _c = do
     col' <- parseCol col
     row' <- parseRow row
     let pos = Pos row' col'
@@ -152,10 +154,11 @@ parseInput [col,row,' ',kind] = do
     return $ Move $ Promote pos kind'
 
 -- Castle
---parseInput "king" = return $ Move $ 
+parseInput "king" c = return $ Move $ Castle c KingSide
+parseInput "queen" c = return $ Move $ Castle c QueenSide
 
 -- Bad input
-parseInput _ = Nothing
+parseInput _input _c= Nothing
 
 parseCol :: Char -> Maybe Int
 parseCol 'a' = Just 0
