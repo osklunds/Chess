@@ -1,51 +1,22 @@
 
--- Types and operations for boards and pieces.
-
--- TODO: Make this module DataTypes or something, and sub-module for
--- Color, Board, Move etc
-
 {-# LANGUAGE LambdaCase #-}
 
-module Board
-( 
--- Types
-  Board
-, defaultBoard
-, Square(..)
-, Color(..)
-, Kind(..)
-, Pos(..)
-, Move(..)
-, Side(..)
+module Types.Board
+( Board
 
--- Board
 , getB
 , setB
 , foldB
 , concatB
 , mapB
 , anyB
+
+
 , applyMove
+, defaultBoard
 , generateBoard
 , sampleBoard
-, homeRow
-
--- Square
-, color
-, invert
-, isEmpty
-, isOccupied
-, isColor
-, isOtherColor
-, isPawn
-, isBishop
-, isKnight
-, isRook
-, isQueen
-, isKing
-
--- Move
-, isCastle
+, homeRow 
 )
 where
 
@@ -55,58 +26,20 @@ import Data.Char
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
 
+import Types.Pos
+import Types.Square
+import Types.Move
+
 --------------------------------------------------------------------------------
--- Types
+-- Data types
 --------------------------------------------------------------------------------
 
 newtype Board = Board [[Square]]
               deriving (Eq, Ord)
 
-data Square = Empty
-            | Piece Color Kind
-            deriving (Eq, Ord)
-
-data Color = Black
-           | White
-           deriving (Eq, Show, Ord)
-
-data Kind = Pawn
-          | Bishop
-          | Knight
-          | Rook
-          | Queen
-          | King
-          deriving (Eq, Show, Ord)
-
-data Pos = Pos Int Int
-         deriving (Eq, Show, Ord)
-
--- Idea: KingMove, QueenMove, etc
--- So that syntactically invalid moves are impossible to create, or
--- are asserted (the latter for e.g. empty squares during castling).
-data Move = NormalMove Pos Pos
-          | Promote Pos Kind
-          | Castle Color Side
-          | EnPassant Pos Pos  -- TODO
-          deriving (Eq, Ord, Show)
-
-data Side = KingSide
-          | QueenSide
-          deriving (Eq, Ord, Show)
-
 --------------------------------------------------------------------------------
--- Default, Show and Read
+-- Show
 --------------------------------------------------------------------------------
-
-defaultBoard :: Board
-defaultBoard = Board $ [map (\kind -> Piece Black kind) defaultRow] ++
-                       [replicate 8 $ Piece Black Pawn] ++
-                       (replicate 4 $ replicate 8 $ Empty) ++
-                       [replicate 8 $ Piece White Pawn] ++
-                       [map (\kind -> Piece White kind) defaultRow]
-
-defaultRow = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
-
 
 instance Show Board where
   show = showBoard
@@ -125,24 +58,9 @@ showRowAndIndex (row, i) = show i ++
                            show i ++
                            "\n"
 
-instance Show Square where
-  show = showSquare
-
-showSquare :: Square -> String
-showSquare Empty                = " "
-showSquare (Piece Black Pawn)   = "♟"
-showSquare (Piece Black Bishop) = "♝"
-showSquare (Piece Black Knight) = "♞"
-showSquare (Piece Black Rook)   = "♜"
-showSquare (Piece Black Queen)  = "♛"
-showSquare (Piece Black King)   = "♚"
-showSquare (Piece White Pawn)   = "♙"
-showSquare (Piece White Bishop) = "♗"
-showSquare (Piece White Knight) = "♘"
-showSquare (Piece White Rook)   = "♖"
-showSquare (Piece White Queen)  = "♕"
-showSquare (Piece White King)   = "♔"
-
+--------------------------------------------------------------------------------
+-- Read
+--------------------------------------------------------------------------------
 
 instance Read Board where
   readsPrec _ str = [(fromString str, "")]
@@ -179,26 +97,6 @@ fromChar '♔' = Piece White King
 --------------------------------------------------------------------------------
 -- Arbitrary
 --------------------------------------------------------------------------------
-
-instance Arbitrary Kind where
-  arbitrary = elements [Pawn, Bishop, Knight, Rook, Queen, King]
-
-instance Arbitrary Color where
-  arbitrary = elements [Black, White]
-
-instance Arbitrary Square where
-  arbitrary = oneof [return Empty,
-                     do
-                      color <- arbitrary
-                      kind  <- arbitrary
-                      return $ Piece color kind
-                    ]
-
-instance Arbitrary Pos where
-    arbitrary = do
-        row <- elements [0..7]
-        col <- elements [0..7]
-        return $ Pos row col
 
 instance Arbitrary Board where
     arbitrary = arbitraryBoard
@@ -274,9 +172,8 @@ oneIn n = do
 instance Arbitrary Side where
     arbitrary = oneof $ map return [KingSide, QueenSide]
 
-
 --------------------------------------------------------------------------------
--- Board
+-- Board operations
 --------------------------------------------------------------------------------
 
 getB :: Pos -> Board -> Square
@@ -305,6 +202,10 @@ mapB f (Board rows) = Board $ map (\row -> map f row) rows
 
 anyB :: (Square -> Bool) -> Board -> Bool
 anyB f = foldB (\acc square -> acc || f square) False
+
+--------------------------------------------------------------------------------
+-- Misc
+--------------------------------------------------------------------------------
 
 applyMove :: Move -> Board -> Board
 applyMove (NormalMove src dst) = applyNormalMove src dst
@@ -345,6 +246,16 @@ applyCastle color side board = board'
                  setB (Pos row rookCol)    Empty $
                  setB (Pos row newRookCol) (Piece color Rook) board
 
+defaultBoard :: Board
+defaultBoard = Board $ [map (\kind -> Piece Black kind) defaultRow] ++
+                       [replicate 8 $ Piece Black Pawn] ++
+                       (replicate 4 $ replicate 8 $ Empty) ++
+                       [replicate 8 $ Piece White Pawn] ++
+                       [map (\kind -> Piece White kind) defaultRow]
+
+defaultRow = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
+
+
 generateBoard :: IO Board
 generateBoard = generate arbitrary
 
@@ -355,60 +266,3 @@ homeRow :: Color -> Int
 homeRow White = 7
 homeRow Black = 0
 
---------------------------------------------------------------------------------
--- Square
---------------------------------------------------------------------------------
-
-color :: Square -> Color
-color (Piece c _) = c
-
-invert :: Color -> Color
-invert White = Black
-invert Black = White
-
-isEmpty :: Square -> Bool
-isEmpty Empty = True
-isEmpty _     = False
-
-isOccupied :: Square -> Bool
-isOccupied = not . isEmpty
-
-isColor :: Color -> Square -> Bool
-isColor _  Empty        = False
-isColor c1 (Piece c2 _) = c1 == c2
-
-isOtherColor :: Color -> Square -> Bool
-isOtherColor _  Empty        = False
-isOtherColor c1 (Piece c2 _) = c1 /= c2
-
-isPawn :: Square -> Bool
-isPawn (Piece _ Pawn) = True
-isPawn _              = False
-
-isBishop :: Square -> Bool
-isBishop (Piece _ Bishop) = True
-isBishop _                = False
-
-isKnight :: Square -> Bool
-isKnight (Piece _ Knight) = True
-isKnight _                = False
-
-isRook :: Square -> Bool
-isRook (Piece _ Rook) = True
-isRook _              = False
-
-isQueen :: Square -> Bool
-isQueen (Piece _ Queen) = True
-isQueen _               = False
-
-isKing :: Square -> Bool
-isKing (Piece _ King) = True
-isKing _              = False
-
---------------------------------------------------------------------------------
--- Move
---------------------------------------------------------------------------------
-
-isCastle :: Move -> Bool
-isCastle (Castle _color _side) = True
-isCastle _                     = False

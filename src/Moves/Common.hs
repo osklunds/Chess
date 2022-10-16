@@ -4,6 +4,6 @@ module Moves.Common
 )
 where
 
-import Board
+import Types
 
 type MovesFun = Color -> Board -> [Move]

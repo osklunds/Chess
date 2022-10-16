@@ -1,7 +1,7 @@
 
 {-# LANGUAGE TemplateHaskell #-} 
 
-module Board.Tests where
+module Types.Board.Tests where
 
 import System.Random
 import Test.QuickCheck
