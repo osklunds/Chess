@@ -130,7 +130,10 @@ computerTurn st = do
 
 -- Input ex: a4 b6
 parseInput :: String -> Maybe UserAction
+-- Undo
 parseInput "undo" = Just $ Undo
+
+-- NormalMove
 parseInput [startCol,startRow,' ',destCol,destRow] = do
     startCol' <- parseCol startCol
     startRow' <- parseRow startRow
@@ -139,12 +142,19 @@ parseInput [startCol,startRow,' ',destCol,destRow] = do
     destRow'  <- parseRow destRow
     let dest = (Pos destRow' destCol')
     return $ Move $ NormalMove start dest
+
+-- Promote
 parseInput [col,row,' ',kind] = do
     col' <- parseCol col
     row' <- parseRow row
     let pos = Pos row' col'
     kind' <- parseKind kind
     return $ Move $ Promote pos kind'
+
+-- Castle
+--parseInput "king" = return $ Move $ 
+
+-- Bad input
 parseInput _ = Nothing
 
 parseCol :: Char -> Maybe Int

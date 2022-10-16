@@ -45,10 +45,10 @@ applyMove :: Move -> GameState -> (GameState, Result)
 applyMove move (GameState {board, turn, captured}) = (nextGameState, result)
   where
     -- Next game state
-    atDest    = getB (moveToDest move) board -- TODO: Fix when not normal
-    captured' = case atDest of
+    capturedThisTurn = moveToCaptured move board
+    captured' = case capturedThisTurn of
                   Empty -> captured
-                  _else -> atDest:captured
+                  _else -> capturedThisTurn:captured
     board'    = B.applyMove move $ board
     opponent  = invert turn
 
@@ -58,3 +58,9 @@ applyMove move (GameState {board, turn, captured}) = (nextGameState, result)
 
     -- Determining result
     result = GR.gameResult opponent board'
+
+moveToCaptured :: Move -> Board -> Square
+moveToCaptured (NormalMove _src dst) board = getB dst board
+-- TODO: It's hacky to use Empty for this
+moveToCaptured _move _board = Empty
+    
