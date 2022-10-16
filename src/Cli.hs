@@ -23,14 +23,8 @@ data State = State { gameStates :: [GameState]
                    , playerColor :: B.Color
                    }
 
-start :: Color -> Maybe Board -> IO ()
-start playerColor maybeStartBoard = do
-    let startBoard = case maybeStartBoard of
-                        Nothing ->
-                            defaultBoard
-                        (Just board) ->
-                            board
-
+start :: Color -> Board -> IO ()
+start playerColor startBoard = do
     let gs = newGameState startBoard
     printBoard gs
 
