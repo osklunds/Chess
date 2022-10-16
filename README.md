@@ -22,8 +22,10 @@ Chess AI written in Haskell.
     - Checkmate with King+Rook
     - Checkmate with King+Queen
 - Rules
-    - Promoting
+    - ~~Promoting~~
     - Castling
+        - ~~Stateless~~
+        - Remember if rooks/king have been moved
     - En passant
     - 3 draw
     - 50 draw

@@ -192,15 +192,33 @@ prop_doNotPromote2 = verifyMakesMove expMove board
                       \  0 1 2 3 4 5 6 7"
         expMove = NormalMove (Pos 1 3) (Pos 2 2)
 
+prop_castling :: Bool
+prop_castling = verifyMakesMove expMove board
+    where
+        board = castleToWinBoard
+        expMove = Castle Black QueenSide
 
+castleToWinBoard :: Board
+castleToWinBoard = read  "  0 1 2 3 4 5 6 7  \n\
+                         \0 ♜       ♚   ♞   0\n\
+                         \1                 1\n\
+                         \2   ♙ ♙ ♔ ♙       2\n\
+                         \3 ♘   ♙   ♙       3\n\
+                         \4         ♙        4\n\
+                         \5 ♗   ♙           5\n\
+                         \6     ♘         ♞ 6\n\
+                         \7 ♟   ♖   ♘       7\n\
+                         \  0 1 2 3 4 5 6 7"
 
-
-
+prop_doNotCastleIfThreatened :: Bool
+prop_doNotCastleIfThreatened = verifyDoesNotMakeMove move board
+    where
+        board = setB (Pos 4 7) (Piece White Bishop) castleToWinBoard
+        move = Castle Black QueenSide
 
 
 -- TODO: Test move that needs two steps ahead thinking
 
--- TODO: Promote to non-queen
 
 --------------------------------------------------------------------------------
 -- Arbitrary
@@ -210,7 +228,8 @@ prop_legalMove :: Board -> Property
 prop_legalMove board = not (null legalMoves) ==> result
     where
         legalMoves = movesF Black board
-        result = and [makeMove d board `elem` legalMoves | d <- depths]
+        -- TODO: Test for more depths when the algorithm is faster
+        result = and [makeMove d board `elem` legalMoves | d <- [1..1]]
 
 -- TODO: escape from check
 
@@ -220,6 +239,9 @@ prop_legalMove board = not (null legalMoves) ==> result
 
 makeMove :: Int -> Board -> Move
 makeMove depth board = moveColor depth Black board
+
+makeMoveWhite :: Int -> Board -> Move
+makeMoveWhite depth board = moveColor depth White board
 
 depths :: [Int]
 depths = [2..3]
@@ -234,6 +256,12 @@ verifyMakesOneOfMoves :: [Move] -> Board -> Bool
 verifyMakesOneOfMoves expMoves board = all pred depths
   where
     pred depth = makeMove depth board `elem` expMoves
+
+verifyDoesNotMakeMove :: Move -> Board -> Bool
+verifyDoesNotMakeMove move board = all pred depths
+    where
+        pred depth = makeMove depth board /= move
+
 
 return []
 runTests = $quickCheckAll

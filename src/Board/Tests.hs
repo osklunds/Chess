@@ -9,6 +9,8 @@ import Data.Maybe
 import Test.QuickCheck.Arbitrary
 
 import Board as B
+import TestLib
+import Moves.Naive.CheckUnaware
 
 --------------------------------------------------------------------------------
 -- get
@@ -81,13 +83,98 @@ prop_applyPromote p color kind b = condition ==> result
         equal = equalExcept b' b'' [p']
         pHasNew = getB p' b'' == Piece color kind
 
+prop_applyCastleWhiteKingSide :: Board -> Bool
+prop_applyCastleWhiteKingSide = applyCastleKingSide White row
+    where
+        row = 7
 
+prop_applyCastleBlackKingSide :: Board -> Bool
+prop_applyCastleBlackKingSide = applyCastleKingSide Black row
+    where
+        row = 0
 
+prop_applyCastleWhiteQueenSide :: Board -> Bool
+prop_applyCastleWhiteQueenSide = applyCastleQueenSide White row
+    where
+        row = 7
 
+prop_applyCastleBlackQueenSide :: Board -> Bool
+prop_applyCastleBlackQueenSide = applyCastleQueenSide Black row
+    where
+        row = 0
 
+applyCastleKingSide :: Color -> Int -> Board -> Bool
+applyCastleKingSide = applyCastle KingSide rookC newRookC newKingC
+    where
+        rookC = 7
+        newRookC = 5
+        newKingC = 6
 
+applyCastleQueenSide :: Color -> Int -> Board -> Bool
+applyCastleQueenSide = applyCastle QueenSide rookC newRookC newKingC
+    where
+        rookC = 0
+        newRookC = 3
+        newKingC = 2
 
+applyCastle :: Side -> Int -> Int -> Int -> Color -> Int -> Board -> Bool
+applyCastle side rookC newRookC newKingC color row board =
+    emptyAtOldKingP && kingAtNewP && emptyAtOldRookP && rookAtNewP && restSame
+    where
+        kingC = 4
+        kingP = Pos row kingC
+        newRookP = Pos row newRookC
+        newKingP = Pos row newKingC
+        rookP = Pos row rookC
+
+        leftmostC = min rookC kingC
+        rightmostC = max rookC kingC
+        emptyPs = [Pos row col | col <- [leftmostC..rightmostC]]
+
+        board' = setB kingP (Piece color King) $
+                 setB rookP (Piece color Rook) $
+                 setEmpty emptyPs $
+                 removeKing color board
         
+        move = Castle color side
+        board'' = applyMove move board'
+
+        emptyAtOldKingP = isEmpty $ getB kingP board''
+        kingAtNewP = getB newKingP board'' == Piece color King
+        emptyAtOldRookP = isEmpty $ getB rookP board''
+        rookAtNewP = getB newRookP board'' == Piece color Rook
+        restSame = equalExcept board' board'' [kingP, newRookP, newKingP, rookP]
+
+--------------------------------------------------------------------------------
+-- Arbitrary
+--------------------------------------------------------------------------------
+
+prop_oneOfEachKing :: Board -> Bool
+prop_oneOfEachKing b = foldB f (0,0) b == (1,1)
+    where
+        f (numBlack, numWhite) sq =
+                case sq of
+                    (Piece Black King) -> (numBlack + 1, numWhite)
+                    (Piece White King) -> (numBlack, numWhite + 1)
+                    _pos               -> (numBlack, numWhite)
+
+prop_promoteDistribution :: Board -> Property
+prop_promoteDistribution = moveDistribution pred
+    where
+        pred (Promote _pos _kind) = True
+        pred _otherMove = False
+
+prop_castleDistribution :: Board -> Property
+prop_castleDistribution = moveDistribution pred
+    where
+        pred = (`elem` [Castle Black QueenSide, Castle Black KingSide])
+
+moveDistribution :: (Move -> Bool) -> Board -> Property
+moveDistribution pred b = collect moveAvailable True
+    where
+        moves = movesF Black b
+        moveAvailable = any (pred) moves
+
 
 --------------------------------------------------------------------------------
 -- Helpers

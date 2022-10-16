@@ -1,6 +1,9 @@
 
 -- Types and operations for boards and pieces.
 
+-- TODO: Make this module DataTypes or something, and sub-module for
+-- Color, Board, Move etc
+
 {-# LANGUAGE LambdaCase #-}
 
 module Board
@@ -13,6 +16,7 @@ module Board
 , Kind(..)
 , Pos(..)
 , Move(..)
+, Side(..)
 
 -- Board
 , getB
@@ -22,7 +26,9 @@ module Board
 , mapB
 , anyB
 , applyMove
-, arbitraryBoard
+, generateBoard
+, sampleBoard
+, homeRow
 
 -- Square
 , color
@@ -39,7 +45,7 @@ module Board
 , isKing
 
 -- Move
-, moveToDest
+, isCastle
 )
 where
 
@@ -75,10 +81,17 @@ data Kind = Pawn
 data Pos = Pos Int Int
          deriving (Eq, Show, Ord)
 
+-- Idea: KingMove, QueenMove, etc
+-- So that syntactically invalid moves are impossible to create, or
+-- are asserted (the latter for e.g. empty squares during castling).
 data Move = NormalMove Pos Pos
-          | Promote Pos Kind   -- TODO
-          | Castle Pos         -- TODO
+          | Promote Pos Kind
+          | Castle Color Side
           | EnPassant Pos Pos  -- TODO
+          deriving (Eq, Ord, Show)
+
+data Side = KingSide
+          | QueenSide
           deriving (Eq, Ord, Show)
 
 --------------------------------------------------------------------------------
@@ -183,29 +196,83 @@ instance Arbitrary Square where
 
 instance Arbitrary Pos where
     arbitrary = do
-        row <- oneof $ map return [0..7]
-        col <- oneof $ map return [0..7]
+        row <- elements [0..7]
+        col <- elements [0..7]
         return $ Pos row col
 
 instance Arbitrary Board where
-  arbitrary = do
+    arbitrary = arbitraryBoard
+
+arbitraryBoard :: Gen Board
+arbitraryBoard = do
     rows <- replicateM 8 $ replicateM 8 arbitrary
 
-    let board   = Board rows
-    let noKings = mapB (\case
-                           (Piece _color King) -> Empty
-                           square              -> square
-                       ) board
-    positions <- replicateM 4 $ arbitrary
-    let [row1,col1,row2,col2] = map (`mod` 8) positions
-    let col2' = case (row1,col1) == (row2,col2) of
-                    True  -> (col2 + 1) `mod` 8
-                    False -> col2
+    let board = Board rows
+    let noKings = mapB (\sq -> if isKing sq then Empty else sq) board
+    
+    castle <- oneIn 4
+    afterCastle <- case castle of
+                        True ->
+                            adjustForCastle noKings
+                        False ->
+                            return noKings
 
-    let blackKing = setB (Pos row1 col1)  (Piece Black King) noKings
-    let whiteKing = setB (Pos row2 col2') (Piece White King) blackKing
+    blackKing <- ensureKing Black afterCastle
+    whiteKing <- ensureKing White blackKing
 
     return whiteKing
+
+ensureKing :: Color -> Board -> Gen Board
+ensureKing color board = do
+    let king = Piece color King
+    case anyB (== king) board of
+        True ->
+            return board
+        False -> do
+            pos <- arbitrary
+            case isKing (getB pos board) of
+                True ->
+                    ensureKing color board
+                False ->
+                    return $ setB pos king board
+
+adjustForCastle :: Board -> Gen Board
+adjustForCastle board = do
+    let foldlFun b (pos,sq) = maybeChangeTo pos sq b
+    let blackCastleRow = (castleRow Black 0)
+    afterBlack <- foldM foldlFun board blackCastleRow
+    let whiteCastleRow = (castleRow White 7)
+    foldM foldlFun afterBlack whiteCastleRow
+
+maybeChangeTo :: Pos -> Square -> Board -> Gen Board
+maybeChangeTo pos square board = do
+    change <- fmap not $ oneIn 4
+    return $ case change of
+                True ->
+                    setB pos square board
+                False ->
+                    board
+
+castleRow :: Color -> Int -> [(Pos,Square)]
+castleRow color row = zip posList pieces
+    where
+        posList = [Pos row col | col <- [0..7]]
+        pieces = [Piece color Rook,
+                  Empty,
+                  Empty,
+                  Empty,
+                  Piece color King,
+                  Empty,
+                  Empty,
+                  Piece color Rook]
+
+oneIn :: Int -> Gen Bool
+oneIn n = do
+    n' <- elements [1..n]
+    return $ n == n'
+
+instance Arbitrary Side where
+    arbitrary = oneof $ map return [KingSide, QueenSide]
 
 
 --------------------------------------------------------------------------------
@@ -240,9 +307,9 @@ anyB :: (Square -> Bool) -> Board -> Bool
 anyB f = foldB (\acc square -> acc || f square) False
 
 applyMove :: Move -> Board -> Board
-applyMove (NormalMove src dst) b = applyNormalMove src dst b
-applyMove (Promote p kind) b = applyPromote p kind b
-applyMove _otherMove _b = undefined
+applyMove (NormalMove src dst) = applyNormalMove src dst
+applyMove (Promote p kind) = applyPromote p kind
+applyMove (Castle color side) = applyCastle color side
 
 applyNormalMove src dst b = assert (not $ isEmpty atSrc)
                                    (setB dst atSrc $ setB src Empty b)
@@ -263,8 +330,30 @@ applyPromote p kind b = assert condition setB p newAtP b
                          row == 7 && color atP == Black
         (Pos row _col) = p
 
-arbitraryBoard :: IO Board
-arbitraryBoard = generate arbitrary
+applyCastle :: Color -> Side -> Board -> Board
+applyCastle color side board = board'
+    where
+        row = case color of
+                White -> 7
+                Black -> 0
+        kingCol = 4
+        (rookCol,newRookCol,newKingCol) = case side of
+                                            KingSide -> (7,5,6)
+                                            QueenSide -> (0,3,2)
+        board' = setB (Pos row kingCol)    Empty $
+                 setB (Pos row newKingCol) (Piece color King) $
+                 setB (Pos row rookCol)    Empty $
+                 setB (Pos row newRookCol) (Piece color Rook) board
+
+generateBoard :: IO Board
+generateBoard = generate arbitrary
+
+sampleBoard :: IO ()
+sampleBoard = sample (arbitrary :: Gen Board)
+
+homeRow :: Color -> Int
+homeRow White = 7
+homeRow Black = 0
 
 --------------------------------------------------------------------------------
 -- Square
@@ -320,6 +409,6 @@ isKing _              = False
 -- Move
 --------------------------------------------------------------------------------
 
-moveToDest :: Move -> Pos
-moveToDest (NormalMove _src dst) = dst
-moveToDest (Promote pos _kind) = pos
+isCastle :: Move -> Bool
+isCastle (Castle _color _side) = True
+isCastle _                     = False

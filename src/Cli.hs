@@ -23,14 +23,8 @@ data State = State { gameStates :: [GameState]
                    , playerColor :: B.Color
                    }
 
-start :: Color -> Maybe Board -> IO ()
-start playerColor maybeStartBoard = do
-    let startBoard = case maybeStartBoard of
-                        Nothing ->
-                            defaultBoard
-                        (Just board) ->
-                            board
-
+start :: Color -> Board -> IO ()
+start playerColor startBoard = do
     let gs = newGameState startBoard
     printBoard gs
 
@@ -53,7 +47,9 @@ playerTurnAskInput st = do
     putStr "Enter your move: "
     input <- getLine
 
-    case parseInput input of
+    let color = playerColor st
+
+    case parseInput input color of
         Nothing -> do
             playerTurnParseError st
         Just Undo -> do
@@ -129,9 +125,12 @@ computerTurn st = do
 --------------------------------------------------------------------------------
 
 -- Input ex: a4 b6
-parseInput :: String -> Maybe UserAction
-parseInput "undo" = Just $ Undo
-parseInput [startCol,startRow,' ',destCol,destRow] = do
+parseInput :: String -> Color -> Maybe UserAction
+-- Undo
+parseInput "undo" _c = Just $ Undo
+
+-- NormalMove
+parseInput [startCol,startRow,' ',destCol,destRow] _c = do
     startCol' <- parseCol startCol
     startRow' <- parseRow startRow
     let start = (Pos startRow' startCol')
@@ -139,13 +138,21 @@ parseInput [startCol,startRow,' ',destCol,destRow] = do
     destRow'  <- parseRow destRow
     let dest = (Pos destRow' destCol')
     return $ Move $ NormalMove start dest
-parseInput [col,row,' ',kind] = do
+
+-- Promote
+parseInput [col,row,' ',kind] _c = do
     col' <- parseCol col
     row' <- parseRow row
     let pos = Pos row' col'
     kind' <- parseKind kind
     return $ Move $ Promote pos kind'
-parseInput _ = Nothing
+
+-- Castle
+parseInput "king" c = return $ Move $ Castle c KingSide
+parseInput "queen" c = return $ Move $ Castle c QueenSide
+
+-- Bad input
+parseInput _input _c= Nothing
 
 parseCol :: Char -> Maybe Int
 parseCol 'a' = Just 0

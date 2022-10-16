@@ -104,7 +104,7 @@ prop_fixedBoard2 = verifyMoves moves White board
             (movesFrom (6,3) [(5,3), (4,3), (5,4)])
 
 verifyMoves :: [((Int,Int),(Int,Int))] -> Color -> Board -> Property
-verifyMoves = MTL.verifyMoves movesF
+verifyMoves = MTL.verifyMoves movesF'
 
 movesFrom :: (Int,Int) -> [(Int,Int)] -> [((Int,Int),(Int,Int))]
 movesFrom start ends = map (\end -> (start, end)) ends
@@ -135,46 +135,38 @@ movesAreSubsetOfMoves kind1 kind2 board pos = movesKind1 `isSubsetOf`
     boardKind1 = setB pos' (Piece Black kind1) board
     boardKind2 = setB pos' (Piece Black kind2) board
 
-    movesKind1 = movesF Black boardKind1
-    movesKind2 = movesF Black boardKind2
+    movesKind1 = movesF' Black boardKind1
+    movesKind2 = movesF' Black boardKind2
 
 --------------------------------------------------------------------------------
 -- All pieces (-)
 --------------------------------------------------------------------------------
 
 prop_noNonMoves :: Board -> Bool
-prop_noNonMoves board = all isMove $ movesF Black board
+prop_noNonMoves board = all isMove $ movesF' Black board
   where
     isMove (start,dest) = start /= dest
 
 prop_destinationIsWithinBoard :: Board -> Bool
 prop_destinationIsWithinBoard board = all pred moves
   where
-    moves = movesF Black board
+    moves = movesF' Black board
     pred (_start,(row,col)) = 0 <= row && row < 8 && 0 <= col && col < 8
 
 prop_destinationIsNotSameColor :: Board -> Bool
 prop_destinationIsNotSameColor board = all pred moves
   where
-    moves              = movesF Black board
+    moves              = movesF' Black board
     pred (_start,dest) = not (isColor Black (getB dest board))
 
 prop_startIsSameColor :: Board -> Bool
 prop_startIsSameColor board = all pred moves
   where
-    moves              = movesF Black board
+    moves              = movesF' Black board
     pred (start,_dest) = isColor Black (getB start board)
 
 prop_blackAndWhiteGiveSameMoves :: Board -> Bool
-prop_blackAndWhiteGiveSameMoves =
-    MTL.prop_blackAndWhiteGiveSameMoves movesF'
-    where
-        movesF' color board = map toNormalMove $ movesF color board
-
-toNormalMove :: ((Int,Int),(Int,Int)) -> Move
-toNormalMove ((rowS,colS),(rowD,colD)) =
-    NormalMove (Pos rowS colS) (Pos rowD colD)
-
+prop_blackAndWhiteGiveSameMoves = MTL.prop_blackAndWhiteGiveSameMoves movesF
 
 --------------------------------------------------------------------------------
 -- King, Queen, Rook and Bishop (-)
@@ -423,7 +415,7 @@ placePieceAndGetMoves board pos kind = (board', pos', movesPlaced)
   where
     pos'        = withinizePos pos
     board'      = setB pos' (Piece Black kind) board
-    moves       = movesF Black board'
+    moves       = movesF' Black board'
     movesPlaced = filter (isMoveFrom pos') moves
 
 emptyBetweenStartAndDest :: Board -> ((Int,Int),(Int,Int)) -> Bool

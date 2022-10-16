@@ -3,17 +3,23 @@
 
 module Moves.Naive.NormalMoves
 ( movesF
+, movesF'
 )
 where
 
 import Board as B hiding (getB)
 import qualified Board as B
 import Moves.Naive.NormalMoves.Lib
+import Moves.Common
 
+movesF :: MovesFun
+movesF c b = map f $  movesF' c b
+    where
+        f ((rowS,colS),(rowD,colD)) = NormalMove (Pos rowS colS) (Pos rowD colD)
 
-movesF :: Color -> Board -> [((Int,Int),(Int,Int))]
-movesF color board = concat [movesFromPos (row,col) color board |
-                             row <- [0..7], col <- [0..7]]
+movesF' :: Color -> Board -> [((Int,Int),(Int,Int))]
+movesF' color board = concat [movesFromPos (row,col) color board |
+                              row <- [0..7], col <- [0..7]]
 
 movesFromPos :: (Int,Int) -> Color -> Board -> [((Int,Int),(Int,Int))]
 movesFromPos pos color board
