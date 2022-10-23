@@ -194,7 +194,10 @@ checkedBoard b = assert (checkBoard b) b
 checkBoard :: Board -> Bool
 checkBoard b = and [checkFun b | checkFun <- checkFuns]
     where
-        checkFuns = [checkNumKings, checkPawnPositions]
+        checkFuns = [checkSize, checkNumKings, checkPawnPositions]
+
+checkSize :: Board -> Bool
+checkSize (Board rows) = length rows == 8 && all ((==8) . length) rows
 
 checkNumKings :: Board -> Bool
 checkNumKings b = numBlack <= 1 && numWhite <= 1
