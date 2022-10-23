@@ -16,6 +16,8 @@ import qualified Moves.Naive.TestLib as MTL
 -- Fixed boards
 --------------------------------------------------------------------------------
 
+-- TODO: Fixed board where you check the moves for just a single piece kind
+
 prop_fixedBoard1 :: Property
 prop_fixedBoard1 = verifyMoves moves Black board
   where
