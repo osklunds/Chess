@@ -197,7 +197,7 @@ concatB :: Board -> [Square]
 concatB (Board rows) = concat rows
 
 mapB :: (Square -> Square) -> Board -> Board
-mapB f (Board rows) = Board $ map (\row -> map f row) rows
+mapB f (Board rows) = checkedBoard $ Board $ map (\row -> map f row) rows
 
 anyB :: (Square -> Bool) -> Board -> Bool
 anyB f = foldB (\acc square -> acc || f square) False
