@@ -100,7 +100,7 @@ arbitraryBoard = do
     blackKing <- ensureKing Black afterCastle
     whiteKing <- ensureKing White blackKing
 
-    return whiteKing
+    return $ checkedBoard whiteKing
 
 ensureKing :: Color -> Board -> Gen Board
 ensureKing color board = do
