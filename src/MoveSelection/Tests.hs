@@ -8,6 +8,7 @@ import Test.QuickCheck
 import Types
 import Moves
 import MoveSelection
+import qualified MoveSelection.Score.Tests as S
 
 
 --------------------------------------------------------------------------------
@@ -264,4 +265,12 @@ verifyDoesNotMakeMove move board = all pred depths
 
 
 return []
-runTests = $quickCheckAll
+runTestsLocal = $quickCheckAll
+
+
+runTests :: IO Bool
+runTests = do
+    s     <- S.runTests
+    local <- runTestsLocal
+
+    return $ and [s, local]
