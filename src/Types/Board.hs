@@ -162,7 +162,7 @@ getB :: Pos -> Board -> Square
 getB (Pos row col) (Board board) = (board !! row) !! col
 
 setB :: Pos -> Square -> Board -> Board
-setB pos sq b = assert (consistencyCheck newBoard) newBoard
+setB pos sq b = checkedBoard newBoard
     where
         newBoard = setB' pos sq b
 
@@ -174,8 +174,11 @@ setB' (Pos rowIdx colIdx) sq (Board oldBoard) = Board $ newBoard
         newRow = replaceAt colIdx sq oldRow
         newBoard = replaceAt rowIdx newRow oldBoard
 
-consistencyCheck :: Board -> Bool
-consistencyCheck b = checkNumKings b
+checkedBoard :: Board -> Board
+checkedBoard b = assert (checkBoard b) b
+
+checkBoard :: Board -> Bool
+checkBoard b = checkNumKings b
 
 checkNumKings :: Board -> Bool
 checkNumKings b = numBlack <= 1 && numWhite <= 1
@@ -204,7 +207,7 @@ anyB f = foldB (\acc square -> acc || f square) False
 --------------------------------------------------------------------------------
 
 applyMove :: Move -> Board -> Board
-applyMove move board = assert (consistencyCheck newBoard) newBoard
+applyMove move board = checkedBoard newBoard
     where
         newBoard = case move of
                     (NormalMove src dst) -> applyNormalMove src dst board
