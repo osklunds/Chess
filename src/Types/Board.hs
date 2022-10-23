@@ -167,6 +167,10 @@ setB (Pos rowIdx colIdx) sq (Board oldBoard) = Board newBoard
     oldRow = oldBoard !! rowIdx
     newRow = replaceAt colIdx sq oldRow
     newBoard = replaceAt rowIdx newRow oldBoard
+-- TODO: Add board consistency check
+-- No pawn at 0 or 7
+-- One of each king (maybe)
+-- At most one of each king
 
 replaceAt :: Int -> a -> [a] -> [a]
 replaceAt i x xs = prefix ++ [x] ++ suffix
