@@ -11,12 +11,12 @@ module Types.Board
 , mapB
 , anyB
 
-
 , applyMove
 , defaultBoard
 , generateBoard
 , sampleBoard
-, homeRow 
+, homeRow
+, numKings
 )
 where
 
@@ -162,15 +162,25 @@ getB :: Pos -> Board -> Square
 getB (Pos row col) (Board board) = (board !! row) !! col
 
 setB :: Pos -> Square -> Board -> Board
-setB (Pos rowIdx colIdx) sq (Board oldBoard) = Board newBoard
-  where
-    oldRow = oldBoard !! rowIdx
-    newRow = replaceAt colIdx sq oldRow
-    newBoard = replaceAt rowIdx newRow oldBoard
--- TODO: Add board consistency check
--- No pawn at 0 or 7
--- One of each king (maybe)
--- At most one of each king
+setB pos sq b = assert (consistencyCheck newBoard) newBoard
+    where
+        newBoard = setB' pos sq b
+
+-- Same as setB, but no consisteny check
+setB' :: Pos -> Square -> Board -> Board
+setB' (Pos rowIdx colIdx) sq (Board oldBoard) = Board $ newBoard
+    where
+        oldRow = oldBoard !! rowIdx
+        newRow = replaceAt colIdx sq oldRow
+        newBoard = replaceAt rowIdx newRow oldBoard
+
+consistencyCheck :: Board -> Bool
+consistencyCheck b = checkNumKings b
+
+checkNumKings :: Board -> Bool
+checkNumKings b = numBlack <= 1 && numWhite <= 1
+    where
+        (numBlack,numWhite) = numKings b
 
 replaceAt :: Int -> a -> [a] -> [a]
 replaceAt i x xs = prefix ++ [x] ++ suffix
@@ -194,17 +204,21 @@ anyB f = foldB (\acc square -> acc || f square) False
 --------------------------------------------------------------------------------
 
 applyMove :: Move -> Board -> Board
-applyMove (NormalMove src dst) = applyNormalMove src dst
-applyMove (Promote p kind) = applyPromote p kind
-applyMove (Castle color side) = applyCastle color side
+applyMove move board = assert (consistencyCheck newBoard) newBoard
+    where
+        newBoard = case move of
+                    (NormalMove src dst) -> applyNormalMove src dst board
+                    (Promote p kind)     -> applyPromote p kind board
+                    (Castle color side)  -> applyCastle color side board
 
+applyNormalMove :: Pos -> Pos -> Board -> Board
 applyNormalMove src dst b = assert (not $ isEmpty atSrc)
-                                   (setB dst atSrc $ setB src Empty b)
+                                   (setB' dst atSrc $ setB' src Empty b)
     where
         atSrc = getB src b
 
 applyPromote :: Pos -> Kind -> Board -> Board
-applyPromote p kind b = assert condition setB p newAtP b
+applyPromote p kind b = assert condition setB' p newAtP b
     where
         -- TODO: assert row+color, kind
         atP    = getB p b
@@ -227,10 +241,10 @@ applyCastle color side board = board'
         (rookCol,newRookCol,newKingCol) = case side of
                                             KingSide -> (7,5,6)
                                             QueenSide -> (0,3,2)
-        board' = setB (Pos row kingCol)    Empty $
-                 setB (Pos row newKingCol) (Piece color King) $
-                 setB (Pos row rookCol)    Empty $
-                 setB (Pos row newRookCol) (Piece color Rook) board
+        board' = setB' (Pos row kingCol)    Empty $
+                 setB' (Pos row newKingCol) (Piece color King) $
+                 setB' (Pos row rookCol)    Empty $
+                 setB' (Pos row newRookCol) (Piece color Rook) board
 
 defaultBoard :: Board
 defaultBoard = Board $ [map (\kind -> Piece Black kind) defaultRow] ++
@@ -252,3 +266,11 @@ homeRow :: Color -> Int
 homeRow White = 7
 homeRow Black = 0
 
+numKings :: Board -> (Int,Int)
+numKings b = foldB f (0,0) b
+    where
+        f (numBlack, numWhite) sq =
+                case sq of
+                    (Piece Black King) -> (numBlack + 1, numWhite)
+                    (Piece White King) -> (numBlack, numWhite + 1)
+                    _pos               -> (numBlack, numWhite)
