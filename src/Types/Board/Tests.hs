@@ -32,14 +32,22 @@ prop_getMiddle = getB (Pos 4 4) defaultBoard == Empty
 -- set
 --------------------------------------------------------------------------------
 
-prop_setNonKing :: Square -> Pos -> Board -> Property
-prop_setNonKing sq pos board = (not $ isKing sq) ==> setSquare sq pos board
+prop_setNonKingNonPawn :: Square -> Pos -> Board -> Property
+prop_setNonKingNonPawn sq pos board = condition ==> setSquare sq pos board
+    where
+        condition = not (isKing sq) && not (isPawn sq)
 
 prop_setKing :: Color -> Pos -> Board -> Bool
 prop_setKing col pos board = setSquare sq pos noKingsBoard
     where
         sq = Piece col King
         noKingsBoard = mapB (\sq -> if isKing sq then Empty else sq) board
+
+prop_setPawn :: Color -> Pos -> Board -> Property
+prop_setPawn col pos@(Pos row _col) board = condition ==> setSquare sq pos board
+    where
+        sq = Piece col Pawn
+        condition = row /= 0 && row /= 7
 
 setSquare :: Square -> Pos -> Board -> Bool
 setSquare sq pos board = newIsChanged && othersAreUnchanged
@@ -62,9 +70,14 @@ prop_showRead board = board == read (show board)
 prop_applyNormalMove :: TwoDifferentPos -> Board -> Property
 prop_applyNormalMove (TwoDifferentPos src dst) b = condition ==> result
     where
-        condition = srcOccupied && dstOccupied
-        srcOccupied = isOccupied $ getB src b
-        dstOccupied = isOccupied $ getB dst b
+        condition = srcOccupied && dstOccupied && notPawnToEdge
+        srcOccupied = isOccupied atSrc
+        dstOccupied = isOccupied atDst
+        notPawnToEdge = not ((isPawn atSrc) && (dstRow /= 0 || dstRow /= 7))
+
+        atSrc = getB src b
+        atDst = getB dst b
+        (Pos dstRow _col) = dst
 
         move = NormalMove src dst
         b' = applyMove move b

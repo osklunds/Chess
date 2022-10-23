@@ -1,6 +1,10 @@
 
 {-# LANGUAGE LambdaCase #-}
 
+-- Representation of a board.
+-- All operations that return a board assert that the returned board is a legal
+-- board.
+
 module Types.Board
 ( Board
 
@@ -85,10 +89,16 @@ instance Arbitrary Board where
 
 arbitraryBoard :: Gen Board
 arbitraryBoard = do
-    rows <- replicateM 8 $ replicateM 8 arbitrary
+    row0 <- replicateM 8 arbitrary
+    let row0' = map (replaceWithEmptyIf isPawn) row0
 
-    let board = Board rows
-    let noKings = mapB (\sq -> if isKing sq then Empty else sq) board
+    row7 <- replicateM 8 arbitrary
+    let row7' = map (replaceWithEmptyIf isPawn) row7
+
+    middleRows <- replicateM 6 $ replicateM 8 arbitrary
+
+    let board = Board $ [row0'] ++ middleRows ++ [row7']
+    let noKings = mapB' (\sq -> if isKing sq then Empty else sq) board
     
     castle <- oneIn 4
     afterCastle <- case castle of
@@ -101,6 +111,11 @@ arbitraryBoard = do
     whiteKing <- ensureKing White blackKing
 
     return $ checkedBoard whiteKing
+
+replaceWithEmptyIf :: (Square -> Bool) -> Square -> Square
+replaceWithEmptyIf pred sq
+    | pred sq   = Empty
+    | otherwise = sq
 
 ensureKing :: Color -> Board -> Gen Board
 ensureKing color board = do
@@ -166,7 +181,6 @@ setB pos sq b = checkedBoard newBoard
     where
         newBoard = setB' pos sq b
 
--- Same as setB, but no consisteny check
 setB' :: Pos -> Square -> Board -> Board
 setB' (Pos rowIdx colIdx) sq (Board oldBoard) = Board $ newBoard
     where
@@ -178,12 +192,19 @@ checkedBoard :: Board -> Board
 checkedBoard b = assert (checkBoard b) b
 
 checkBoard :: Board -> Bool
-checkBoard b = checkNumKings b
+checkBoard b = and [checkFun b | checkFun <- checkFuns]
+    where
+        checkFuns = [checkNumKings, checkPawnPositions]
 
 checkNumKings :: Board -> Bool
 checkNumKings b = numBlack <= 1 && numWhite <= 1
     where
         (numBlack,numWhite) = numKings b
+
+checkPawnPositions :: Board -> Bool
+checkPawnPositions b = not $ any isPawn [getB p b | p <- ps]
+    where
+        ps = [Pos row col | row <- [0,7], col <- [0..7]]
 
 replaceAt :: Int -> a -> [a] -> [a]
 replaceAt i x xs = prefix ++ [x] ++ suffix
@@ -197,7 +218,10 @@ concatB :: Board -> [Square]
 concatB (Board rows) = concat rows
 
 mapB :: (Square -> Square) -> Board -> Board
-mapB f (Board rows) = checkedBoard $ Board $ map (\row -> map f row) rows
+mapB f b = checkedBoard $ mapB' f b
+
+mapB' :: (Square -> Square) -> Board -> Board
+mapB' f (Board rows) = Board $ map (\row -> map f row) rows
 
 anyB :: (Square -> Bool) -> Board -> Bool
 anyB f = foldB (\acc square -> acc || f square) False
