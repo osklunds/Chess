@@ -209,8 +209,8 @@ applyPromote p kind b = assert condition setB p newAtP b
         condition = pawnAtP && notToPawnOrKing && pAtTopOrBottom
         pawnAtP = isPawn atP
         notToPawnOrKing = kind /= Pawn && kind /= King
-        pAtTopOrBottom = row == 0 && color atP == White ||
-                         row == 7 && color atP == Black
+        pAtTopOrBottom = row == 1 && color atP == White ||
+                         row == 6 && color atP == Black
         (Pos row _col) = p
 
 applyCastle :: Color -> Side -> Board -> Board

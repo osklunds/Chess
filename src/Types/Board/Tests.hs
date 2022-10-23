@@ -69,13 +69,13 @@ prop_applyPromote p color kind b = condition ==> result
     where
         (Pos row col) = p
         row' = if row <= 3
-                then 0
-                else 7
+                then 1
+                else 6
         p' = (Pos row' col)
 
         condition = atTopOrBottom && notToPawnOrKing
-        atTopOrBottom = row' == 0 && color == White ||
-                        row' == 7 && color == Black
+        atTopOrBottom = row' == 1 && color == White ||
+                        row' == 6 && color == Black
         notToPawnOrKing = kind /= Pawn && kind /= King
 
         b' = setB p' (Piece color Pawn) b
