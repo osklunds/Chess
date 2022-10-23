@@ -55,12 +55,6 @@ prop_fixedBoard1 = verifyMoves moves Black board
             -- Pawn at (0,0)
             (movesFrom (0,0) [(1,0)]) ++
 
-            -- Pawn at (6,5)
-            (movesFrom (6,5) [(7,6)]) ++
-
-            -- Pawn at (6,7)
-            (movesFrom (6,7) [(7,6)]) ++
-
             -- Pawn at (4,5)
             (movesFrom (4,5) [(5,5), (5,6)]) ++
 
@@ -101,6 +95,28 @@ prop_fixedBoard2 = verifyMoves moves White board
 
             -- Pawn at (6,3)
             (movesFrom (6,3) [(5,3), (4,3), (5,4)])
+
+prop_fixedBoardNoPawnMoveToTop :: Property
+prop_fixedBoardNoPawnMoveToTop = verifyMoves moves White board
+  where
+    board = read  "  0 1 2 3 4 5 6 7  \n\
+                  \0           ♞     0\n\
+                  \1         ♙     ♙ 1\n\
+                  \2   ♙             2\n\
+                  \3                 3\n\
+                  \4                 4\n\
+                  \5   ♔         ♚   5\n\
+                  \6                 6\n\
+                  \7                 7\n\
+                  \  0 1 2 3 4 5 6 7"
+    moves = -- King at (5,1)
+            (movesFrom (5,1) [(4,0), (4,1), (4,2), (5,2), (6,2), (6,1),
+                              (6,0), (5,0)]) ++
+
+            -- Pawn at (2,1)
+            (movesFrom (2,1) [(1,1)])
+
+            -- Note: No moves for pawn at (1,4)
 
 verifyMoves :: [((Int,Int),(Int,Int))] -> Color -> Board -> Property
 verifyMoves = MTL.verifyMoves movesF'
@@ -303,7 +319,7 @@ movesIfCan getDir kind maxLength board start dir length =
 --------------------------------------------------------------------------------
 
 prop_pawnSingleForward :: Board -> (Int,Int) -> Property
-prop_pawnSingleForward board pos = isWithinBoard dest ==>
+prop_pawnSingleForward board pos = isWithinPawnArea dest ==>
                                    (move `elem` moves) ==
                                    isEmpty atDest
   where
@@ -327,7 +343,7 @@ prop_pawnDoubleForward board pos = isWithinBoard dest ==>
     move                   = (start,dest)
 
 prop_pawnMovesRight :: Board -> (Int,Int) -> Property
-prop_pawnMovesRight board pos = isWithinBoard dest ==>
+prop_pawnMovesRight board pos = isWithinPawnArea dest ==>
                                 (move `elem` moves) ==
                                 isOtherColor Black atDest
   where
@@ -337,7 +353,7 @@ prop_pawnMovesRight board pos = isWithinBoard dest ==>
     move                   = (start,dest)
 
 prop_pawnMovesLeft :: Board -> (Int,Int) -> Property
-prop_pawnMovesLeft board pos = isWithinBoard dest ==>
+prop_pawnMovesLeft board pos = isWithinPawnArea dest ==>
                                (move `elem` moves) ==
                                isOtherColor Black atDest
   where

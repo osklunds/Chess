@@ -6,6 +6,7 @@ module Moves.Naive.NormalMoves.Lib
 , tupleSignum
 , tupleMaxAbs
 , isWithinBoard
+, isWithinPawnArea
 , getB
 , setB
 , toPos
@@ -32,6 +33,9 @@ tupleMaxAbs (a,b) = max (abs a) (abs b)
 
 isWithinBoard :: (Int,Int) -> Bool
 isWithinBoard (row,col) = 0 <= row && row < 8 && 0 <= col && col < 8
+
+isWithinPawnArea :: (Int,Int) -> Bool
+isWithinPawnArea pos@(row,_col) = isWithinBoard pos && row /= 0 && row /= 7
 
 getB :: (Int,Int) -> Board -> Square
 getB = T.getB . toPos

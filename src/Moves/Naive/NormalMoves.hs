@@ -129,11 +129,10 @@ pawnMoves start board = [(start,dest) | dest <- dests]
     atForward       = getB forward board
     atDoubleForward = getB doubleForward board
 
-    dests = [left    | isWithinBoard left    && isOtherColor color atLeft] ++
-            [right   | isWithinBoard right   && isOtherColor color atRight] ++
-            [forward | isWithinBoard forward && isEmpty atForward] ++
-            [doubleForward | isWithinBoard doubleForward &&
+    dests = [left    | isWithinPawnArea left    && isOtherColor color atLeft] ++
+            [right   | isWithinPawnArea right   && isOtherColor color atRight] ++
+            [forward | isWithinPawnArea forward && isEmpty atForward] ++
+            [doubleForward | isWithinPawnArea doubleForward &&
                              isEmpty atDoubleForward &&
                              isEmpty atForward &&
                              isAtInitial]
-
