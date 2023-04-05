@@ -64,7 +64,9 @@ evalState color (State {board, numberOfMoves, turn}) =
 -- M1,M2 is better than M2,M1, where M1 is promote, and M2 is a dummy move
 -- In the end, the order doesn't matter if just evaluating score and num moves
 -- to reach there, but if they are equal, it should be better to get a higher
--- score earlier in the game.
+-- score earlier in the game. Or is it the second to last that should be
+-- compared? A separate unit test (not necesarily about chess) to test this
+-- might be needed.
 
 -- The solution could be that store board score for each level/depth. The
 -- score at the deepest depth is what is prio, but if that is equal,
