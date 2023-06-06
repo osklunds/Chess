@@ -32,25 +32,25 @@ prop_getMiddle = getB (Pos 4 4) defaultBoard == Empty
 -- set
 --------------------------------------------------------------------------------
 
-prop_setNonKingNonPawn :: Square -> Pos -> Board -> Property
-prop_setNonKingNonPawn sq pos board = condition ==> setSquare sq pos board
+prop_setNonKingNonPawn :: Pos -> Square -> Board -> Property
+prop_setNonKingNonPawn pos sq board = condition ==> setSquare pos sq board
     where
         condition = not (isKing sq) && not (isPawn sq)
 
 prop_setKing :: Color -> Pos -> Board -> Bool
-prop_setKing col pos board = setSquare sq pos noKingsBoard
+prop_setKing col pos board = setSquare pos sq noKingsBoard
     where
         sq = Piece col King
         noKingsBoard = mapB (\sq -> if isKing sq then Empty else sq) board
 
 prop_setPawn :: Color -> Pos -> Board -> Property
-prop_setPawn col pos@(Pos row _col) board = condition ==> setSquare sq pos board
+prop_setPawn col pos@(Pos row _col) board = condition ==> setSquare pos sq board
     where
         sq = Piece col Pawn
         condition = row /= 0 && row /= 7
 
-setSquare :: Square -> Pos -> Board -> Bool
-setSquare sq pos board = newIsChanged && othersAreUnchanged
+setSquare :: Pos -> Square -> Board -> Bool
+setSquare pos sq board = newIsChanged && othersAreUnchanged
     where
         newBoard = setB pos sq board
         newIsChanged = getB pos newBoard == sq
