@@ -26,14 +26,14 @@ prop_fixedBoard1 :: Property
 prop_fixedBoard1 = verifyMoves expMoves Black board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
-                  \0 ♟             ♝ 0\n\
-                  \1   ♞           ♝ 1\n\
+                  \0               ♝ 0\n\
+                  \1 ♟ ♞           ♝ 1\n\
                   \2   ♔     ♝       2\n\
                   \3     ♜   ♙     ♙ 3\n\
                   \4     ♛   ♖ ♟ ♗ ♚ 4\n\
                   \5     ♖         ♜ 5\n\
-                  \6       ♘ ♞ ♟ ♝ ♟ 6\n\
-                  \7   ♟   ♜   ♞ ♖ ♝ 7\n\
+                  \6 ♟     ♘ ♞ ♟ ♝ ♟ 6\n\
+                  \7   ♞   ♜   ♞ ♖ ♝ 7\n\
                   \  0 1 2 3 4 5 6 7"
     expMoves = -- King at (4 7)
                (normalMovesFrom (Pos 4 7) [(Pos 3 6), (Pos 4 6)]) ++
@@ -63,14 +63,14 @@ prop_fixedBoard1 = verifyMoves expMoves Black board
                -- Bishop at (6 6)
                (normalMovesFrom (Pos 6 6) [(Pos 5 5), (Pos 4 4)]) ++
 
-               -- Pawn at (0 0)
-               (normalMovesFrom (Pos 0 0) [(Pos 1 0)]) ++
+               -- Pawn at (1 0)
+               (normalMovesFrom (Pos 1 0) [(Pos 2 0), (Pos 3 0)]) ++
 
                -- Pawn at (6 5)
                (normalMovesFrom (Pos 6 5) [(Pos 7 6)]) ++
 
                -- Pawn at (6 7)
-               (normalMovesFrom (Pos 6 7) [(Pos 7 6)]) ++
+               promotesAt (Pos 6 7) ++
 
                -- Pawn at (4 5)
                (normalMovesFrom (Pos 4 5) [(Pos 5 5)]) ++
@@ -98,10 +98,7 @@ prop_fixedBoard1 = verifyMoves expMoves Black board
                -- Knight at (6 4)
                (normalMovesFrom (Pos 6 4) [(Pos 4 3), (Pos 5 6), (Pos 7 6),
                                            (Pos 7 2), (Pos 5 2)
-                                          ]) ++
-
-               -- Pawn at (7 1)
-               promotesAt (Pos 7 1)
+                                          ])
 
 prop_fixedBoardAllKindsPreventMove :: Property
 prop_fixedBoardAllKindsPreventMove = verifyMoves moves White board
