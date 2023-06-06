@@ -14,6 +14,9 @@ import qualified Moves.Naive.TestLib as MTL
 import Moves.Common
 import Lib
 
+-- New strategy: Put most tests here. Use lots of hard coded boards, also for
+-- "simple" sitations".
+
 
 --------------------------------------------------------------------------------
 -- General
