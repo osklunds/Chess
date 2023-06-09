@@ -41,7 +41,7 @@ prop_fixedBoard1 = verifyMoves expMoves Black board
 
                -- Queen at (4 2)
                (normalMovesFrom (Pos 4 2) [(Pos 4 3), (Pos 4 4), (Pos 5 2),
-                                           (Pos 5 1), (Pos 6 0), (Pos 4 1),
+                                           (Pos 5 1), (Pos 4 1),
                                            (Pos 4 0), (Pos 3 1), (Pos 2 0),
                                            (Pos 3 3), (Pos 5 3)
                                           ]) ++
@@ -64,13 +64,19 @@ prop_fixedBoard1 = verifyMoves expMoves Black board
                (normalMovesFrom (Pos 6 6) [(Pos 5 5), (Pos 4 4)]) ++
 
                -- Pawn at (1 0)
-               (normalMovesFrom (Pos 1 0) [(Pos 2 0), (Pos 3 0)]) ++
+               (normalMovesFrom (Pos 1 0) [(Pos 2 0), (Pos 3 0), (Pos 2 1)]) ++
 
                -- Pawn at (6 5)
-               (normalMovesFrom (Pos 6 5) [(Pos 7 6)]) ++
+               -- TODO
 
                -- Pawn at (6 7)
-               promotes (Pos 6 7) (Pos 7 7) ++
+               promotes (Pos 6 7) (Pos 7 6) ++
+
+               -- Pawn at (6 5)
+               promotes (Pos 6 5) (Pos 7 6) ++
+
+               -- Pawn at (6 0)
+               promotes (Pos 6 0) (Pos 7 0) ++
 
                -- Pawn at (4 5)
                (normalMovesFrom (Pos 4 5) [(Pos 5 5)]) ++
@@ -91,6 +97,9 @@ prop_fixedBoard1 = verifyMoves expMoves Black board
 
                -- Knight at (1 1)
                (normalMovesFrom (Pos 1 1) [(Pos 0 3), (Pos 2 3), (Pos 3 0)]) ++
+
+               -- Knight at (7 1)
+               (normalMovesFrom (Pos 7 1) [(Pos 5 0), (Pos 5 2), (Pos 6 3)]) ++
 
                -- Knight at (7 5)
                (normalMovesFrom (Pos 7 5) [(Pos 5 6), (Pos 5 4), (Pos 6 3)]) ++

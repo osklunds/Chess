@@ -9,6 +9,7 @@ where
 import Types as T
 import Moves.Common
 import Moves.Naive.NormalMoves.Lib hiding (getB)
+import Debug.Trace
 
 movesF :: MovesFun
 movesF = concatApply [normalMoves, promotes, castlings]
@@ -37,7 +38,7 @@ movesFromPos pos color board
                  (Piece _ Rook)   -> rookMoves
                  (Piece _ Bishop) -> bishopMoves
                  (Piece _ Knight) -> knightMoves
-                 (Piece _ Pawn)   -> pawnMoves
+                 (Piece _ Pawn)   -> pawnMoves isWithinPawnArea
 
 kingMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
 kingMoves pos board = filter isOneStep $ queenMoves pos board
@@ -111,8 +112,8 @@ knightDiffs = [(2,1),  -- L
                (1,2),
                (-1,2)]
 
-pawnMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
-pawnMoves start board = [(start,dest) | dest <- dests]
+pawnMoves :: ((Int,Int) -> Bool) -> (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
+pawnMoves isValidDst start board = [(start,dest) | dest <- dests]
   where
     color       = T.color $ getBTemp start board
     forwardDir  = case color of
@@ -133,21 +134,26 @@ pawnMoves start board = [(start,dest) | dest <- dests]
     atForward       = getBTemp forward board
     atDoubleForward = getBTemp doubleForward board
 
-    dests = [left    | isWithinPawnArea left    && isOtherColor color atLeft] ++
-            [right   | isWithinPawnArea right   && isOtherColor color atRight] ++
-            [forward | isWithinPawnArea forward && isEmpty atForward] ++
-            [doubleForward | isWithinPawnArea doubleForward &&
+    dests = [left    | isValidDst left    && isOtherColor color atLeft] ++
+            [right   | isValidDst right   && isOtherColor color atRight] ++
+            [forward | isValidDst forward && isEmpty atForward] ++
+            [doubleForward | isValidDst doubleForward &&
                              isEmpty atDoubleForward &&
                              isEmpty atForward &&
                              isAtInitial]
 
 promotes :: MovesFun
-promotes c b = [Promote p p kind | p <- positionsWithPawn, kind <- [Rook, Bishop, Knight, Queen]]
+promotes c b = [Promote (toPos src) (toPos dst) kind | (src,dst) <- normals, kind <- [Rook, Bishop, Knight, Queen]]
     where
     -- TODO: Re-use from normal moves
         row = if c == White then 1 else 6
         positions = [Pos row col | col <- [0..7]]
         positionsWithPawn = [p | p <- positions, let atP = getB p b, isPawn atP, isColor c atP]
+        normals = concat [pawnMoves isWithinBoard (posToTuple src) b | src <- positionsWithPawn]
+
+-- TODO: Remove
+posToTuple :: Pos -> (Int,Int)
+posToTuple (Pos row col) = (row, col)
 
 
 castlings :: MovesFun
