@@ -37,7 +37,7 @@ prop_fixedBoard1 = verifyMoves expMoves Black board
                   \  0 1 2 3 4 5 6 7"
     expMoves = -- King at (4 7)
                (normalMovesFrom (Pos 4 7) [(Pos 3 6), (Pos 4 6)]) ++
-               -- Note that (Pos 3 7) and (Pos 5 6) are missing as destinations
+               -- Note that (Pos 3 7) and (Pos 6 4) are missing as destinations
 
                -- Queen at (4 2)
                (normalMovesFrom (Pos 4 2) [(Pos 4 3), (Pos 4 4), (Pos 5 2),
