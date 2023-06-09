@@ -189,6 +189,7 @@ setB' (Pos rowIdx colIdx) sq (Board oldBoard) = Board $ newBoard
         newBoard = replaceAt rowIdx newRow oldBoard
 
 checkedBoard :: Board -> Board
+-- TODO: foldAssert etc?
 checkedBoard board = assertSize $
                      assertNumKings $
                      assertPawnPositions board
