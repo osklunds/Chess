@@ -128,8 +128,8 @@ prop_fixedBoardMovesAwayIfIsChecked :: Property
 prop_fixedBoardMovesAwayIfIsChecked = verifyMoves moves White board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
-                  \0       ♙         0\n\
-                  \1 ♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟ 1\n\
+                  \0                 0\n\
+                  \1 ♟ ♟ ♟ ♙ ♟ ♟ ♟ ♟ 1\n\
                   \2                 2\n\
                   \3                 3\n\
                   \4                 4\n\
