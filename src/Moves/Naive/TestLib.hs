@@ -60,12 +60,9 @@ mirrorBoard board = foldl mirrorBoardAtPos
                           [Pos row col | row <- [0..3], col <- [0..7]]
 
 mirrorBoardAtPos :: Board -> Pos -> Board
-mirrorBoardAtPos board pos = setB pos atMirroredPos $
-                             setB mirroredPos atPos $ board
+mirrorBoardAtPos board pos = swapPiecesAtPositions board pos mirroredPos
     where
         mirroredPos   = mirrorPos pos
-        atPos         = getB pos board
-        atMirroredPos = getB mirroredPos board
 
 mirrorPos :: Pos -> Pos
 mirrorPos (Pos row col) = Pos (7 - row) col

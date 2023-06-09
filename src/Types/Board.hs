@@ -21,6 +21,7 @@ module Types.Board
 , sampleBoard
 , homeRow
 , numKings
+, swapPiecesAtPositions
 )
 where
 
@@ -304,3 +305,10 @@ numKings b = foldB f (0,0) b
                     (Piece Black King) -> (numBlack + 1, numWhite)
                     (Piece White King) -> (numBlack, numWhite + 1)
                     _pos               -> (numBlack, numWhite)
+
+swapPiecesAtPositions :: Board -> Pos -> Pos -> Board
+swapPiecesAtPositions board pos1 pos2 = checkedBoard newBoard
+    where
+        atPos1 = getB pos1 board
+        atPos2 = getB pos2 board
+        newBoard = setB' pos1 atPos2 $ setB' pos2 atPos1 board
