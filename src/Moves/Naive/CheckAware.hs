@@ -39,7 +39,7 @@ attackedPositions color board = dests
 
 moveToCapturedPoss :: Move -> [Pos]
 moveToCapturedPoss (NormalMove _src dst) = [dst]
-moveToCapturedPoss (Promote pos _kind) = [pos]
+moveToCapturedPoss (Promote _src dst _kind) = [dst]
 moveToCapturedPoss (Castle _color _side) = []
 
 castleToKingPoss :: Color -> Side -> [Pos]

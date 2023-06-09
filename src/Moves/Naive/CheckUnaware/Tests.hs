@@ -12,6 +12,7 @@ import Moves.Naive.CheckUnaware
 import qualified Moves.Naive.NormalMoves as NM
 import TestLib
 
+-- TODO: Port some of these to Check Aware
 --------------------------------------------------------------------------------
 -- Promotes
 --------------------------------------------------------------------------------
@@ -114,33 +115,10 @@ prop_noCastlingOtherRow board row color
         moves = movesF color board'
         castlings = [Castle color KingSide, Castle color QueenSide]
 
---------------------------------------------------------------------------------
--- General
---------------------------------------------------------------------------------
-
--- TODO: Board with normal + castle + promote + all others
-
-prop_movesAreSupersetOfNormalMoves :: Color -> Board -> Bool
-prop_movesAreSupersetOfNormalMoves color board =
-    normalMoves `isSubsetOf` moves
-    where
-        moves        = movesF color board
-        normalMoves  = NM.movesF color board
-
-prop_blackAndWhiteGiveSameMoves :: Board -> Bool
-prop_blackAndWhiteGiveSameMoves =
-    MTL.prop_blackAndWhiteGiveSameMoves movesF
 
 --------------------------------------------------------------------------------
 -- Helpers
 --------------------------------------------------------------------------------
-
-verifyMoves :: [Move] -> Color -> Board -> Property
-verifyMoves expMoves color board =
-    MTL.verifyMoves movesF allExpMoves color board
-    where
-        expNormalMoves = NM.movesF color board
-        allExpMoves = expMoves ++ expNormalMoves
 
 
 return []

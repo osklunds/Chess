@@ -159,6 +159,7 @@ movesAreSubsetOfMoves kind1 kind2 board pos = movesKind1 `isSubsetOf`
 -- All pieces (-)
 --------------------------------------------------------------------------------
 
+-- TODO: Port some of these tests to check aware
 prop_noNonMoves :: Board -> Bool
 prop_noNonMoves board = all isMove $ movesF' Black board
   where

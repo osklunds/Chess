@@ -9,7 +9,6 @@ import Test.QuickCheck
 import Types
 import Moves.Naive.CheckAware
 import qualified Moves.Naive.CheckUnaware as CU
-import qualified Moves.Naive.NormalMoves as NM
 import qualified Moves.Naive.TestLib as MTL
 import Moves.Common
 import Lib
@@ -71,7 +70,7 @@ prop_fixedBoard1 = verifyMoves expMoves Black board
                (normalMovesFrom (Pos 6 5) [(Pos 7 6)]) ++
 
                -- Pawn at (6 7)
-               promotesAt (Pos 6 7) ++
+               promotes (Pos 6 7) (Pos 7 7) ++
 
                -- Pawn at (4 5)
                (normalMovesFrom (Pos 4 5) [(Pos 5 5)]) ++
@@ -252,8 +251,8 @@ verifyCastlingMoves = MTL.verifyMoves movesF'
 normalMovesFrom :: Pos -> [Pos] -> [Move]
 normalMovesFrom src dsts = map (NormalMove src) dsts
 
-promotesAt :: Pos -> [Move]
-promotesAt p = [Promote p k | k <- [Rook, Bishop, Knight, Queen]]
+promotes :: Pos -> Pos -> [Move]
+promotes src dst = [Promote src dst k | k <- [Rook, Bishop, Knight, Queen]]
 
 
 return []
