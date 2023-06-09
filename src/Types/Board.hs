@@ -189,23 +189,20 @@ setB' (Pos rowIdx colIdx) sq (Board oldBoard) = Board $ newBoard
         newBoard = replaceAt rowIdx newRow oldBoard
 
 checkedBoard :: Board -> Board
-checkedBoard b = assert (checkBoard b) b
+checkedBoard board = assertSize $
+                     assertNumKings $
+                     assertPawnPositions board
 
-checkBoard :: Board -> Bool
-checkBoard b = and [checkFun b | checkFun <- checkFuns]
+assertSize :: Board -> Board
+assertSize board@(Board rows) = assert (length rows == 8 && all ((==8) . length) rows) board
+
+assertNumKings :: Board -> Board
+assertNumKings board = assert (numBlack <= 1 && numWhite <= 1) board
     where
-        checkFuns = [checkSize, checkNumKings, checkPawnPositions]
+        (numBlack,numWhite) = numKings board
 
-checkSize :: Board -> Bool
-checkSize (Board rows) = length rows == 8 && all ((==8) . length) rows
-
-checkNumKings :: Board -> Bool
-checkNumKings b = numBlack <= 1 && numWhite <= 1
-    where
-        (numBlack,numWhite) = numKings b
-
-checkPawnPositions :: Board -> Bool
-checkPawnPositions b = not $ any isPawn [getB p b | p <- ps]
+assertPawnPositions :: Board -> Board
+assertPawnPositions board = assert (not $ any isPawn [getB p board | p <- ps]) board
     where
         ps = [Pos row col | row <- [0,7], col <- [0..7]]
 
