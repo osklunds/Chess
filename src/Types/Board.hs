@@ -237,9 +237,9 @@ applyMove :: Move -> Board -> Board
 applyMove move board = checkedBoard newBoard
     where
         newBoard = case move of
-                    (NormalMove src dst) -> applyNormalMove src dst board
-                    (Promote p kind)     -> applyPromote p kind board
-                    (Castle color side)  -> applyCastle color side board
+                    (NormalMove src dst)   -> applyNormalMove src dst board
+                    (Promote src dst kind) -> applyPromote src dst kind board
+                    (Castle color side)    -> applyCastle color side board
 
 applyNormalMove :: Pos -> Pos -> Board -> Board
 applyNormalMove src dst b = assert (not $ isEmpty atSrc)
@@ -247,19 +247,21 @@ applyNormalMove src dst b = assert (not $ isEmpty atSrc)
     where
         atSrc = getB src b
 
-applyPromote :: Pos -> Kind -> Board -> Board
-applyPromote p kind b = assert condition setB' p newAtP b
+applyPromote :: Pos -> Pos -> Kind -> Board -> Board
+applyPromote src dst kind board = assert condition newBoard
     where
-        -- TODO: assert row+color, kind
-        atP    = getB p b
-        newAtP = Piece (color atP) kind
-
-        condition = pawnAtP && notToPawnOrKing && pAtTopOrBottom
-        pawnAtP = isPawn atP
+        condition = isPawnAtSrc && notToPawnOrKing && srcIsAtTopOrBottom
+        isPawnAtSrc = isPawn atSrc
+        atSrc = getB src board
         notToPawnOrKing = kind /= Pawn && kind /= King
-        pAtTopOrBottom = row == 1 && color atP == White ||
-                         row == 6 && color atP == Black
-        (Pos row _col) = p
+        colorAtSrc = color atSrc
+        srcIsAtTopOrBottom = row == 1 && colorAtSrc == White ||
+                             row == 6 && colorAtSrc == Black
+        (Pos row _col) = src
+
+        boardNoAtSrc = setB src Empty board
+        newPiece = Piece colorAtSrc kind
+        newBoard = setB dst newPiece boardNoAtSrc
 
 applyCastle :: Color -> Side -> Board -> Board
 applyCastle color side board = board'

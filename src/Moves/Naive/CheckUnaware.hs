@@ -21,11 +21,13 @@ normalMoves :: MovesFun
 normalMoves = NM.movesF
 
 promotes :: MovesFun
-promotes c b = [Promote p k | p <- withPawn, k <- [Rook, Bishop, Knight, Queen]]
+promotes c b = [Promote p p kind | p <- positionsWithPawn, kind <- [Rook, Bishop, Knight, Queen]]
     where
-        r = if c == White then 0 else 7
-        ps = [Pos r c | c <- [0..7]]
-        withPawn = [p | p <- ps, let atP = getB p b, isPawn atP, isColor c atP]
+    -- TODO: Re-use from normal moves
+        row = if c == White then 1 else 6
+        positions = [Pos row col | col <- [0..7]]
+        positionsWithPawn = [p | p <- positions, let atP = getB p b, isPawn atP, isColor c atP]
+
 
 castlings :: MovesFun
 castlings = concatApply [kingSideCastle, queenSideCastle]
