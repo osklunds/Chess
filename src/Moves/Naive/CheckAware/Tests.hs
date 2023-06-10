@@ -66,9 +66,6 @@ prop_board1 = verifyMoves expMoves Black board
                -- Pawn at (1 0)
                (normalMovesFrom (Pos 1 0) [(Pos 2 0), (Pos 3 0), (Pos 2 1)]) ++
 
-               -- Pawn at (6 5)
-               -- TODO
-
                -- Pawn at (6 7)
                promotesFrom (Pos 6 7) (Pos 7 6) ++
 
