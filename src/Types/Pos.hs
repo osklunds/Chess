@@ -1,6 +1,8 @@
 
 module Types.Pos
 ( Pos(..)
+, rowOf
+, isWithinBoard
 )
 where
 
@@ -15,3 +17,10 @@ instance Arbitrary Pos where
         row <- elements [0..7]
         col <- elements [0..7]
         return $ Pos row col
+
+rowOf :: Pos -> Int
+rowOf (Pos row _col) = row
+
+isWithinBoard :: Pos -> Bool
+isWithinBoard (Pos row col) = 0 <= row && row < 8 && 0 <= col && col < 8
+

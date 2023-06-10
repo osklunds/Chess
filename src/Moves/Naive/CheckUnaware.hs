@@ -11,149 +11,172 @@ import Moves.Common
 import Debug.Trace
 
 movesF :: MovesFun
-movesF = concatApply [normalMoves, promotes, castlings]
+movesF = concatApply [normalAndPromotes, castlings]
 
 concatApply :: [MovesFun] -> MovesFun
 concatApply movesFuns color board = concat [movesFun color board | movesFun <- movesFuns]
 
-normalMoves :: MovesFun
-normalMoves c b = map f $  movesF' c b
-    where
-        f ((rowS,colS),(rowD,colD)) = NormalMove (Pos rowS colS) (Pos rowD colD)
+normalAndPromotes :: MovesFun
+normalAndPromotes color board = concat [movesFromPos (Pos row col) color board |
+                                  row <- [0..7], col <- [0..7]]
 
-movesF' :: Color -> Board -> [((Int,Int),(Int,Int))]
-movesF' color board = concat [movesFromPos (row,col) color board |
-                              row <- [0..7], col <- [0..7]]
-
-movesFromPos :: (Int,Int) -> Color -> Board -> [((Int,Int),(Int,Int))]
+movesFromPos :: Pos -> Color -> Board -> [Move]
 movesFromPos pos color board
-  | isColor color atPos = movesFun pos board
-  | otherwise           = []
-  where
-    atPos = getBTemp pos board
-    movesFun = case atPos of
-                 (Piece _ King )  -> kingMoves
-                 (Piece _ Queen)  -> queenMoves
-                 (Piece _ Rook)   -> rookMoves
-                 (Piece _ Bishop) -> bishopMoves
-                 (Piece _ Knight) -> knightMoves
-                 (Piece _ Pawn)   -> pawnMoves isWithinPawnArea
+    | isColor color atPos = movesFun pos board
+    | otherwise           = []
+    where
+        atPos = getB pos board
+        movesFun = case atPos of
+                     (Piece _ King )  -> kingMoves
+                     (Piece _ Queen)  -> queenMoves
+                     (Piece _ Rook)   -> rookMoves
+                     (Piece _ Bishop) -> bishopMoves
+                     (Piece _ Knight) -> knightMoves
+                     (Piece _ Pawn)   -> pawnMoves
 
-kingMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
+kingMoves :: Pos -> Board -> [Move]
 kingMoves pos board = filter isOneStep $ queenMoves pos board
   where
-    isOneStep (start,dest) = tupleMaxAbs (dest `tupleSub` start) <= 1
+    isOneStep (NormalMove src dst) = diffMaxAbs (dst `posDiff` src) <= 1
 
-queenMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
+data Diff = Diff Int Int
+          deriving (Eq, Show, Ord)
+
+posDiff :: Pos -> Pos -> Diff
+posDiff (Pos srcRow srcCol) (Pos dstRow dstCol) =
+    Diff (srcRow - dstRow) (srcCol - dstCol)
+
+diffMaxAbs :: Diff -> Int
+diffMaxAbs (Diff row col) = max (abs row) (abs col)
+
+queenMoves :: Pos -> Board -> [Move]
 queenMoves = movesFromDirs queenDirs
 
-rookMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
+rookMoves :: Pos -> Board -> [Move]
 rookMoves = movesFromDirs rookDirs
 
-bishopMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
+bishopMoves :: Pos -> Board -> [Move]
 bishopMoves = movesFromDirs bishopDirs
 
-movesFromDirs :: [(Int,Int)] -> (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
-movesFromDirs dirs start board = concatMap movesFun dirs
-  where
-    atPos         = getBTemp start board
-    color         = colorOf atPos
-    movesFun diff = movesFromColorAndDiff color diff start board
+movesFromDirs :: [Diff] -> Pos -> Board -> [Move]
+movesFromDirs dirs src board = concatMap movesFun dirs
+    where
+        atSrc = getB src board
+        color = colorOf atSrc
+        movesAsTuplesFun diff = movesFromColorAndDiff color diff src board
+        movesFun = map (\(src,dst) -> NormalMove src dst) . movesAsTuplesFun
 
-movesFromColorAndDiff :: Color ->
-                         (Int,Int) ->
-                         (Int,Int) ->
-                         Board ->
-                         [((Int,Int),(Int,Int))]
-movesFromColorAndDiff color diff start board
-  | not (isWithinBoard dest)  = []
-  | isEmpty atDest            = (thisMove:remainingMoves)
-  | isOtherColor color atDest = [thisMove]
-  | otherwise                 = []
-  where
-    dest           = start `tupleAdd` diff
-    atDest         = getBTemp dest board
-    thisMove       = (start,dest)
-    remainingMoves = movesFromColorAndDiff color nextDiff start board
-    nextDiff       = diff `tupleAdd` tupleSignum diff
+movesFromColorAndDiff :: Color -> Diff -> Pos -> Board -> [(Pos,Pos)]
+movesFromColorAndDiff color diff src board
+    -- The diff points outside the board. Not a valid move, and no point in
+    -- seraching for more moves in this direction.
+    | not (isWithinBoard dst) = []
 
-queenDirs :: [(Int,Int)]
+    -- The diff points at an empty square. We can move there, and there are
+    -- more potential moves, so let's continue searching.
+    | isEmpty atDst = (thisMove:remainingMoves)
+
+    -- The diff points at a square with a piece of the other color. We can move
+    -- there to capture it. But we can't jump over it, so stop seraching for
+    -- more moves in this direction.
+    | isOtherColor color atDst = [thisMove]
+
+    -- The diff points at a square with a piece of the same color. We can't
+    -- move there. And we can't jump over it either, so stop seraching for more
+    -- moves in this direction.
+    | isColor color atDst = []
+    where
+        dst = src `posPlusDiff` diff
+        atDst = getB dst board
+        thisMove = (src,dst)
+        nextDiff  = expandDiffByOne diff
+        remainingMoves = movesFromColorAndDiff color nextDiff src board
+
+posPlusDiff :: Pos -> Diff -> Pos
+posPlusDiff (Pos row col) (Diff rowDiff colDiff) = Pos (row + rowDiff) (col + colDiff)
+
+expandDiffByOne :: Diff -> Diff
+expandDiffByOne (Diff rowDiff colDiff) = Diff (rowDiff + signum rowDiff) (colDiff + signum colDiff)
+
+queenDirs :: [Diff]
 queenDirs = rookDirs ++ bishopDirs
 
-rookDirs :: [(Int,Int)]
-rookDirs = [(1,0),  -- Down
-            (0,-1), -- Left
-            (-1,0), -- Up
-            (0,1)]  -- Right
-
-bishopDirs :: [(Int,Int)]
-bishopDirs = [(1,1),   -- Down-right
-              (1,-1),  -- Down-left
-              (-1,-1), -- Up-left
-              (-1,1)]  -- Up-right
-
-knightMoves :: (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
-knightMoves start board = filter hasValidDest moves
-  where
-    (Piece color Knight) = getBTemp start board
-    moves                = map (\diff -> (start, start `tupleAdd` diff))
-                               knightDiffs
-    hasValidDest (_start,dest) = let atDest = getBTemp dest board
-                                 in  isWithinBoard dest &&
-                                     not (isColor color atDest)
-
-knightDiffs = [(2,1),  -- L
-               (2,-1),
-               (1,-2),
-               (-1,-2),
-               (-2,-1),
-               (-2,1),
-               (1,2),
-               (-1,2)]
-
-pawnMoves :: ((Int,Int) -> Bool) -> (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
-pawnMoves isValidDst start board = [(start,dest) | dest <- dests]
-  where
-    color       = colorOf $ getBTemp start board
-    forwardDir  = case color of
-                    Black -> 1
-                    White -> (-1)
-    (row,_col)  = start
-    isAtInitial = case color of
-                    Black -> row == 1
-                    White -> row == 6
-
-    left          = start `tupleAdd` (forwardDir, -1)
-    right         = start `tupleAdd` (forwardDir,  1)
-    forward       = start `tupleAdd` (forwardDir,  0)
-    doubleForward = start `tupleAdd` (forwardDir*2,0)
-
-    atLeft          = getBTemp left  board
-    atRight         = getBTemp right board
-    atForward       = getBTemp forward board
-    atDoubleForward = getBTemp doubleForward board
-
-    dests = [left    | isValidDst left    && isOtherColor color atLeft] ++
-            [right   | isValidDst right   && isOtherColor color atRight] ++
-            [forward | isValidDst forward && isEmpty atForward] ++
-            [doubleForward | isValidDst doubleForward &&
-                             isEmpty atDoubleForward &&
-                             isEmpty atForward &&
-                             isAtInitial]
-
-promotes :: MovesFun
-promotes c b = [Promote (toPos src) (toPos dst) kind | (src,dst) <- normals, kind <- [Rook, Bishop, Knight, Queen]]
+rookDirs :: [Diff]
+rookDirs = [down, left, up, right]
     where
-    -- TODO: Re-use from normal moves
-        row = if c == White then 1 else 6
-        positions = [Pos row col | col <- [0..7]]
-        positionsWithPawn = [p | p <- positions, let atP = getB p b, isPawn atP, isColor c atP]
-        normals = concat [pawnMoves isWithinBoard (posToTuple src) b | src <- positionsWithPawn]
+        down  = Diff 1    0
+        left  = Diff 0    (-1)
+        up    = Diff (-1) 0
+        right = Diff 0    1
 
--- TODO: Remove
-posToTuple :: Pos -> (Int,Int)
-posToTuple (Pos row col) = (row, col)
+bishopDirs :: [Diff]
+bishopDirs = [downRight, downLeft, upLeft, upRight]
+    where
+        downRight = Diff 1    1
+        downLeft  = Diff 1    (-1)
+        upLeft    = Diff (-1) (-1)
+        upRight   = Diff (-1) 1
 
+-- TODO: Change the Pos tuple to Move
+knightMoves :: Pos -> Board -> [Move]
+knightMoves src board = filter hasValidDst moves
+    where
+        (Piece color Knight) = getB src board
+        moves = map (\diff -> NormalMove src (src `posPlusDiff` diff)) knightDiffs
+        hasValidDst (NormalMove _src dst) = isWithinBoard dst &&
+                                            not (isColor color (getB dst board))
+
+-- TODO: This hard coding means that each diff must be tested
+knightDiffs :: [Diff]
+knightDiffs = [Diff 2    1,
+               Diff 2    (-1),
+               Diff 1    (-2),
+               Diff (-1) (-2),
+               Diff (-2) (-1),
+               Diff (-2) 1,
+               Diff 1    2,
+               Diff (-1) 2]
+
+pawnMoves :: Pos -> Board -> [Move]
+pawnMoves src board = moves
+    where
+        color = colorOf $ getB src board
+        forwardDir = case color of
+                       Black -> 1
+                       White -> (-1)
+        row = rowOf src
+        isAtHomeRow = case color of
+                        Black -> row == 1
+                        White -> row == 6
+
+        left          = src `posPlusDiff` Diff forwardDir     (-1)
+        right         = src `posPlusDiff` Diff forwardDir     1
+        forward       = src `posPlusDiff` Diff forwardDir     0
+        doubleForward = src `posPlusDiff` Diff (forwardDir*2) 0
+
+        atLeft          = getB left board
+        atRight         = getB right board
+        atForward       = getB forward board
+        atDoubleForward = getB doubleForward board
+
+        dsts = [left | isWithinBoard left && isOtherColor color atLeft] ++
+               [right | isWithinBoard right && isOtherColor color atRight] ++
+               [forward | isWithinBoard forward && isEmpty atForward] ++
+               [doubleForward | isWithinBoard doubleForward && isEmpty atDoubleForward && isEmpty atForward && isAtHomeRow]
+
+        goalRow = case color of
+                    Black -> 7
+                    White -> 0
+        dstAtGoalRow = case dsts of
+                        (dst:_rest) -> rowOf dst == goalRow
+                        [] -> False
+        createMove = case dstAtGoalRow of
+                        True ->
+                        -- TODO: Assert that all dsts are at goal row
+                            \dst -> [Promote src dst kind | kind <- [Rook, Bishop, Knight, Queen]]
+                        False ->
+                            \dst -> [NormalMove src dst]
+        moves = concatMap createMove dsts
 
 castlings :: MovesFun
 castlings = concatApply [kingSideCastle, queenSideCastle]
@@ -177,27 +200,3 @@ queenSideCastle c b
 getBL :: [Pos] -> Board -> [Square]
 getBL ps b = [getB p b | p <- ps]
 
--- TODO: Remove
-getBTemp :: (Int,Int) -> Board -> Square
-getBTemp (row,col) = getB (Pos row col)
-
-tupleAdd :: (Int,Int) -> (Int,Int) -> (Int,Int)
-tupleAdd (a,b) (c,d) = (a+c,b+d)
-
-tupleSub :: (Int,Int) -> (Int,Int) -> (Int,Int)
-tupleSub (a,b) (c,d) = (a-c,b-d)
-
-tupleSignum :: (Int,Int) -> (Int,Int)
-tupleSignum (a,b) = (signum a,signum b)
-
-tupleMaxAbs :: (Int,Int) -> Int
-tupleMaxAbs (a,b) = max (abs a) (abs b)
-
-isWithinBoard :: (Int,Int) -> Bool
-isWithinBoard (row,col) = 0 <= row && row < 8 && 0 <= col && col < 8
-
-isWithinPawnArea :: (Int,Int) -> Bool
-isWithinPawnArea pos@(row,_col) = isWithinBoard pos && row /= 0 && row /= 7
-
-toPos :: (Int,Int) -> Pos
-toPos (row,col) = Pos row col

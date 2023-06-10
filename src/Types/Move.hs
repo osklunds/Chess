@@ -13,7 +13,7 @@ import Types.Square
 -- Idea: KingMove, QueenMove, etc
 -- So that syntactically invalid moves are impossible to create, or
 -- are asserted (the latter for e.g. empty squares during castling).
-data Move = NormalMove Pos Pos
+data Move = NormalMove Pos Pos -- TODO: Remove Move from name
           | Promote Pos Pos Kind -- TODO continue here. Need src and dst
           | Castle Color Side -- TODO two pos: king and rook
           | EnPassant Pos Pos  -- TODO
