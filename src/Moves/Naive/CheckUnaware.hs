@@ -8,7 +8,6 @@ where
 
 import Types as T
 import Moves.Common
-import Moves.Naive.NormalMoves.Lib hiding (getB)
 import Debug.Trace
 
 movesF :: MovesFun
@@ -182,3 +181,23 @@ getBL ps b = [getB p b | p <- ps]
 getBTemp :: (Int,Int) -> Board -> Square
 getBTemp (row,col) = getB (Pos row col)
 
+tupleAdd :: (Int,Int) -> (Int,Int) -> (Int,Int)
+tupleAdd (a,b) (c,d) = (a+c,b+d)
+
+tupleSub :: (Int,Int) -> (Int,Int) -> (Int,Int)
+tupleSub (a,b) (c,d) = (a-c,b-d)
+
+tupleSignum :: (Int,Int) -> (Int,Int)
+tupleSignum (a,b) = (signum a,signum b)
+
+tupleMaxAbs :: (Int,Int) -> Int
+tupleMaxAbs (a,b) = max (abs a) (abs b)
+
+isWithinBoard :: (Int,Int) -> Bool
+isWithinBoard (row,col) = 0 <= row && row < 8 && 0 <= col && col < 8
+
+isWithinPawnArea :: (Int,Int) -> Bool
+isWithinPawnArea pos@(row,_col) = isWithinBoard pos && row /= 0 && row /= 7
+
+toPos :: (Int,Int) -> Pos
+toPos (row,col) = Pos row col
