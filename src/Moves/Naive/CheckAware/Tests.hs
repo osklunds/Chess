@@ -314,7 +314,22 @@ prop_checkedMultipleTypesOfMoves = verifyMoves moves White board
     moves = (normalMovesFrom (Pos 5 7) [(Pos 5 6), (Pos 4 7), (Pos 6 7)]) ++
             (normalMovesFrom (Pos 6 5) [(Pos 5 6)])
 
--- TODO: Test pinning
+prop_kingPinned :: Property
+prop_kingPinned = verifyMoves moves White board
+  where
+    board = read  "  0 1 2 3 4 5 6 7  \n\
+                  \0                 0\n\
+                  \1                 1\n\
+                  \2       ♚         2\n\
+                  \3                 3\n\
+                  \4                 4\n\
+                  \5   ♜   ♗   ♔     5\n\
+                  \6                 6\n\
+                  \7                 7\n\
+                  \  0 1 2 3 4 5 6 7"
+    moves = (normalMovesFrom (Pos 5 5) [(Pos 5 4), (Pos 4 4), (Pos 4 5),
+                                        (Pos 4 6), (Pos 5 6), (Pos 6 6),
+                                        (Pos 6 5), (Pos 6 4)])
 
 prop_movesAreSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
 prop_movesAreSubsetOfCheckUnawareMoves color board =
