@@ -14,7 +14,7 @@ movesF :: MovesFun
 movesF = concatApply [normalMoves, promotes, castlings]
 
 concatApply :: [MovesFun] -> MovesFun
-concatApply fs c b = concat [f c b | f <- fs]
+concatApply movesFuns color board = concat [movesFun color board | movesFun <- movesFuns]
 
 normalMoves :: MovesFun
 normalMoves c b = map f $  movesF' c b
