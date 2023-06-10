@@ -144,7 +144,14 @@ mirrorMove (Castle color side) = Castle (invert color) side
 
 
 --------------------------------------------------------------------------------
--- Pawn
+-- Kind specific
+--
+-- These tests focus on boards with interesting scenarios for the different
+-- kinds of pieces.  However, moves for all pieces are still verified to
+-- increase the total coverage and to test scenarios that are
+-- randomly/accidentally created However, moves for all pieces are still
+-- verified to increase the total coverage and to test scenarios that are
+-- randomly/accidentally created.
 --------------------------------------------------------------------------------
 
 prop_pawns :: Property
