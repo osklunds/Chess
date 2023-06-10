@@ -6,7 +6,7 @@ module Moves.Naive.CheckUnaware
 )
 where
 
-import Types as T
+import Types
 import Moves.Common
 import Debug.Trace
 
@@ -57,7 +57,7 @@ movesFromDirs :: [(Int,Int)] -> (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
 movesFromDirs dirs start board = concatMap movesFun dirs
   where
     atPos         = getBTemp start board
-    color         = T.color atPos
+    color         = colorOf atPos
     movesFun diff = movesFromColorAndDiff color diff start board
 
 movesFromColorAndDiff :: Color ->
@@ -114,7 +114,7 @@ knightDiffs = [(2,1),  -- L
 pawnMoves :: ((Int,Int) -> Bool) -> (Int,Int) -> Board -> [((Int,Int),(Int,Int))]
 pawnMoves isValidDst start board = [(start,dest) | dest <- dests]
   where
-    color       = T.color $ getBTemp start board
+    color       = colorOf $ getBTemp start board
     forwardDir  = case color of
                     Black -> 1
                     White -> (-1)

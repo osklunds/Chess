@@ -4,7 +4,7 @@ module Types.Square
 , Color(..)
 , Kind(..)
 
-, color
+, colorOf
 , invert
 , isEmpty
 , isOccupied
@@ -109,8 +109,8 @@ instance Arbitrary Kind where
 -- Functions
 --------------------------------------------------------------------------------
 
-color :: Square -> Color
-color (Piece c _) = c
+colorOf :: Square -> Color
+colorOf (Piece c _) = c
 
 invert :: Color -> Color
 invert White = Black

@@ -253,7 +253,7 @@ applyPromote src dst kind board = assert condition newBoard
         isPawnAtSrc = isPawn atSrc
         atSrc = getB src board
         notToPawnOrKing = kind /= Pawn && kind /= King
-        colorAtSrc = color atSrc
+        colorAtSrc = colorOf atSrc
         srcIsAtTopOrBottom = row == 1 && colorAtSrc == White ||
                              row == 6 && colorAtSrc == Black
         (Pos row _col) = src
