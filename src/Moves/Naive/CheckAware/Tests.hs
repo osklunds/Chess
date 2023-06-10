@@ -142,6 +142,47 @@ mirrorMove (NormalMove src dst) = NormalMove (mirrorPos src) (mirrorPos dst)
 mirrorMove (Promote src dst kind) = Promote (mirrorPos src) (mirrorPos dst) kind
 mirrorMove (Castle color side) = Castle (invert color) side
 
+prop_noNonMoves :: Color -> Board -> Bool
+prop_noNonMoves color board = all isMove moves
+    where
+        moves = movesF color board
+
+        isMove (NormalMove src dst) = src /= dst
+        isMove (Promote src dst _kind) = src /= dst
+        isMove (Castle _color _side) = True
+
+prop_srcAndDstAreWithinBoard :: Color -> Board -> Bool
+prop_srcAndDstAreWithinBoard color board = all isMoveWithinBoard moves
+    where
+        moves = movesF color board
+
+        isWithinBoard (Pos row col) = 0 <= row && row < 8 && 0 <= col && col < 8
+
+        isMoveWithinBoard (NormalMove src dst) = isWithinBoard src && isWithinBoard dst
+        isMoveWithinBoard (Promote src dst _kind) = isWithinBoard src && isWithinBoard dst
+        isMoveWithinBoard (Castle _color _side) = True
+
+prop_dstIsNotSameColor :: Color -> Board -> Bool
+prop_dstIsNotSameColor color board = all dstIsNotSameColor moves
+    where
+        moves = movesF color board
+
+        isNotSameColor pos = not (isColor color (getB pos board))
+
+        dstIsNotSameColor (NormalMove _src dst) = isNotSameColor dst
+        dstIsNotSameColor (Promote _src dst _kind) = isNotSameColor dst
+        dstIsNotSameColor (Castle _color _side) = True
+
+prop_srcIsSameColor :: Color -> Board -> Bool
+prop_srcIsSameColor color board = all srcIsSameColor moves
+    where
+        moves = movesF color board
+
+        isSameColor pos = isColor color (getB pos board)
+
+        srcIsSameColor (NormalMove src _dst) = isSameColor src
+        srcIsSameColor (Promote src _dst _kind) = isSameColor src
+        srcIsSameColor (Castle _color _side) = True
 
 --------------------------------------------------------------------------------
 -- Kind specific
