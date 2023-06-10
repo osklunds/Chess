@@ -9,7 +9,6 @@ import Test.QuickCheck
 import Types
 import Moves.Naive.CheckAware
 import qualified Moves.Naive.CheckUnaware as CU
-import qualified Moves.Naive.TestLib as MTL
 import Moves.Common
 import Lib
 
@@ -502,11 +501,28 @@ prop_noCastlingOtherRow = movesFromBoardWithKingAtRow 0 `listEq` allCastlings &&
 -- Helpers
 --------------------------------------------------------------------------------
 
-verifyMoves :: [Move] -> Color -> Board -> Property
-verifyMoves = MTL.verifyMoves movesF
+type VerifyMovesFun = [Move] -> Color -> Board -> Property
 
-verifyCastlingMoves :: [Move] -> Color -> Board -> Property
-verifyCastlingMoves = MTL.verifyMoves movesFOnlyCastling
+verifyMovesCustomFun :: MovesFun -> VerifyMovesFun
+verifyMovesCustomFun movesF expMoves' color board =
+    counterexample errorString verificationResult
+    where
+        expMoves = sort expMoves'
+        actMoves = sort $ movesF color board
+        verificationResult = expMoves == actMoves
+        actualMissing = expMoves \\ actMoves
+        actualExtra = actMoves \\ expMoves
+        errorString = show board ++ "\n" ++
+                      "Expected moves: " ++ show expMoves ++ "\n\n" ++
+                      "Actual moves: " ++ show actMoves ++ "\n\n" ++
+                      "Actual is missing: " ++ show actualMissing ++ "\n\n" ++
+                      "Actual has these extra: " ++ show actualExtra
+
+verifyMoves :: VerifyMovesFun
+verifyMoves = verifyMovesCustomFun movesF
+
+verifyCastlingMoves :: VerifyMovesFun
+verifyCastlingMoves = verifyMovesCustomFun movesFOnlyCastling
 
 movesFOnlyCastling :: MovesFun
 movesFOnlyCastling color board = filter isCastle $ movesF color board
