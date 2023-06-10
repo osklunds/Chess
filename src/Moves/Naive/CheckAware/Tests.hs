@@ -22,8 +22,8 @@ import Lib
 -- General
 --------------------------------------------------------------------------------
 
-prop_fixedBoard1 :: Property
-prop_fixedBoard1 = verifyMoves expMoves Black board
+prop_board1 :: Property
+prop_board1 = verifyMoves expMoves Black board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0               ♝ 0\n\
@@ -109,8 +109,8 @@ prop_fixedBoard1 = verifyMoves expMoves Black board
                                            (Pos 7 2), (Pos 5 2)
                                           ])
 
-prop_fixedBoardAllKindsPreventMove :: Property
-prop_fixedBoardAllKindsPreventMove = verifyMoves moves White board
+prop_allKindsPreventKingMove :: Property
+prop_allKindsPreventKingMove = verifyMoves moves White board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
@@ -124,8 +124,8 @@ prop_fixedBoardAllKindsPreventMove = verifyMoves moves White board
                   \  0 1 2 3 4 5 6 7"
     moves = normalMovesFrom (Pos 5 3) [(Pos 6 4)]
 
-prop_fixedBoardMovesAwayIfIsChecked :: Property
-prop_fixedBoardMovesAwayIfIsChecked = verifyMoves moves White board
+prop_kingMovesAwayIfChecked :: Property
+prop_kingMovesAwayIfChecked = verifyMoves moves White board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
@@ -140,28 +140,29 @@ prop_fixedBoardMovesAwayIfIsChecked = verifyMoves moves White board
     moves = normalMovesFrom (Pos 5 3) [(Pos 4 2), (Pos 4 3), (Pos 4 4),
                                        (Pos 6 2), (Pos 6 3), (Pos 6 4)]
 
-prop_fixedBoardBlocksWithOther :: Property
-prop_fixedBoardBlocksWithOther = verifyMoves moves White board
+prop_blocksWithOtherIfKingIsChecked :: Property
+prop_blocksWithOtherIfKingIsChecked = verifyMoves moves White board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♚     ♘         0\n\
                   \1 ♟ ♟ ♟ ♟ ♟ ♟ ♙ ♟ 1\n\
                   \2                 2\n\
                   \3               ♛ 3\n\
-                  \4             ♜ ♝ 4\n\
+                  \4     ♖       ♜ ♝ 4\n\
                   \5 ♜             ♔ 5\n\
                   \6       ♙     ♜ ♝ 6\n\
                   \7               ♛ 7\n\
                   \  0 1 2 3 4 5 6 7"
-    moves = normalMovesFrom (Pos 6 3) [(Pos 5 3)]
+    moves = (normalMovesFrom (Pos 6 3) [(Pos 5 3)]) ++
+            (normalMovesFrom (Pos 4 2) [(Pos 5 2)])
 
-prop_fixedBoardCapturesThreat :: Property
-prop_fixedBoardCapturesThreat = verifyMoves moves White board
+prop_capturesThreatIfKingIsChecked :: Property
+prop_capturesThreatIfKingIsChecked = verifyMoves moves White board
   where
     board = read  "  0 1 2 3 4 5 6 7  \n\
                   \0 ♚   ♘     ♗     0\n\
                   \1               ♙ 1\n\
-                  \2                 2\n\
+                  \2               ♛ 2\n\
                   \3               ♛ 3\n\
                   \4             ♜ ♝ 4\n\
                   \5 ♜             ♔ 5\n\
