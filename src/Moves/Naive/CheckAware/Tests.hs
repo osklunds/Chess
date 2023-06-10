@@ -212,7 +212,20 @@ prop_capturesThreatIfKingIsChecked = verifyMoves moves White board
                   \  0 1 2 3 4 5 6 7"
     moves = normalMovesFrom (Pos 0 5) [(Pos 5 0)]
 
--- TODO: Test that king can capture threat
+prop_kingCanCaptureThreat :: Property
+prop_kingCanCaptureThreat = verifyMoves moves White board
+  where
+    board = read  "  0 1 2 3 4 5 6 7  \n\
+                  \0 ♚   ♘     ♗     0\n\
+                  \1               ♙ 1\n\
+                  \2           ♝     2\n\
+                  \3                 3\n\
+                  \4                 4\n\
+                  \5             ♜ ♔ 5\n\
+                  \6                 6\n\
+                  \7             ♝   7\n\
+                  \  0 1 2 3 4 5 6 7"
+    moves = normalMovesFrom (Pos 5 7) [(Pos 5 6)]
 
 prop_movesAreSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
 prop_movesAreSubsetOfCheckUnawareMoves color board =
