@@ -171,8 +171,8 @@ prop_capturesThreatIfKingIsChecked = verifyMoves moves White board
                   \  0 1 2 3 4 5 6 7"
     moves = normalMovesFrom (Pos 0 5) [(Pos 5 0)]
 
-prop_movesIsSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
-prop_movesIsSubsetOfCheckUnawareMoves color board =
+prop_movesAreSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
+prop_movesAreSubsetOfCheckUnawareMoves color board =
   moves `isSubsetOf` movesCheckUnaware
   where
     moves             = movesF color board
