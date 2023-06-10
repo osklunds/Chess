@@ -443,6 +443,35 @@ prop_bothCastlingsPossible = verifyCastlingMoves expMoves Black board
                       \  0 1 2 3 4 5 6 7"
         expMoves = [Castle Black QueenSide, Castle Black KingSide]
 
+prop_castlingKingSide :: Property
+prop_castlingKingSide = verifyCastlingMoves expMoves Black board
+    where
+        board = read  "  0 1 2 3 4 5 6 7  \n\
+                      \0 ♜   ♘   ♚     ♜ 0\n\
+                      \1   ♞ ♛       ♝ ♟ 1\n\
+                      \2       ♔   ♛ ♖   2\n\
+                      \3   ♜ ♛ ♝     ♞ ♕ 3\n\
+                      \4 ♟   ♕ ♞   ♜ ♟ ♟ 4\n\
+                      \5       ♕     ♞   5\n\
+                      \6   ♞   ♝     ♜ ♘ 6\n\
+                      \7                 7\n\
+                      \  0 1 2 3 4 5 6 7"
+        expMoves = [Castle Black KingSide]
+
+prop_castlingQueenSide :: Property
+prop_castlingQueenSide = verifyCastlingMoves expMoves Black board
+    where
+        board = read  "  0 1 2 3 4 5 6 7  \n\
+                      \0 ♜       ♚       0\n\
+                      \1 ♟ ♟ ♟ ♟ ♜ ♝     1\n\
+                      \2         ♞ ♕     2\n\
+                      \3     ♔   ♟       3\n\
+                      \4 ♛ ♕   ♕ ♖ ♟     4\n\
+                      \5 ♜     ♖ ♜ ♝ ♜ ♜ 5\n\
+                      \6 ♘   ♛   ♗ ♘   ♞ 6\n\
+                      \7           ♘     7\n\
+                      \  0 1 2 3 4 5 6 7"
+        expMoves = [Castle Black QueenSide]
 
 --------------------------------------------------------------------------------
 -- Helpers
