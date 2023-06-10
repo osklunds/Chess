@@ -67,13 +67,13 @@ prop_board1 = verifyMoves expMoves Black board
                (normalMovesFrom (Pos 1 0) [(Pos 2 0), (Pos 3 0), (Pos 2 1)]) ++
 
                -- Pawn at (6 7)
-               promotesFrom (Pos 6 7) (Pos 7 6) ++
+               promotesFrom (Pos 6 7) [(Pos 7 6)] ++
 
                -- Pawn at (6 5)
-               promotesFrom (Pos 6 5) (Pos 7 6) ++
+               promotesFrom (Pos 6 5) [(Pos 7 6)] ++
 
                -- Pawn at (6 0)
-               promotesFrom (Pos 6 0) (Pos 7 0) ++
+               promotesFrom (Pos 6 0) [(Pos 7 0)] ++
 
                -- Pawn at (4 5)
                (normalMovesFrom (Pos 4 5) [(Pos 5 5)]) ++
@@ -144,7 +144,74 @@ mirrorMove (Castle color side) = Castle (invert color) side
 
 
 --------------------------------------------------------------------------------
--- Check
+-- Pawn
+--------------------------------------------------------------------------------
+
+prop_pawns :: Property
+prop_pawns = verifyMoves expMoves Black board
+  where
+    board = read  "  0 1 2 3 4 5 6 7  \n\
+                  \0 ♚             ♔ 0\n\
+                  \1   ♟     ♟   ♗ ♟ 1\n\
+                  \2       ♖   ♗     2\n\
+                  \3 ♟ ♕ ♖           3\n\
+                  \4   ♙ ♝     ♗     4\n\
+                  \5 ♜       ♛   ♘ ♞ 5\n\
+                  \6   ♗ ♟ ♟     ♟   6\n\
+                  \7     ♜     ♘   ♖ 7\n\
+                  \  0 1 2 3 4 5 6 7"
+    expMoves = -- Pawn at (3 0)
+               (normalMovesFrom (Pos 3 0) [(Pos 4 0), (Pos 4 1)]) ++
+
+               -- Pawn at (1 1)
+               (normalMovesFrom (Pos 1 1) [(Pos 2 1)]) ++
+
+               -- Pawn at (6 2)
+               [] ++
+
+               -- Pawn at (6 3)
+               (promotesFrom (Pos 6 3) [(Pos 7 3)]) ++
+
+               -- Pawn at (1 4)
+               (normalMovesFrom (Pos 1 4) [(Pos 2 4), (Pos 3 4), (Pos 2 3),
+                                           (Pos 2 5)]) ++
+
+               -- Pawn at (6 6)
+               (promotesFrom (Pos 6 6) [(Pos 7 5), (Pos 7 6), (Pos 7 7)]) ++
+
+               -- Pawn at (1 7)
+               (normalMovesFrom (Pos 1 7) [(Pos 2 7), (Pos 3 7)]) ++
+
+               -- Rook at (5 0)
+               (normalMovesFrom (Pos 5 0) [(Pos 4 0), (Pos 5 1), (Pos 5 2),
+                                           (Pos 5 3), (Pos 6 0), (Pos 7 0)]) ++
+               
+               -- Rook at (7 2)
+               (normalMovesFrom (Pos 7 2) [(Pos 7 1), (Pos 7 0), (Pos 7 3),
+                                           (Pos 7 4), (Pos 7 5)]) ++
+
+               -- Queen at (5 4)
+               (normalMovesFrom (Pos 5 4) [(Pos 5 3), (Pos 5 2), (Pos 5 1),
+                                           (Pos 4 3), (Pos 3 2), (Pos 4 4),
+                                           (Pos 3 4), (Pos 2 4), (Pos 4 5),
+                                           (Pos 5 5), (Pos 5 6), (Pos 6 5),
+                                           (Pos 7 6), (Pos 6 4), (Pos 7 4)]) ++
+               -- Knight at (5 7)
+               (normalMovesFrom (Pos 5 7) [(Pos 3 6), (Pos 4 5), (Pos 6 5),
+                                           (Pos 7 6)]) ++
+
+               -- Bishop at (4 2)
+               (normalMovesFrom (Pos 4 2) [(Pos 3 1), (Pos 3 3), (Pos 2 4),
+                                           (Pos 1 5), (Pos 0 6), (Pos 5 3),
+                                           (Pos 6 4), (Pos 7 5), (Pos 5 1),
+                                           (Pos 6 0)]) ++
+               
+               -- King at (0 0)
+               (normalMovesFrom (Pos 0 0) [(Pos 0 1), (Pos 1 0)])
+
+
+--------------------------------------------------------------------------------
+-- Check and king
 --------------------------------------------------------------------------------
 
 prop_allKindsPreventKingMove :: Property
@@ -240,6 +307,8 @@ prop_checkedMultipleTypesOfMoves = verifyMoves moves White board
     moves = (normalMovesFrom (Pos 5 7) [(Pos 5 6), (Pos 4 7), (Pos 6 7)]) ++
             (normalMovesFrom (Pos 6 5) [(Pos 5 6)])
 
+-- TODO: Test pinning
+
 prop_movesAreSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
 prop_movesAreSubsetOfCheckUnawareMoves color board =
   moves `isSubsetOf` movesCheckUnaware
@@ -327,8 +396,8 @@ verifyCastlingMoves = MTL.verifyMoves movesF'
 normalMovesFrom :: Pos -> [Pos] -> [Move]
 normalMovesFrom src dsts = map (NormalMove src) dsts
 
-promotesFrom :: Pos -> Pos -> [Move]
-promotesFrom src dst = [Promote src dst k | k <- [Rook, Bishop, Knight, Queen]]
+promotesFrom :: Pos -> [Pos] -> [Move]
+promotesFrom src dsts = [Promote src dst k | k <- [Rook, Bishop, Knight, Queen], dst <- dsts]
 
 
 return []
