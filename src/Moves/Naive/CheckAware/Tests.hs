@@ -109,6 +109,47 @@ prop_board1 = verifyMoves expMoves Black board
                                            (Pos 7 2), (Pos 5 2)
                                           ])
 
+prop_blackAndWhiteGiveSameMoves :: Board -> Bool
+prop_blackAndWhiteGiveSameMoves board =
+    blackMoves `listEq` mirroredWhiteMoves
+    where
+        blackMoves         = movesF Black board
+        swappedColors      = swapColors board
+        mirroredBoard      = mirrorBoard swappedColors
+        whiteMoves         = movesF White mirroredBoard
+        mirroredWhiteMoves = map mirrorMove whiteMoves
+
+swapColors :: Board -> Board
+swapColors = mapB swapColor
+
+swapColor :: Square -> Square
+swapColor Empty = Empty
+swapColor (Piece White kind) = Piece Black kind
+swapColor (Piece Black kind) = Piece White kind
+
+mirrorBoard :: Board -> Board
+mirrorBoard board = foldl mirrorBoardAtPos
+                          board
+                          [Pos row col | row <- [0..3], col <- [0..7]]
+
+mirrorBoardAtPos :: Board -> Pos -> Board
+mirrorBoardAtPos board pos = swapPiecesAtPositions board pos mirroredPos
+    where
+        mirroredPos   = mirrorPos pos
+
+mirrorPos :: Pos -> Pos
+mirrorPos (Pos row col) = Pos (7 - row) col
+
+mirrorMove :: Move -> Move
+mirrorMove (NormalMove src dst) = NormalMove (mirrorPos src) (mirrorPos dst)
+mirrorMove (Promote src dst kind) = Promote (mirrorPos src) (mirrorPos dst) kind
+mirrorMove (Castle color side) = Castle (invert color) side
+
+
+--------------------------------------------------------------------------------
+-- Check
+--------------------------------------------------------------------------------
+
 prop_allKindsPreventKingMove :: Property
 prop_allKindsPreventKingMove = verifyMoves moves White board
   where
@@ -171,48 +212,14 @@ prop_capturesThreatIfKingIsChecked = verifyMoves moves White board
                   \  0 1 2 3 4 5 6 7"
     moves = normalMovesFrom (Pos 0 5) [(Pos 5 0)]
 
+-- TODO: Test that king can capture threat
+
 prop_movesAreSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
 prop_movesAreSubsetOfCheckUnawareMoves color board =
   moves `isSubsetOf` movesCheckUnaware
   where
     moves             = movesF color board
     movesCheckUnaware = CU.movesF color board
-
-prop_blackAndWhiteGiveSameMoves :: Board -> Bool
-prop_blackAndWhiteGiveSameMoves board =
-    blackMoves `listEq` mirroredWhiteMoves
-    where
-        blackMoves         = movesF Black board
-        swappedColors      = swapColors board
-        mirroredBoard      = mirrorBoard swappedColors
-        whiteMoves         = movesF White mirroredBoard
-        mirroredWhiteMoves = map mirrorMove whiteMoves
-
-swapColors :: Board -> Board
-swapColors = mapB swapColor
-
-swapColor :: Square -> Square
-swapColor Empty = Empty
-swapColor (Piece White kind) = Piece Black kind
-swapColor (Piece Black kind) = Piece White kind
-
-mirrorBoard :: Board -> Board
-mirrorBoard board = foldl mirrorBoardAtPos
-                          board
-                          [Pos row col | row <- [0..3], col <- [0..7]]
-
-mirrorBoardAtPos :: Board -> Pos -> Board
-mirrorBoardAtPos board pos = swapPiecesAtPositions board pos mirroredPos
-    where
-        mirroredPos   = mirrorPos pos
-
-mirrorPos :: Pos -> Pos
-mirrorPos (Pos row col) = Pos (7 - row) col
-
-mirrorMove :: Move -> Move
-mirrorMove (NormalMove src dst) = NormalMove (mirrorPos src) (mirrorPos dst)
-mirrorMove (Promote src dst kind) = Promote (mirrorPos src) (mirrorPos dst) kind
-mirrorMove (Castle color side) = Castle (invert color) side
 
 --------------------------------------------------------------------------------
 -- Castling
