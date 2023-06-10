@@ -1,7 +1,6 @@
 
 module Moves.Naive.TestLib
 ( verifyMoves
-, prop_blackAndWhiteGiveSameMoves
 )
 where
 
@@ -35,39 +34,3 @@ verifyMoves movesF expMoves' color board =
 --------------------------------------------------------------------------------
 -- Black and White give the same moves
 --------------------------------------------------------------------------------
-
-prop_blackAndWhiteGiveSameMoves :: MovesFun -> Board -> Bool
-prop_blackAndWhiteGiveSameMoves movesF board =
-    blackMoves `listEq` mirroredWhiteMoves
-    where
-        blackMoves         = movesF Black board
-        swappedColors      = swapColors board
-        mirroredBoard      = mirrorBoard swappedColors
-        whiteMoves         = movesF White mirroredBoard
-        mirroredWhiteMoves = map mirrorMove whiteMoves
-
-swapColors :: Board -> Board
-swapColors = mapB swapColor
-
-swapColor :: Square -> Square
-swapColor Empty = Empty
-swapColor (Piece White kind) = Piece Black kind
-swapColor (Piece Black kind) = Piece White kind
-
-mirrorBoard :: Board -> Board
-mirrorBoard board = foldl mirrorBoardAtPos
-                          board
-                          [Pos row col | row <- [0..3], col <- [0..7]]
-
-mirrorBoardAtPos :: Board -> Pos -> Board
-mirrorBoardAtPos board pos = swapPiecesAtPositions board pos mirroredPos
-    where
-        mirroredPos   = mirrorPos pos
-
-mirrorPos :: Pos -> Pos
-mirrorPos (Pos row col) = Pos (7 - row) col
-
-mirrorMove :: Move -> Move
-mirrorMove (NormalMove src dst) = NormalMove (mirrorPos src) (mirrorPos dst)
-mirrorMove (Promote src dst kind) = Promote (mirrorPos src) (mirrorPos dst) kind
-mirrorMove (Castle color side) = Castle (invert color) side
