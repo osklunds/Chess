@@ -26,6 +26,7 @@ movesFromPos pos color board
     | otherwise           = []
     where
         atPos = getB pos board
+        -- TODO: Name the underscores
         movesFun = case atPos of
                      (Piece _ King )  -> kingMoves
                      (Piece _ Queen)  -> queenMoves
@@ -145,6 +146,7 @@ pawnMoves src board = moves
                        Black -> 1
                        White -> (-1)
         row = rowOf src
+        -- TODO: Use homeRow fun
         isAtHomeRow = case color of
                         Black -> row == 1
                         White -> row == 6
@@ -159,6 +161,7 @@ pawnMoves src board = moves
         atForward       = getB forward board
         atDoubleForward = getB doubleForward board
 
+        -- TODO: Make this prettier
         dsts = [left | isWithinBoard left && isOtherColor color atLeft] ++
                [right | isWithinBoard right && isOtherColor color atRight] ++
                [forward | isWithinBoard forward && isEmpty atForward] ++
@@ -178,6 +181,7 @@ pawnMoves src board = moves
                             \dst -> [NormalMove src dst]
         moves = concatMap createMove dsts
 
+-- TODO: Improve variable names
 castlings :: MovesFun
 castlings = concatApply [kingSideCastle, queenSideCastle]
 
