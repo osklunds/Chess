@@ -70,13 +70,13 @@ prop_board1 = verifyMoves expMoves Black board
                -- TODO
 
                -- Pawn at (6 7)
-               promotes (Pos 6 7) (Pos 7 6) ++
+               promotesFrom (Pos 6 7) (Pos 7 6) ++
 
                -- Pawn at (6 5)
-               promotes (Pos 6 5) (Pos 7 6) ++
+               promotesFrom (Pos 6 5) (Pos 7 6) ++
 
                -- Pawn at (6 0)
-               promotes (Pos 6 0) (Pos 7 0) ++
+               promotesFrom (Pos 6 0) (Pos 7 0) ++
 
                -- Pawn at (4 5)
                (normalMovesFrom (Pos 4 5) [(Pos 5 5)]) ++
@@ -301,8 +301,8 @@ verifyCastlingMoves = MTL.verifyMoves movesF'
 normalMovesFrom :: Pos -> [Pos] -> [Move]
 normalMovesFrom src dsts = map (NormalMove src) dsts
 
-promotes :: Pos -> Pos -> [Move]
-promotes src dst = [Promote src dst k | k <- [Rook, Bishop, Knight, Queen]]
+promotesFrom :: Pos -> Pos -> [Move]
+promotesFrom src dst = [Promote src dst k | k <- [Rook, Bishop, Knight, Queen]]
 
 
 return []
