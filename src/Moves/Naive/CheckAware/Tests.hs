@@ -225,8 +225,8 @@ prop_movesAreSubsetOfCheckUnawareMoves color board =
 -- Castling
 --------------------------------------------------------------------------------
 
-prop_fixedBoardNoCastlingKingWouldPass :: Property
-prop_fixedBoardNoCastlingKingWouldPass = verifyCastlingMoves moves White board
+prop_noCastlingSinceKingWouldPassThreat :: Property
+prop_noCastlingSinceKingWouldPassThreat = verifyCastlingMoves moves White board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0   ♜ ♚     ♖ ♘   0\n\
@@ -240,8 +240,8 @@ prop_fixedBoardNoCastlingKingWouldPass = verifyCastlingMoves moves White board
                       \  0 1 2 3 4 5 6 7"
         moves = [Castle White KingSide]
 
-prop_fixedBoardNoCastlingKingInCheck :: Property
-prop_fixedBoardNoCastlingKingInCheck = verifyCastlingMoves moves White board
+prop_noCastlingSinceKingIsChecked :: Property
+prop_noCastlingSinceKingIsChecked = verifyCastlingMoves moves White board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0 ♜         ♚   ♜ 0\n\
@@ -255,8 +255,8 @@ prop_fixedBoardNoCastlingKingInCheck = verifyCastlingMoves moves White board
                       \  0 1 2 3 4 5 6 7"
         moves = []
 
-prop_fixedBoardNoCastlingDestAttacked :: Property
-prop_fixedBoardNoCastlingDestAttacked = verifyCastlingMoves moves Black board
+prop_noCastlingSinceDstAttacked :: Property
+prop_noCastlingSinceDstAttacked = verifyCastlingMoves moves Black board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0 ♜       ♚     ♜ 0\n\
@@ -270,8 +270,8 @@ prop_fixedBoardNoCastlingDestAttacked = verifyCastlingMoves moves Black board
                       \  0 1 2 3 4 5 6 7"
         moves = [Castle Black QueenSide]
 
-prop_fixedBoardBothCastlings :: Property
-prop_fixedBoardBothCastlings = verifyCastlingMoves moves Black board
+prop_bothCastlingsPossible :: Property
+prop_bothCastlingsPossible = verifyCastlingMoves moves Black board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
                       \0 ♜       ♚     ♜ 0\n\
