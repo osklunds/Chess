@@ -473,6 +473,31 @@ prop_castlingQueenSide = verifyCastlingMoves expMoves Black board
                       \  0 1 2 3 4 5 6 7"
         expMoves = [Castle Black QueenSide]
 
+prop_noCastlingOtherRow :: Bool
+                          -- Check row 0 too, using the same function,
+                          -- as a sanity check
+prop_noCastlingOtherRow = movesFromBoardWithKingAtRow 0 `listEq` allCastlings &&
+                          movesFromBoardWithKingAtRow 2 `listEq` noCastlings &&
+                          movesFromBoardWithKingAtRow 7 `listEq` noCastlings
+    where
+        board = read  "  0 1 2 3 4 5 6 7  \n\
+                      \0 ♜             ♜ 0\n\
+                      \1 ♜             ♜ 1\n\
+                      \2 ♜             ♜ 2\n\
+                      \3 ♜             ♜ 3\n\
+                      \4 ♜             ♜ 4\n\
+                      \5 ♜         ♔   ♜ 5\n\
+                      \6 ♜             ♜ 6\n\
+                      \7 ♜             ♜ 7\n\
+                      \  0 1 2 3 4 5 6 7"
+        movesFromBoardWithKingAtRow row = movesFOnlyCastling Black board'
+            where
+                board' = setB (Pos row 4) (Piece Black King) $
+                         setB (Pos row 4) Empty $ board
+                
+        noCastlings = []
+        allCastlings = [Castle Black KingSide, Castle Black QueenSide]
+
 --------------------------------------------------------------------------------
 -- Helpers
 --------------------------------------------------------------------------------
@@ -481,9 +506,10 @@ verifyMoves :: [Move] -> Color -> Board -> Property
 verifyMoves = MTL.verifyMoves movesF
 
 verifyCastlingMoves :: [Move] -> Color -> Board -> Property
-verifyCastlingMoves = MTL.verifyMoves movesF'
-    where
-        movesF' color board = filter isCastle $ movesF color board
+verifyCastlingMoves = MTL.verifyMoves movesFOnlyCastling
+
+movesFOnlyCastling :: MovesFun
+movesFOnlyCastling color board = filter isCastle $ movesF color board
 
 normalMovesFrom :: Pos -> [Pos] -> [Move]
 normalMovesFrom src dsts = map (NormalMove src) dsts
