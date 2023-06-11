@@ -11,19 +11,19 @@ import Moves.Common
 import Debug.Trace
 
 movesFun :: MovesFun
-movesFun = concatApply [normalAndPromotes, castlings]
+movesFun = concatApply [normalAndPromotesMovesFun, castlingsMovesFun]
 
 concatApply :: [MovesFun] -> MovesFun
 concatApply movesFuns color board = concat [movesFun color board | movesFun <- movesFuns]
 
-normalAndPromotes :: MovesFun
-normalAndPromotes color board = concat [movesFromPos (Pos row col) color board |
-                                  row <- [0..7], col <- [0..7]]
+normalAndPromotesMovesFun :: MovesFun
+normalAndPromotesMovesFun color board = concat [movesFromPos (Pos row col) color board |
+                                                row <- [0..7], col <- [0..7]]
 
 movesFromPos :: Pos -> Color -> Board -> [Move]
 movesFromPos pos color board
     | isColor color atPos = movesFun pos board
-    | otherwise           = []
+    | otherwise = []
     where
         atPos = getB pos board
         movesFun = case atPos of
@@ -36,18 +36,8 @@ movesFromPos pos color board
 
 kingMoves :: Pos -> Board -> [Move]
 kingMoves pos board = filter isOneStep $ queenMoves pos board
-  where
-    isOneStep (NormalMove src dst) = diffMaxAbs (dst `posDiff` src) <= 1
-
-data Diff = Diff Int Int
-          deriving (Eq, Show, Ord)
-
-posDiff :: Pos -> Pos -> Diff
-posDiff (Pos srcRow srcCol) (Pos dstRow dstCol) =
-    Diff (srcRow - dstRow) (srcCol - dstCol)
-
-diffMaxAbs :: Diff -> Int
-diffMaxAbs (Diff row col) = max (abs row) (abs col)
+    where
+        isOneStep (NormalMove src dst) = diffMaxAbs (dst `posDiff` src) <= 1
 
 queenMoves :: Pos -> Board -> [Move]
 queenMoves = movesFromDirs queenDirs
@@ -69,7 +59,7 @@ movesFromDirs dirs src board = concatMap movesFun dirs
 movesFromColorAndDiff :: Color -> Diff -> Pos -> Board -> [(Pos,Pos)]
 movesFromColorAndDiff color diff src board
     -- The diff points outside the board. Not a valid move, and no point in
-    -- seraching for more moves in this direction.
+    -- searching for more moves in this direction.
     | not (isWithinBoard dst) = []
 
     -- The diff points at an empty square. We can move there, and there are
@@ -77,12 +67,12 @@ movesFromColorAndDiff color diff src board
     | isEmpty atDst = (thisMove:remainingMoves)
 
     -- The diff points at a square with a piece of the other color. We can move
-    -- there to capture it. But we can't jump over it, so stop seraching for
+    -- there to capture it. But we can't jump over it, so stop searching for
     -- more moves in this direction.
     | isOtherColor color atDst = [thisMove]
 
     -- The diff points at a square with a piece of the same color. We can't
-    -- move there. And we can't jump over it either, so stop seraching for more
+    -- move there. And we can't jump over it either, so stop searching for more
     -- moves in this direction.
     | isColor color atDst = []
     where
@@ -91,12 +81,6 @@ movesFromColorAndDiff color diff src board
         thisMove = (src,dst)
         nextDiff  = expandDiffByOne diff
         remainingMoves = movesFromColorAndDiff color nextDiff src board
-
-posPlusDiff :: Pos -> Diff -> Pos
-posPlusDiff (Pos row col) (Diff rowDiff colDiff) = Pos (row + rowDiff) (col + colDiff)
-
-expandDiffByOne :: Diff -> Diff
-expandDiffByOne (Diff rowDiff colDiff) = Diff (rowDiff + signum rowDiff) (colDiff + signum colDiff)
 
 queenDirs :: [Diff]
 queenDirs = rookDirs ++ bishopDirs
@@ -117,24 +101,25 @@ bishopDirs = [downRight, downLeft, upLeft, upRight]
         upLeft    = Diff (-1) (-1)
         upRight   = Diff (-1) 1
 
--- TODO: Change the Pos tuple to Move
 knightMoves :: Pos -> Board -> [Move]
 knightMoves src board = filter hasValidDst moves
     where
-        (Piece color Knight) = getB src board
+        color = colorOf $ getB src board
         moves = map (\diff -> NormalMove src (src `posPlusDiff` diff)) knightDiffs
         hasValidDst (NormalMove _src dst) = isWithinBoard dst &&
                                             not (isColor color (getB dst board))
 
 knightDiffs :: [Diff]
-knightDiffs = [Diff 2    1,
-               Diff 2    (-1),
-               Diff 1    (-2),
-               Diff (-1) (-2),
-               Diff (-2) (-1),
-               Diff (-2) 1,
-               Diff 1    2,
-               Diff (-1) 2]
+knightDiffs = [downRight, downLeft, leftDown, leftUp, upLeft, upRight, rightDown, rightUp]
+    where
+        downRight = Diff 2    1
+        downLeft  = Diff 2    (-1)
+        leftDown  = Diff 1    (-2)
+        leftUp    = Diff (-1) (-2)
+        upLeft    = Diff (-2) (-1)
+        upRight   = Diff (-2) 1
+        rightDown = Diff 1    2
+        rightUp   = Diff (-1) 2
 
 pawnMoves :: Pos -> Board -> [Move]
 pawnMoves src board = moves
@@ -180,8 +165,8 @@ pawnMoves src board = moves
         moves = concatMap createMove dsts
 
 -- TODO: Improve variable names
-castlings :: MovesFun
-castlings = concatApply [kingSideCastle, queenSideCastle]
+castlingsMovesFun :: MovesFun
+castlingsMovesFun = concatApply [kingSideCastle, queenSideCastle]
 
 kingSideCastle :: MovesFun
 kingSideCastle c b
@@ -201,4 +186,24 @@ queenSideCastle c b
 
 getBL :: [Pos] -> Board -> [Square]
 getBL ps b = [getB p b | p <- ps]
+
+
+-------------------------------------------------------------------------------
+-- Diff
+-------------------------------------------------------------------------------
+
+data Diff = Diff Int Int deriving (Eq, Show, Ord)
+
+posDiff :: Pos -> Pos -> Diff
+posDiff (Pos srcRow srcCol) (Pos dstRow dstCol) =
+    Diff (srcRow - dstRow) (srcCol - dstCol)
+
+diffMaxAbs :: Diff -> Int
+diffMaxAbs (Diff row col) = max (abs row) (abs col)
+
+posPlusDiff :: Pos -> Diff -> Pos
+posPlusDiff (Pos row col) (Diff rowDiff colDiff) = Pos (row + rowDiff) (col + colDiff)
+
+expandDiffByOne :: Diff -> Diff
+expandDiffByOne (Diff rowDiff colDiff) = Diff (rowDiff + signum rowDiff) (colDiff + signum colDiff)
 
