@@ -127,7 +127,6 @@ knightMoves src board = filter hasValidDst moves
         hasValidDst (NormalMove _src dst) = isWithinBoard dst &&
                                             not (isColor color (getB dst board))
 
--- TODO: This hard coding means that each diff must be tested
 knightDiffs :: [Diff]
 knightDiffs = [Diff 2    1,
                Diff 2    (-1),

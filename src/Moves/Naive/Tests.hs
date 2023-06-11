@@ -251,6 +251,60 @@ prop_pawns = verifyMoves expMoves Black board
                -- King at (0 0)
                (normalMovesFrom (Pos 0 0) [(Pos 0 1), (Pos 1 0)])
 
+prop_knights :: Property
+prop_knights = verifyMoves expMoves Black board
+  where
+    board = read  "  0 1 2 3 4 5 6 7  \n\
+                  \0 ♗       ♚     ♜ 0\n\
+                  \1     ♝   ♜ ♜   ♙ 1\n\
+                  \2 ♜     ♗     ♕ ♝ 2\n\
+                  \3 ♖           ♖   3\n\
+                  \4 ♟     ♘ ♞       4\n\
+                  \5       ♖   ♘   ♝ 5\n\
+                  \6 ♟ ♙         ♖   6\n\
+                  \7 ♗   ♞   ♔     ♖ 7\n\
+                  \  0 1 2 3 4 5 6 7"
+    expMoves = -- Knight at (4 4)
+               (normalMovesFrom (Pos 4 4) [(Pos 2 5), (Pos 3 6), (Pos 5 6),
+                                           (Pos 6 5), (Pos 6 3), (Pos 5 2),
+                                           (Pos 3 2), (Pos 2 3)]) ++
+               
+               -- Knight at (7 2)
+               (normalMovesFrom (Pos 7 2) [(Pos 5 1), (Pos 5 3), (Pos 6 4)]) ++
+
+               -- Rook at (2 0)
+               (normalMovesFrom (Pos 2 0) [(Pos 1 0), (Pos 0 0), (Pos 2 1),
+                                           (Pos 2 2), (Pos 2 3), (Pos 3 0)]) ++
+               
+               -- Pawn at (4 0)
+               (normalMovesFrom (Pos 4 0) [(Pos 5 0)]) ++
+
+               -- Pawn at (6 0)
+               [] ++
+
+               -- Bishop at (1 2)
+               (normalMovesFrom (Pos 1 2) [(Pos 0 1), (Pos 0 3), (Pos 2 3),
+                                           (Pos 2 1), (Pos 3 0)]) ++
+               
+               -- King at (0 4)
+               (normalMovesFrom (Pos 0 4) [(Pos 0 5), (Pos 0 3), (Pos 1 3)]) ++
+
+               -- Rook at (1 4)
+               (normalMovesFrom (Pos 1 4) [(Pos 1 3), (Pos 2 4), (Pos 3 4)]) ++
+
+               -- Rook at (1 5)
+               [] ++
+               
+               -- Rook at (0 7)
+               (normalMovesFrom (Pos 0 7) [(Pos 0 6), (Pos 0 5), (Pos 1 7)]) ++
+
+               -- Bishop at (2 7)
+               (normalMovesFrom (Pos 2 7) [(Pos 1 6), (Pos 0 5), (Pos 3 6)]) ++
+
+               -- Bishop at (5 7)
+               (normalMovesFrom (Pos 5 7) [(Pos 6 6), (Pos 4 6), (Pos 3 5),
+                                           (Pos 2 4), (Pos 1 3), (Pos 0 2)])
+
 
 --------------------------------------------------------------------------------
 -- Check and king
