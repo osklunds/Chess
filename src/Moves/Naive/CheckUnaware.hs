@@ -125,9 +125,8 @@ pawnMoves :: Pos -> Board -> [Move]
 pawnMoves src board = moves
     where
         color = colorOf $ getB src board
-        forwardDir = case color of
-                       Black -> 1
-                       White -> (-1)
+        forwardDir = pawnForwardDir color
+
         left          = src `posPlusDiff` Diff forwardDir     (-1)
         right         = src `posPlusDiff` Diff forwardDir     1
         forward       = src `posPlusDiff` Diff forwardDir     0
@@ -159,6 +158,10 @@ pawnMoves src board = moves
                         False ->
                             \dst -> [NormalMove src dst]
         moves = concatMap createMove dsts
+
+pawnForwardDir :: Color -> Int
+pawnForwardDir Black = 1
+pawnForwardDir White = -1
 
 -- TODO: Improve variable names
 castlingsMovesFun :: MovesFun
