@@ -145,20 +145,19 @@ pawnMoves src board = moves
                [forward       | isWithinBoard forward       && isEmpty atForward                                              ] ++
                [doubleForward | isWithinBoard doubleForward && isEmpty atDoubleForward && isEmpty atForward && isAtPawnHomeRow]
 
-        dstAtGoalRow = case dsts of
-                        (dst:_rest) -> rowOf dst == pawnGoalRow color
-                        [] -> False
-        createMove = case dstAtGoalRow of
-                        True ->
-                        -- TODO: Assert that all dsts are at goal row
-                            \dst -> [Promote src dst kind | kind <- [Rook, Bishop, Knight, Queen]]
-                        False ->
-                            \dst -> [NormalMove src dst]
-        moves = concatMap createMove dsts
+        dstsAreAtGoalRow = case dsts of
+                               (dst:_rest) -> rowOf dst == pawnGoalRow color
+                               [] -> False
+        makeMovesFromDst = makePawnMoves dstsAreAtGoalRow src 
+        moves = concatMap makeMovesFromDst dsts
 
 pawnForwardDir :: Color -> Int
 pawnForwardDir Black = 1
 pawnForwardDir White = -1
+
+makePawnMoves :: Bool -> Pos -> Pos -> [Move]
+makePawnMoves True  src dst = [Promote src dst kind | kind <- [Rook, Bishop, Knight, Queen]]
+makePawnMoves False src dst = [NormalMove src dst]
 
 -- TODO: Improve variable names
 castlingsMovesFun :: MovesFun
