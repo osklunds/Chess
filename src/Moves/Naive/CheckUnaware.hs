@@ -143,10 +143,9 @@ pawnMoves src board = moves
                         Black -> row == 1
                         White -> row == 6
 
-        -- TODO: Make this prettier
-        dsts = [left | isWithinBoard left && isOtherColor color atLeft] ++
-               [right | isWithinBoard right && isOtherColor color atRight] ++
-               [forward | isWithinBoard forward && isEmpty atForward] ++
+        dsts = [left          | isWithinBoard left          && isOtherColor color atLeft                                   ] ++
+               [right         | isWithinBoard right         && isOtherColor color atRight                                  ] ++
+               [forward       | isWithinBoard forward       && isEmpty atForward                                           ] ++
                [doubleForward | isWithinBoard doubleForward && isEmpty atDoubleForward && isEmpty atForward && isAtStartRow]
 
         goalRow = homeRow $ invert color
