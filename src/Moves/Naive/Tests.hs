@@ -12,11 +12,6 @@ import qualified Moves.Naive.CheckUnaware as CU
 import Moves.Common
 import Lib
 
--- New strategy: Put most tests here. Use lots of hard coded boards, also for
--- "simple" sitations". Delete all normal move tests. Only add check unaware
--- tests if it's needed for debugging.
-
-
 --------------------------------------------------------------------------------
 -- General
 --------------------------------------------------------------------------------
