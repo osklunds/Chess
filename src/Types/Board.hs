@@ -20,6 +20,7 @@ module Types.Board
 , generateBoard
 , sampleBoard
 , homeRow
+, pawnHomeRow
 , numKings
 , swapPiecesAtPositions
 )
@@ -296,6 +297,10 @@ sampleBoard = sample (arbitrary :: Gen Board)
 homeRow :: Color -> Int
 homeRow White = 7
 homeRow Black = 0
+
+pawnHomeRow :: Color -> Int
+pawnHomeRow White = 6
+pawnHomeRow Black = 1
 
 numKings :: Board -> (Int,Int)
 numKings b = foldB f (0,0) b

@@ -138,14 +138,12 @@ pawnMoves src board = moves
         atDoubleForward = getB doubleForward board
 
         row = rowOf src
-        isAtStartRow = case color of
-                        Black -> row == 1
-                        White -> row == 6
+        isAtPawnHomeRow = row == pawnHomeRow color
 
-        dsts = [left          | isWithinBoard left          && isOtherColor color atLeft                                   ] ++
-               [right         | isWithinBoard right         && isOtherColor color atRight                                  ] ++
-               [forward       | isWithinBoard forward       && isEmpty atForward                                           ] ++
-               [doubleForward | isWithinBoard doubleForward && isEmpty atDoubleForward && isEmpty atForward && isAtStartRow]
+        dsts = [left          | isWithinBoard left          && isOtherColor color atLeft                                      ] ++
+               [right         | isWithinBoard right         && isOtherColor color atRight                                     ] ++
+               [forward       | isWithinBoard forward       && isEmpty atForward                                              ] ++
+               [doubleForward | isWithinBoard doubleForward && isEmpty atDoubleForward && isEmpty atForward && isAtPawnHomeRow]
 
         goalRow = homeRow $ invert color
         dstAtGoalRow = case dsts of
