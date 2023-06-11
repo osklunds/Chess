@@ -129,8 +129,7 @@ pawnMoves src board = moves
                        Black -> 1
                        White -> (-1)
         row = rowOf src
-        -- TODO: Use homeRow fun
-        isAtHomeRow = case color of
+        isAtStartRow = case color of
                         Black -> row == 1
                         White -> row == 6
 
@@ -148,7 +147,7 @@ pawnMoves src board = moves
         dsts = [left | isWithinBoard left && isOtherColor color atLeft] ++
                [right | isWithinBoard right && isOtherColor color atRight] ++
                [forward | isWithinBoard forward && isEmpty atForward] ++
-               [doubleForward | isWithinBoard doubleForward && isEmpty atDoubleForward && isEmpty atForward && isAtHomeRow]
+               [doubleForward | isWithinBoard doubleForward && isEmpty atDoubleForward && isEmpty atForward && isAtStartRow]
 
         goalRow = case color of
                     Black -> 7
