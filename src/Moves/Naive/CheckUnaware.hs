@@ -145,9 +145,8 @@ pawnMoves src board = moves
                [forward       | isWithinBoard forward       && isEmpty atForward                                              ] ++
                [doubleForward | isWithinBoard doubleForward && isEmpty atDoubleForward && isEmpty atForward && isAtPawnHomeRow]
 
-        goalRow = homeRow $ invert color
         dstAtGoalRow = case dsts of
-                        (dst:_rest) -> rowOf dst == goalRow
+                        (dst:_rest) -> rowOf dst == pawnGoalRow color
                         [] -> False
         createMove = case dstAtGoalRow of
                         True ->

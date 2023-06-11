@@ -21,6 +21,7 @@ module Types.Board
 , sampleBoard
 , homeRow
 , pawnHomeRow
+, pawnGoalRow
 , numKings
 , swapPiecesAtPositions
 )
@@ -301,6 +302,9 @@ homeRow Black = 0
 pawnHomeRow :: Color -> Int
 pawnHomeRow White = 6
 pawnHomeRow Black = 1
+
+pawnGoalRow :: Color -> Int
+pawnGoalRow = homeRow . invert
 
 numKings :: Board -> (Int,Int)
 numKings b = foldB f (0,0) b
