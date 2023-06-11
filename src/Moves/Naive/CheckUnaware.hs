@@ -167,25 +167,27 @@ makePawnMoves :: Bool -> Pos -> Pos -> [Move]
 makePawnMoves True  src dst = [Promote src dst kind | kind <- [Rook, Bishop, Knight, Queen]]
 makePawnMoves False src dst = [NormalMove src dst]
 
--- TODO: Improve variable names
 castlingsMovesFun :: MovesFun
 castlingsMovesFun = concatApply [kingSideCastle, queenSideCastle]
 
 kingSideCastle :: MovesFun
-kingSideCastle color board
-    | actualLane == laneNeededforCastle = [Castle color KingSide]
-    | otherwise = []
+kingSideCastle color = castleHelper laneNeededforCastle cols KingSide color
     where
-        actualLane = getBList [Pos (homeRow color) col | col <- [4..7]] board
         laneNeededforCastle = [Piece color King, Empty, Empty, Piece color Rook]
+        cols = [4..7]
 
 queenSideCastle :: MovesFun
-queenSideCastle c b
-    | getBList [Pos row col | col <- [0..4]] b == lane = [Castle c QueenSide]
-    | otherwise                                     = []
+queenSideCastle color = castleHelper laneNeededforCastle cols QueenSide color
     where
-        row = homeRow c
-        lane = [Piece c Rook, Empty, Empty, Empty, Piece c King]
+        laneNeededforCastle = [Piece color Rook, Empty, Empty, Empty, Piece color King]
+        cols = [0..4]
+
+castleHelper :: [Square] -> [Int] -> Side -> MovesFun
+castleHelper laneNeededforCastle cols castleSide color board
+    | actualLane == laneNeededforCastle = [Castle color castleSide]
+    | otherwise = []
+    where
+        actualLane = getBList [Pos (homeRow color) col | col <- cols] board
 
 getBList :: [Pos] -> Board -> [Square]
 getBList ps b = [getB p b | p <- ps]
