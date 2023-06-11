@@ -2,7 +2,7 @@
 -- Generation of all syntactially possible moves.
 
 module Moves.Naive.CheckUnaware
-( movesF
+( movesFun
 )
 where
 
@@ -10,8 +10,8 @@ import Types
 import Moves.Common
 import Debug.Trace
 
-movesF :: MovesFun
-movesF = concatApply [normalAndPromotes, castlings]
+movesFun :: MovesFun
+movesFun = concatApply [normalAndPromotes, castlings]
 
 concatApply :: [MovesFun] -> MovesFun
 concatApply movesFuns color board = concat [movesFun color board | movesFun <- movesFuns]

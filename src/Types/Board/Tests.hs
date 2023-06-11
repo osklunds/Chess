@@ -199,7 +199,7 @@ prop_castleDistribution = moveDistribution pred
 moveDistribution :: (Move -> Bool) -> Board -> Property
 moveDistribution pred b = collect moveAvailable True
     where
-        moves = movesF Black b
+        moves = movesFun Black b
         moveAvailable = any (pred) moves
 
 

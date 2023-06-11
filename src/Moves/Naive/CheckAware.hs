@@ -3,7 +3,7 @@
 -- you may not be in check afterwards.
 
 module Moves.Naive.CheckAware
-( movesF
+( movesFun
 , isKingThreatened
 )
 where
@@ -14,8 +14,8 @@ import Moves.Common
 import Control.Exception
 
 
-movesF :: MovesFun
-movesF color board = filter isAllowed $ CU.movesF color board
+movesFun :: MovesFun
+movesFun color board = filter isAllowed $ CU.movesFun color board
     where
         attPoss = attackedPositions (invert color) board
         isAllowed move = isMoveAllowed move color board attPoss
@@ -34,7 +34,7 @@ isCastleAllowed castleColor side moveColor _board attPoss =
 attackedPositions :: Color -> Board -> [Pos]
 attackedPositions color board = dests
     where
-        moves = CU.movesF color board
+        moves = CU.movesFun color board
         dests = concatMap moveToCapturedPoss moves
 
 moveToCapturedPoss :: Move -> [Pos]

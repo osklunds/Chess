@@ -104,10 +104,10 @@ prop_blackAndWhiteGiveSameMoves :: Board -> Bool
 prop_blackAndWhiteGiveSameMoves board =
     blackMoves `listEq` mirroredWhiteMoves
     where
-        blackMoves         = movesF Black board
+        blackMoves         = movesFun Black board
         swappedColors      = swapColors board
         mirroredBoard      = mirrorBoard swappedColors
-        whiteMoves         = movesF White mirroredBoard
+        whiteMoves         = movesFun White mirroredBoard
         mirroredWhiteMoves = map mirrorMove whiteMoves
 
 swapColors :: Board -> Board
@@ -139,7 +139,7 @@ mirrorMove (Castle color side) = Castle (invert color) side
 prop_noNonMoves :: Color -> Board -> Bool
 prop_noNonMoves color board = all isMove moves
     where
-        moves = movesF color board
+        moves = movesFun color board
 
         isMove (NormalMove src dst) = src /= dst
         isMove (Promote src dst _kind) = src /= dst
@@ -148,7 +148,7 @@ prop_noNonMoves color board = all isMove moves
 prop_srcAndDstAreWithinBoard :: Color -> Board -> Bool
 prop_srcAndDstAreWithinBoard color board = all isMoveWithinBoard moves
     where
-        moves = movesF color board
+        moves = movesFun color board
 
         isWithinBoard (Pos row col) = 0 <= row && row < 8 && 0 <= col && col < 8
 
@@ -159,7 +159,7 @@ prop_srcAndDstAreWithinBoard color board = all isMoveWithinBoard moves
 prop_dstIsNotSameColor :: Color -> Board -> Bool
 prop_dstIsNotSameColor color board = all dstIsNotSameColor moves
     where
-        moves = movesF color board
+        moves = movesFun color board
 
         isNotSameColor pos = not (isColor color (getB pos board))
 
@@ -170,7 +170,7 @@ prop_dstIsNotSameColor color board = all dstIsNotSameColor moves
 prop_srcIsSameColor :: Color -> Board -> Bool
 prop_srcIsSameColor color board = all srcIsSameColor moves
     where
-        moves = movesF color board
+        moves = movesFun color board
 
         isSameColor pos = isColor color (getB pos board)
 
@@ -424,8 +424,8 @@ prop_movesAreSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
 prop_movesAreSubsetOfCheckUnawareMoves color board =
   moves `isSubsetOf` movesCheckUnaware
   where
-    moves             = movesF color board
-    movesCheckUnaware = CU.movesF color board
+    moves             = movesFun color board
+    movesCheckUnaware = CU.movesFun color board
 
 --------------------------------------------------------------------------------
 -- Castling
@@ -538,7 +538,7 @@ prop_noCastlingOtherRow = movesFromBoardWithKingAtRow 0 `listEq` allCastlings &&
                       \6 ♜             ♜ 6\n\
                       \7 ♜             ♜ 7\n\
                       \  0 1 2 3 4 5 6 7"
-        movesFromBoardWithKingAtRow row = movesFOnlyCastling Black board'
+        movesFromBoardWithKingAtRow row = movesFunOnlyCastling Black board'
             where
                 board' = setB (Pos row 4) (Piece Black King) $
                          setB (Pos row 4) Empty $ board
@@ -553,11 +553,11 @@ prop_noCastlingOtherRow = movesFromBoardWithKingAtRow 0 `listEq` allCastlings &&
 type VerifyMovesFun = [Move] -> Color -> Board -> Property
 
 verifyMovesCustomFun :: MovesFun -> VerifyMovesFun
-verifyMovesCustomFun movesF expMoves' color board =
+verifyMovesCustomFun movesFun expMoves' color board =
     counterexample errorString verificationResult
     where
         expMoves = sort expMoves'
-        actMoves = sort $ movesF color board
+        actMoves = sort $ movesFun color board
         verificationResult = expMoves == actMoves
         actualMissing = expMoves \\ actMoves
         actualExtra = actMoves \\ expMoves
@@ -568,13 +568,13 @@ verifyMovesCustomFun movesF expMoves' color board =
                       "Actual has these extra: " ++ show actualExtra
 
 verifyMoves :: VerifyMovesFun
-verifyMoves = verifyMovesCustomFun movesF
+verifyMoves = verifyMovesCustomFun movesFun
 
 verifyCastlingMoves :: VerifyMovesFun
-verifyCastlingMoves = verifyMovesCustomFun movesFOnlyCastling
+verifyCastlingMoves = verifyMovesCustomFun movesFunOnlyCastling
 
-movesFOnlyCastling :: MovesFun
-movesFOnlyCastling color board = filter isCastle $ movesF color board
+movesFunOnlyCastling :: MovesFun
+movesFunOnlyCastling color board = filter isCastle $ movesFun color board
 
 normalMovesFrom :: Pos -> [Pos] -> [Move]
 normalMovesFrom src dsts = map (NormalMove src) dsts
