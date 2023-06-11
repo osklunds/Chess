@@ -190,7 +190,7 @@ castleHelper laneNeededforCastle cols castleSide color board
         actualLane = getBList [Pos (homeRow color) col | col <- cols] board
 
 getBList :: [Pos] -> Board -> [Square]
-getBList ps b = [getB p b | p <- ps]
+getBList poss board = [getB pos board | pos <- poss]
 
 
 -------------------------------------------------------------------------------
