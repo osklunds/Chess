@@ -172,23 +172,23 @@ castlingsMovesFun :: MovesFun
 castlingsMovesFun = concatApply [kingSideCastle, queenSideCastle]
 
 kingSideCastle :: MovesFun
-kingSideCastle c b
-    | getBL [Pos row col | col <- [4..7]] b == lane = [Castle c KingSide]
-    | otherwise                                     = []
+kingSideCastle color board
+    | actualLane == laneNeededforCastle = [Castle color KingSide]
+    | otherwise = []
     where
-        row = homeRow c
-        lane = [Piece c King, Empty, Empty, Piece c Rook]
+        actualLane = getBList [Pos (homeRow color) col | col <- [4..7]] board
+        laneNeededforCastle = [Piece color King, Empty, Empty, Piece color Rook]
 
 queenSideCastle :: MovesFun
 queenSideCastle c b
-    | getBL [Pos row col | col <- [0..4]] b == lane = [Castle c QueenSide]
+    | getBList [Pos row col | col <- [0..4]] b == lane = [Castle c QueenSide]
     | otherwise                                     = []
     where
         row = homeRow c
         lane = [Piece c Rook, Empty, Empty, Empty, Piece c King]
 
-getBL :: [Pos] -> Board -> [Square]
-getBL ps b = [getB p b | p <- ps]
+getBList :: [Pos] -> Board -> [Square]
+getBList ps b = [getB p b | p <- ps]
 
 
 -------------------------------------------------------------------------------
