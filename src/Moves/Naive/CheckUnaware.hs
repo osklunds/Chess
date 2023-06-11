@@ -9,6 +9,7 @@ where
 import Types
 import Moves.Common
 import Debug.Trace
+import Control.Exception
 
 movesFun :: MovesFun
 movesFun = concatApply [normalAndPromotesMovesFun, castlingsMovesFun]
@@ -145,9 +146,13 @@ pawnMoves src board = moves
                [forward       | isWithinBoard forward       && isEmpty atForward                                              ] ++
                [doubleForward | isWithinBoard doubleForward && isEmpty atDoubleForward && isEmpty atForward && isAtPawnHomeRow]
 
-        dstsAreAtGoalRow = case dsts of
-                               (dst:_rest) -> rowOf dst == pawnGoalRow color
+        isAtGoalRow dst = rowOf dst == pawnGoalRow color
+        oneDstIsAtGoalRow = case dsts of
+                               (dst:_rest) -> isAtGoalRow dst
                                [] -> False
+        allDstsAreAtGoalRow = all isAtGoalRow dsts
+        dstsAreAtGoalRow = assert (oneDstIsAtGoalRow == allDstsAreAtGoalRow) oneDstIsAtGoalRow
+
         makeMovesFromDst = makePawnMoves dstsAreAtGoalRow src 
         moves = concatMap makeMovesFromDst dsts
 
