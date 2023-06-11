@@ -128,11 +128,6 @@ pawnMoves src board = moves
         forwardDir = case color of
                        Black -> 1
                        White -> (-1)
-        row = rowOf src
-        isAtStartRow = case color of
-                        Black -> row == 1
-                        White -> row == 6
-
         left          = src `posPlusDiff` Diff forwardDir     (-1)
         right         = src `posPlusDiff` Diff forwardDir     1
         forward       = src `posPlusDiff` Diff forwardDir     0
@@ -143,15 +138,18 @@ pawnMoves src board = moves
         atForward       = getB forward board
         atDoubleForward = getB doubleForward board
 
+        row = rowOf src
+        isAtStartRow = case color of
+                        Black -> row == 1
+                        White -> row == 6
+
         -- TODO: Make this prettier
         dsts = [left | isWithinBoard left && isOtherColor color atLeft] ++
                [right | isWithinBoard right && isOtherColor color atRight] ++
                [forward | isWithinBoard forward && isEmpty atForward] ++
                [doubleForward | isWithinBoard doubleForward && isEmpty atDoubleForward && isEmpty atForward && isAtStartRow]
 
-        goalRow = case color of
-                    Black -> 7
-                    White -> 0
+        goalRow = homeRow $ invert color
         dstAtGoalRow = case dsts of
                         (dst:_rest) -> rowOf dst == goalRow
                         [] -> False
