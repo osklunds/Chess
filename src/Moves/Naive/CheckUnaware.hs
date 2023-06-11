@@ -146,19 +146,22 @@ pawnMoves src board = moves
                [forward       | isWithinBoard forward       && isEmpty atForward                                              ] ++
                [doubleForward | isWithinBoard doubleForward && isEmpty atDoubleForward && isEmpty atForward && isAtPawnHomeRow]
 
-        isAtGoalRow dst = rowOf dst == pawnGoalRow color
-        oneDstIsAtGoalRow = case dsts of
-                               (dst:_rest) -> isAtGoalRow dst
-                               [] -> False
-        allDstsAreAtGoalRow = all isAtGoalRow dsts
-        dstsAreAtGoalRow = assert (oneDstIsAtGoalRow == allDstsAreAtGoalRow) oneDstIsAtGoalRow
-
-        makeMovesFromDst = makePawnMoves dstsAreAtGoalRow src 
+        atGoalRow = dstsAreAtPawnGoalRow dsts color
+        makeMovesFromDst = makePawnMoves atGoalRow src 
         moves = concatMap makeMovesFromDst dsts
 
 pawnForwardDir :: Color -> Int
 pawnForwardDir Black = 1
 pawnForwardDir White = -1
+
+dstsAreAtPawnGoalRow :: [Pos] -> Color -> Bool
+dstsAreAtPawnGoalRow dsts color = assert (oneDstIsAtGoalRow == allDstsAreAtGoalRow) oneDstIsAtGoalRow
+    where
+        isAtGoalRow dst = rowOf dst == pawnGoalRow color
+        oneDstIsAtGoalRow = case dsts of
+                               (dst:_rest) -> isAtGoalRow dst
+                               [] -> False
+        allDstsAreAtGoalRow = all isAtGoalRow dsts
 
 makePawnMoves :: Bool -> Pos -> Pos -> [Move]
 makePawnMoves True  src dst = [Promote src dst kind | kind <- [Rook, Bishop, Knight, Queen]]
