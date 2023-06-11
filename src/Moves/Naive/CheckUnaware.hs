@@ -26,14 +26,13 @@ movesFromPos pos color board
     | otherwise           = []
     where
         atPos = getB pos board
-        -- TODO: Name the underscores
         movesFun = case atPos of
-                     (Piece _ King )  -> kingMoves
-                     (Piece _ Queen)  -> queenMoves
-                     (Piece _ Rook)   -> rookMoves
-                     (Piece _ Bishop) -> bishopMoves
-                     (Piece _ Knight) -> knightMoves
-                     (Piece _ Pawn)   -> pawnMoves
+                     (Piece _color King )  -> kingMoves
+                     (Piece _color Queen)  -> queenMoves
+                     (Piece _color Rook)   -> rookMoves
+                     (Piece _color Bishop) -> bishopMoves
+                     (Piece _color Knight) -> knightMoves
+                     (Piece _color Pawn)   -> pawnMoves
 
 kingMoves :: Pos -> Board -> [Move]
 kingMoves pos board = filter isOneStep $ queenMoves pos board
