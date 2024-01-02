@@ -74,6 +74,13 @@ evalState color (State {board, numberOfMoves, turn}) =
 
 -- Or to use move evaluation in the optimization algorithm
 
+-- The solution to go for, for now, is that if two moves have the same score in
+-- the end, then the move with the highest score *first* wins, if equal then
+-- second, and so on. The reasoning is that long term they are the same. So do
+-- the shortest term good move because in the next round, you are allowed to
+-- think one more step, and then it's good to start from a better board. A more
+-- concrete reason is to force the computer to "make progress".
+
 instance Ord Score where
   compare (Score (numScore1,numMoves1)) (Score (numScore2,numMoves2))
     = compare (numScore1,numMoves2) (numScore2,numMoves1)
