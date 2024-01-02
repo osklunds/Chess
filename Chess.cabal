@@ -23,6 +23,6 @@ executable Chess
         -Wno-missing-home-modules
         -freverse-errors
         -fno-ignore-asserts
-    build-depends:       base >=4.13 && <4.14, QuickCheck, containers
+    build-depends:       base >=4.13, QuickCheck, containers, parallel, random
     hs-source-dirs:      src
     default-language:    Haskell2010
