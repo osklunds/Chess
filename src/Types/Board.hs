@@ -1,5 +1,6 @@
 
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE NamedFieldPuns #-}
 
 -- Representation of a board.
 -- All operations that return a board assert that the returned board is a legal
@@ -41,8 +42,18 @@ import Types.Move
 -- Data types
 --------------------------------------------------------------------------------
 
-newtype Board = Board [[Square]]
-              deriving (Eq, Ord)
+data Board = Board { rows :: [[Square]],
+                     blackCastleState :: CastleState,
+                     whiteCastleState :: CastleState
+                   }
+             deriving (Eq, Ord)
+
+-- TODO: Make type more specific than Bool
+data CastleState = CastleState { leftRook :: Bool,
+                                 king :: Bool,
+                                 rightRook :: Bool
+                               }
+                   deriving (Eq, Ord)
 
 --------------------------------------------------------------------------------
 -- Show
@@ -52,9 +63,9 @@ instance Show Board where
   show = showBoard
 
 showBoard :: Board -> String
-showBoard (Board rows) = "  a b c d e f g h\n" ++
-                         (concatMap showRowAndIndex rowsAndIndexes) ++
-                         "  a b c d e f g h"
+showBoard (Board { rows }) = "  a b c d e f g h\n" ++
+                             (concatMap showRowAndIndex rowsAndIndexes) ++
+                             "  a b c d e f g h"
   where
     rowsAndIndexes = zip rows [8,7..1]
 
@@ -73,7 +84,7 @@ instance Read Board where
   readsPrec _ str = [(fromString str, "")]
 
 fromString :: String -> Board
-fromString board = Board $ map f rows''
+fromString board = Board { rows = map f rows'', blackCastleState, whiteCastleState}
     where
         rows   = lines board
         rows'  = tail rows
@@ -82,6 +93,10 @@ fromString board = Board $ map f rows''
         f row  = [read [c] | (c,i) <- rowWithIndexes, not (isDigit c), even i]
             where
                 rowWithIndexes = zip row [0..]
+
+        -- TODO: Read instead
+        blackCastleState = CastleState { leftRook = True, king = True, rightRook = True }
+        whiteCastleState = blackCastleState
 
 --------------------------------------------------------------------------------
 -- Arbitrary
@@ -100,7 +115,10 @@ arbitraryBoard = do
 
     middleRows <- replicateM 6 $ replicateM 8 arbitrary
 
-    let board = Board $ [row0'] ++ middleRows ++ [row7']
+    -- TODO: Generate
+    let blackCastleState = CastleState { leftRook = True, king = True, rightRook = True }
+    let whiteCastleState = blackCastleState
+    let board = Board { rows = [row0'] ++ middleRows ++ [row7'], blackCastleState, whiteCastleState }
     let noKings = mapB' (\sq -> if isKing sq then Empty else sq) board
     
     castle <- oneIn 4
@@ -177,7 +195,7 @@ instance Arbitrary Side where
 --------------------------------------------------------------------------------
 
 getB :: Pos -> Board -> Square
-getB (Pos row col) (Board board) = (board !! row) !! col
+getB (Pos row col) (Board { rows }) = (rows !! row) !! col
 
 setB :: Pos -> Square -> Board -> Board
 setB pos sq b = checkedBoard newBoard
@@ -185,11 +203,11 @@ setB pos sq b = checkedBoard newBoard
         newBoard = setB' pos sq b
 
 setB' :: Pos -> Square -> Board -> Board
-setB' (Pos rowIdx colIdx) sq (Board oldBoard) = Board $ newBoard
+setB' (Pos rowIdx colIdx) sq board@(Board { rows = oldRows }) = board { rows = newRows }
     where
-        oldRow = oldBoard !! rowIdx
+        oldRow = oldRows !! rowIdx
         newRow = replaceAt colIdx sq oldRow
-        newBoard = replaceAt rowIdx newRow oldBoard
+        newRows = replaceAt rowIdx newRow oldRows
 
 checkedBoard :: Board -> Board
 -- TODO: foldAssert etc?
@@ -198,7 +216,7 @@ checkedBoard board = assertSize $
                      assertPawnPositions board
 
 assertSize :: Board -> Board
-assertSize board@(Board rows) = assert (length rows == 8 && all ((==8) . length) rows) board
+assertSize board@(Board { rows }) = assert (length rows == 8 && all ((==8) . length) rows) board
 
 assertNumKings :: Board -> Board
 assertNumKings board = assert (numBlack <= 1 && numWhite <= 1) board
@@ -219,13 +237,13 @@ foldB :: (a -> Square -> a) -> a -> Board -> a
 foldB f v board = foldl f v $ concatB board
 
 concatB :: Board -> [Square]
-concatB (Board rows) = concat rows
+concatB (Board { rows }) = concat rows
 
 mapB :: (Square -> Square) -> Board -> Board
 mapB f b = checkedBoard $ mapB' f b
 
 mapB' :: (Square -> Square) -> Board -> Board
-mapB' f (Board rows) = Board $ map (\row -> map f row) rows
+mapB' f board@(Board  { rows }) = board {rows = map (\row -> map f row) rows }
 
 anyB :: (Square -> Bool) -> Board -> Bool
 anyB f = foldB (\acc square -> acc || f square) False
@@ -280,11 +298,15 @@ applyCastle color side board = board'
                  setB' (Pos row newRookCol) (Piece color Rook) board
 
 defaultBoard :: Board
-defaultBoard = Board $ [map (\kind -> Piece Black kind) defaultRow] ++
-                       [replicate 8 $ Piece Black Pawn] ++
-                       (replicate 4 $ replicate 8 $ Empty) ++
-                       [replicate 8 $ Piece White Pawn] ++
-                       [map (\kind -> Piece White kind) defaultRow]
+defaultBoard = Board { rows, blackCastleState, whiteCastleState }
+    where
+        rows = [map (\kind -> Piece Black kind) defaultRow] ++
+               [replicate 8 $ Piece Black Pawn] ++
+               (replicate 4 $ replicate 8 $ Empty) ++
+               [replicate 8 $ Piece White Pawn] ++
+               [map (\kind -> Piece White kind) defaultRow]
+        blackCastleState = CastleState { leftRook = True, king = True, rightRook = True }
+        whiteCastleState = blackCastleState
 
 defaultRow = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
 
