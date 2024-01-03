@@ -34,6 +34,6 @@ Chess AI written in Haskell.
     - Moves are re-calculated so many times. For generating check aware moves,
       calculating game result, calculating the score, etc. This should be
       optimized
-    - Move Score to top-level
+    - ~~Move Score to top-level~~
     - Test promotes with MoveSelection
 

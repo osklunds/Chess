@@ -1,12 +1,12 @@
 
 {-# LANGUAGE TemplateHaskell #-}
 
-module MoveSelection.Score.Tests where
+module Score.Tests where
 
 import Test.QuickCheck
 
 import Types
-import MoveSelection.Score
+import Score
 
 
 prop_scoreNormal :: Bool

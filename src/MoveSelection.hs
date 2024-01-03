@@ -15,7 +15,7 @@ import Test.QuickCheck
 
 import Types
 import Moves
-import MoveSelection.Score
+import Score
 import Optimize
 
 
