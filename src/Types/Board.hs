@@ -48,12 +48,13 @@ data Board = Board { rows :: [[Square]],
                    }
              deriving (Eq, Ord)
 
--- TODO: Make type more specific than Bool
-data CastleState = CastleState { leftRook :: Bool,
-                                 king :: Bool,
-                                 rightRook :: Bool
+data CastleState = CastleState { leftRook  :: CastleMoved,
+                                 king      :: CastleMoved,
+                                 rightRook :: CastleMoved
                                }
                    deriving (Eq, Ord)
+
+data CastleMoved = Moved | Unmoved deriving (Eq, Ord)
 
 --------------------------------------------------------------------------------
 -- Show
@@ -95,7 +96,7 @@ fromString board = Board { rows = map f rows'', blackCastleState, whiteCastleSta
                 rowWithIndexes = zip row [0..]
 
         -- TODO: Read instead
-        blackCastleState = CastleState { leftRook = True, king = True, rightRook = True }
+        blackCastleState = CastleState { leftRook = Unmoved, king = Unmoved, rightRook = Unmoved }
         whiteCastleState = blackCastleState
 
 --------------------------------------------------------------------------------
@@ -116,7 +117,7 @@ arbitraryBoard = do
     middleRows <- replicateM 6 $ replicateM 8 arbitrary
 
     -- TODO: Generate
-    let blackCastleState = CastleState { leftRook = True, king = True, rightRook = True }
+    let blackCastleState = CastleState { leftRook = Unmoved, king = Unmoved, rightRook = Unmoved }
     let whiteCastleState = blackCastleState
     let board = Board { rows = [row0'] ++ middleRows ++ [row7'], blackCastleState, whiteCastleState }
     let noKings = mapB' (\sq -> if isKing sq then Empty else sq) board
@@ -305,7 +306,7 @@ defaultBoard = Board { rows, blackCastleState, whiteCastleState }
                (replicate 4 $ replicate 8 $ Empty) ++
                [replicate 8 $ Piece White Pawn] ++
                [map (\kind -> Piece White kind) defaultRow]
-        blackCastleState = CastleState { leftRook = True, king = True, rightRook = True }
+        blackCastleState = CastleState { leftRook = Unmoved, king = Unmoved, rightRook = Unmoved }
         whiteCastleState = blackCastleState
 
 defaultRow = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
