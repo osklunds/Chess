@@ -63,6 +63,24 @@ setSquare pos sq board = newIsChanged && othersAreUnchanged
 prop_showRead :: Board -> Bool
 prop_showRead board = board == read (show board)
 
+prop_read :: Bool
+prop_read = expBoard == read inputString
+    where
+        inputString = "  a b c d e f g h  \n\
+                      \8 ♜ ♞ ♝ ♛ ♚ ♝ ♞ ♜ 8\n\
+                      \7 ♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟ 7\n\
+                      \6                 6\n\
+                      \5         ♞       5\n\
+                      \4                 4\n\
+                      \3                 3\n\
+                      \2 ♙ ♙ ♙ ♙   ♙ ♙ ♙ 2\n\
+                      \1 ♜ ♘ ♗ ♕ ♔ ♗ ♘ ♖ 1\n\
+                      \  a b c d e f g h"
+        expBoard = setB (Pos 3 4) (Piece Black Knight) $
+                   setB (Pos 7 0) (Piece Black Rook) $
+                   setB (Pos 6 4) Empty $
+                   defaultBoard
+
 --------------------------------------------------------------------------------
 -- applyMove
 --------------------------------------------------------------------------------
