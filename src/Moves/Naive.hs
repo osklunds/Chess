@@ -1,11 +1,11 @@
 
 module Moves.Naive
-( movesF
+( movesFun
 )
 where
 
 import Moves.Common
 import qualified Moves.Naive.CheckAware
 
-movesF :: MovesFun
-movesF = Moves.Naive.CheckAware.movesF
+movesFun :: MovesFun
+movesFun = Moves.Naive.CheckAware.movesFun

@@ -45,7 +45,7 @@ genStates (State {board, turn, numberOfMoves}) = states
   where
     hasKing = anyB (== (Piece turn King)) board
     moves   = case hasKing of
-                True  -> movesF turn board
+                True  -> movesFun turn board
                 False -> []
     -- Optimization. If "turn" has no king anyway, turn lost in a previous
     -- state and there's no need to check moves now.

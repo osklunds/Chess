@@ -140,12 +140,16 @@ parseInput [startCol,startRow,' ',destCol,destRow] _c = do
     return $ Move $ NormalMove start dest
 
 -- Promote
-parseInput [col,row,' ',kind] _c = do
-    col' <- parseCol col
-    row' <- parseRow row
-    let pos = Pos row' col'
+parseInput [startCol,startRow,' ',destCol,destRow,kind] _c = do
+    startCol' <- parseCol startCol
+    startRow' <- parseRow startRow
+    let start = (Pos startRow' startCol')
+    destCol'  <- parseCol destCol
+    destRow'  <- parseRow destRow
+    let dest = (Pos destRow' destCol')
     kind' <- parseKind kind
-    return $ Move $ Promote pos kind'
+    return $ Move $ Promote start dest kind'
+  -- TODO: Make common helper for normal and promote
 
 -- Castle
 parseInput "king" c = return $ Move $ Castle c KingSide
@@ -195,7 +199,7 @@ printBoardWithMove move = putStrLn . (showBoardWithMarkers markers) . board
     where
         markersAsPos = case move of
                     (NormalMove src dst) -> [src, dst]
-                    (Promote dst _kind) -> [dst]
+                    (Promote src dst _kind) -> [src, dst]
         markers = [(r,c) | (Pos r c) <- markersAsPos]
 
 showBoardWithMarkers :: [(Int,Int)] -> Board -> String

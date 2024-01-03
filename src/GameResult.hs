@@ -23,5 +23,5 @@ gameResult player board = case (canMove, isThreatened) of
                             (False, True ) -> Checkmate
                             (False, False) -> Draw
   where
-    canMove      = not $ null $ M.movesF player board
+    canMove      = not $ null $ M.movesFun player board
     isThreatened = isKingThreatened player board

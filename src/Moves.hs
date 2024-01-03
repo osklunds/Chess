@@ -2,12 +2,12 @@
 -- Generation of all possible moves.
 
 module Moves
-( movesF
+( movesFun
 )
 where
 
 import Moves.Common
-import qualified Moves.Naive as N
+import qualified Moves.Naive
 
-movesF :: MovesFun
-movesF = N.movesF
+movesFun :: MovesFun
+movesFun = Moves.Naive.movesFun

@@ -37,7 +37,7 @@ validateMove move (GameState {board, turn})
   | threatensCurKing             = WouldBeInCheck
   | otherwise                    = Ok
   where
-    legalMoves       = movesF turn board
+    legalMoves       = movesFun turn board
     newBoard         = T.applyMove move board
     threatensCurKing = GR.isKingThreatened turn newBoard
 
