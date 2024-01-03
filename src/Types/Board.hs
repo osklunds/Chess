@@ -64,11 +64,14 @@ instance Show Board where
   show = showBoard
 
 showBoard :: Board -> String
-showBoard (Board { rows }) = "  a b c d e f g h\n" ++
-                             (concatMap showRowAndIndex rowsAndIndexes) ++
-                             "  a b c d e f g h"
-  where
-    rowsAndIndexes = zip rows [8,7..1]
+showBoard (Board { rows, blackCastleState, whiteCastleState }) =
+    "  " ++ show blackCastleState ++ "\n" ++
+    "  a b c d e f g h\n" ++
+    (concatMap showRowAndIndex rowsAndIndexes) ++
+    "  a b c d e f g h\n" ++
+    "  " ++ show whiteCastleState
+    where
+        rowsAndIndexes = zip rows [8,7..1]
 
 showRowAndIndex :: ([Square], Int) -> String
 showRowAndIndex (row, i) = show i ++
@@ -76,6 +79,14 @@ showRowAndIndex (row, i) = show i ++
                            concat [show sq ++ " " | sq <- row] ++
                            show i ++
                            "\n"
+
+instance Show CastleState where
+    show (CastleState { leftRook, king, rightRook }) =
+        show leftRook ++ "       " ++ show king ++ "     " ++ show rightRook
+
+instance Show CastleMoved where
+    show Moved = "M"
+    show Unmoved = "U"
 
 --------------------------------------------------------------------------------
 -- Read
