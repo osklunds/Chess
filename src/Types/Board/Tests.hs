@@ -63,6 +63,26 @@ setSquare pos sq board = newIsChanged && othersAreUnchanged
 prop_showRead :: Board -> Bool
 prop_showRead board = board == read (show board)
 
+prop_show :: Property
+prop_show = counterexample (expString ++ "\n" ++ actString) result
+    where
+        board = setB (Pos 0 3) Empty $
+                setB (Pos 6 6) (Piece Black Bishop) $
+                setB (Pos 6 0) Empty $
+                defaultBoard
+        expString = "  a b c d e f g h\n\
+                    \8 ♜ ♞ ♝   ♚ ♝ ♞ ♜ 8\n\
+                    \7 ♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟ 7\n\
+                    \6                 6\n\
+                    \5                 5\n\
+                    \4                 4\n\
+                    \3                 3\n\
+                    \2   ♙ ♙ ♙ ♙ ♙ ♝ ♙ 2\n\
+                    \1 ♖ ♘ ♗ ♕ ♔ ♗ ♘ ♖ 1\n\
+                    \  a b c d e f g h"
+        actString = show board
+        result = expString == actString
+
 prop_read :: Bool
 prop_read = expBoard == read inputString
     where
