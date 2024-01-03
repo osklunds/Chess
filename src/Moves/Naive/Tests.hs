@@ -182,10 +182,8 @@ prop_srcIsSameColor color board = all srcIsSameColor moves
 -- Kind specific
 --
 -- These tests focus on boards with interesting scenarios for the different
--- kinds of pieces.  However, moves for all pieces are still verified to
+-- kinds of pieces. However, moves for all pieces are still verified to
 -- increase the total coverage and to test scenarios that are
--- randomly/accidentally created However, moves for all pieces are still
--- verified to increase the total coverage and to test scenarios that are
 -- randomly/accidentally created.
 --------------------------------------------------------------------------------
 
@@ -305,6 +303,7 @@ prop_knights = verifyMoves expMoves Black board
                (normalMovesFrom (Pos 5 7) [(Pos 6 6), (Pos 4 6), (Pos 3 5),
                                            (Pos 2 4), (Pos 1 3), (Pos 0 2)])
 
+-- TODO: Add tests for rook, queen, bishop too
 
 --------------------------------------------------------------------------------
 -- Check and king
