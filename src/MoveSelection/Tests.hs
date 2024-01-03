@@ -39,14 +39,15 @@ verifyCapturesPiece kind = verifyMakesMove expMove board'
     board' = setB dst piece board
 
 prop_escape :: Bool
+-- TODO: Use Int5 etc for depths instead
 prop_escape = and [verifyEscapesFromThreat d k | d <- depths, k <- nonKingKinds]
 
 verifyEscapesFromThreat :: Int -> Kind -> Bool
 verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'') 
                                          threatenedPosList
   where
-    curPos            = Pos 6 4
-    threatenedPosList = [curPos, Pos 6 2, Pos 0 0, Pos 0 1, Pos 1 1,
+    curPos            = Pos 5 4
+    threatenedPosList = [curPos, Pos 5 2, Pos 5 4, Pos 0 0, Pos 0 1, Pos 1 1,
                                  Pos 2 1, Pos 2 0]
     piece             = Piece Black kind
 
@@ -56,9 +57,9 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
                     \2                 2\n\
                     \3                 3\n\
                     \4                 4\n\
-                    \5                 5\n\
-                    \6        [ ]      6\n\
-                    \7       ♙         7\n\
+                    \5        [ ]      5\n\
+                    \6       ♙         6\n\
+                    \7                 7\n\
                     \  0 1 2 3 4 5 6 7"
     board'  = setB curPos piece board
     move    = makeMove depth board'
@@ -70,14 +71,14 @@ prop_checkmate = verifyMakesOneOfMoves expMoves board
     expMoves = [NormalMove (Pos 7 1) (Pos 7 0), NormalMove (Pos 6 1) (Pos 6 0)]
     -- The board looks like this to reduce the number of moves to speed up
     board = read  "  0 1 2 3 4 5 6 7  \n\
-                  \0 ♔   ♟           0\n\
+                  \0 ♔   ♝           0\n\
                   \1     ♟           1\n\
                   \2     ♟           2\n\
                   \3     ♟           3\n\
                   \4     ♟         ♚ 4\n\
                   \5     ♟           5\n\
                   \6   ♜ ♟           6\n\
-                  \7   ♜ ♟           7\n\
+                  \7   ♜ ♞           7\n\
                   \  0 1 2 3 4 5 6 7"
 
 prop_checkmateByMovingAwayPiece :: Bool
@@ -86,14 +87,14 @@ prop_checkmateByMovingAwayPiece = verifyMakesOneOfMoves expMoves board
     expMoves = [NormalMove (Pos 3 0) (Pos 1 2), NormalMove (Pos 3 0) (Pos 5 2)]
     -- The board looks like this to reduce the number of moves to speed up
     board = read  "  0 1 2 3 4 5 6 7  \n\
-                  \0 ♔     ♟         0\n\
+                  \0 ♔     ♞         0\n\
                   \1       ♟         1\n\
                   \2       ♟         2\n\
                   \3 ♝     ♟         3\n\
                   \4       ♟       ♚ 4\n\
                   \5       ♟         5\n\
                   \6       ♟         6\n\
-                  \7 ♜ ♜   ♟         7\n\
+                  \7 ♜ ♜   ♞         7\n\
                   \  0 1 2 3 4 5 6 7"
 
 prop_escapeFromCheckEvenIfCanCheckmate :: Bool
@@ -137,16 +138,16 @@ prop_promote :: Bool
 prop_promote = verifyMakesMove expMove board
     where
         board = read  "  0 1 2 3 4 5 6 7  \n\
-                      \0         ♙     ♚ 0\n\
-                      \1                 1\n\
+                      \0               ♚ 0\n\
+                      \1         ♙       1\n\
                       \2                 2\n\
                       \3                 3\n\
                       \4                 4\n\
                       \5     ♔           5\n\
-                      \6                 6\n\
-                      \7         ♟       7\n\
+                      \6         ♟       6\n\
+                      \7                 7\n\
                       \  0 1 2 3 4 5 6 7"
-        expMove = Promote (Pos 7 4) Queen
+        expMove = Promote (Pos 6 4) (Pos 7 4) Queen
 
 prop_promoteToKnight :: Bool
 prop_promoteToKnight = verifyMakesMove expMove board
@@ -157,11 +158,11 @@ prop_promoteToKnight = verifyMakesMove expMove board
                       \2                 2\n\
                       \3                 3\n\
                       \4                 4\n\
-                      \5   ♙ ♙ ♙   ♝     5\n\
-                      \6   ♙ ♔ ♙         6\n\
-                      \7   ♙ ♙   ♟       7\n\
+                      \5   ♙ ♘ ♙   ♝     5\n\
+                      \6   ♙ ♔ ♙ ♟       6\n\
+                      \7   ♘ ♘           7\n\
                       \  0 1 2 3 4 5 6 7"
-        expMove = Promote (Pos 7 4) Knight
+        expMove = Promote (Pos 6 4) (Pos 7 4) Knight
 
 prop_doNotPromote1 :: Bool
 prop_doNotPromote1 = verifyMakesMove expMove board
@@ -173,8 +174,8 @@ prop_doNotPromote1 = verifyMakesMove expMove board
                       \3                 3\n\
                       \4                 4\n\
                       \5 ♔               5\n\
-                      \6                 6\n\
-                      \7         ♟       7\n\
+                      \6         ♟       6\n\
+                      \7                 7\n\
                       \  0 1 2 3 4 5 6 7"
         expMove = NormalMove (Pos 1 2) (Pos 1 0)
 
@@ -188,8 +189,8 @@ prop_doNotPromote2 = verifyMakesMove expMove board
                       \3                 3\n\
                       \4                 4\n\
                       \5 ♔               5\n\
-                      \6                 6\n\
-                      \7             ♟   7\n\
+                      \6             ♟   6\n\
+                      \7                 7\n\
                       \  0 1 2 3 4 5 6 7"
         expMove = NormalMove (Pos 1 3) (Pos 2 2)
 
@@ -205,10 +206,10 @@ castleToWinBoard = read  "  0 1 2 3 4 5 6 7  \n\
                          \1                 1\n\
                          \2   ♙ ♙ ♔ ♙       2\n\
                          \3 ♘   ♙   ♙       3\n\
-                         \4         ♙        4\n\
+                         \4         ♙       4\n\
                          \5 ♗   ♙           5\n\
-                         \6     ♘         ♞ 6\n\
-                         \7 ♟   ♖   ♘       7\n\
+                         \6 ♟   ♘         ♞ 6\n\
+                         \7     ♖   ♘       7\n\
                          \  0 1 2 3 4 5 6 7"
 
 prop_doNotCastleIfThreatened :: Bool
@@ -228,7 +229,7 @@ prop_doNotCastleIfThreatened = verifyDoesNotMakeMove move board
 prop_legalMove :: Board -> Property
 prop_legalMove board = not (null legalMoves) ==> result
     where
-        legalMoves = movesF Black board
+        legalMoves = movesFun Black board
         -- TODO: Test for more depths when the algorithm is faster
         result = and [makeMove d board `elem` legalMoves | d <- [1..1]]
 
