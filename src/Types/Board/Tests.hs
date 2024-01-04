@@ -56,6 +56,14 @@ setSquare pos sq board = newIsChanged && othersAreUnchanged
         newIsChanged = getB pos newBoard == sq
         othersAreUnchanged = equalExcept board newBoard [pos]
 
+prop_setCastleState :: Color -> CastleState -> CastleState -> Board -> Bool
+prop_setCastleState color castleState1 castleState2 board =
+    castleState1 == getCastleState color board'' &&
+    castleState2 == getCastleState (invert color) board''
+    where
+        board' = setCastleState color castleState1 board
+        board'' = setCastleState (invert color) castleState2 board'
+
 --------------------------------------------------------------------------------
 -- Show and Read
 --------------------------------------------------------------------------------
@@ -66,11 +74,13 @@ prop_showRead board = board == read (show board)
 prop_show :: Property
 prop_show = counterexample (expString ++ "\n" ++ actString) result
     where
+        castleState = (CastleState { leftRook = Moved, king = Unmoved, rightRook = Unmoved })
         board = setB (Pos 0 3) Empty $
                 setB (Pos 6 6) (Piece Black Bishop) $
                 setB (Pos 6 0) Empty $
+                setCastleState Black castleState $
                 defaultBoard
-        expString = "  U       U     U\n\
+        expString = "  M       U     U\n\
                     \  a b c d e f g h\n\
                     \8 ♜ ♞ ♝   ♚ ♝ ♞ ♜ 8\n\
                     \7 ♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟ 7\n\
@@ -99,11 +109,13 @@ prop_read = counterexample (show expBoard ++ "\n" ++ show actBoard) result
                       \2 ♙ ♙ ♙ ♙   ♙ ♙ ♙ 2\n\
                       \1 ♜ ♘ ♗ ♕ ♔ ♗ ♘ ♖ 1\n\
                       \  a b c d e f g h\n\
-                      \  U       U     U"
+                      \  U       M     U"
         actBoard = read inputString
+        expCastleState = (CastleState { leftRook = Unmoved, king = Moved, rightRook = Unmoved })
         expBoard = setB (Pos 3 4) (Piece Black Knight) $
                    setB (Pos 7 0) (Piece Black Rook) $
                    setB (Pos 6 4) Empty $
+                   setCastleState White expCastleState $
                    defaultBoard
         result = expBoard == actBoard
 

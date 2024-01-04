@@ -7,24 +7,33 @@
 -- board.
 
 module Types.Board
-( Board
+(
+    Board
+    , CastleState(..)
+    , CastleMoved(..)
 
-, getB
-, setB
-, foldB
-, concatB
-, mapB
-, anyB
-
-, applyMove
-, defaultBoard
-, generateBoard
-, sampleBoard
-, homeRow
-, pawnHomeRow
-, pawnGoalRow
-, numKings
-, swapPiecesAtPositions
+    -- Squares
+    , getB
+    , setB
+    , foldB
+    , concatB
+    , mapB
+    , anyB
+    
+    -- Castle state
+    , getCastleState
+    , setCastleState
+    
+    -- Other
+    , applyMove
+    , defaultBoard
+    , generateBoard
+    , sampleBoard
+    , homeRow
+    , pawnHomeRow
+    , pawnGoalRow
+    , numKings
+    , swapPiecesAtPositions
 )
 where
 
@@ -226,6 +235,16 @@ oneIn n = do
 instance Arbitrary Side where
     arbitrary = oneof $ map return [KingSide, QueenSide]
 
+instance Arbitrary CastleState where
+    arbitrary = do
+        leftRook <- arbitrary
+        king <- arbitrary
+        rightRook <- arbitrary
+        return $ CastleState { leftRook, king, rightRook }
+
+instance Arbitrary CastleMoved where
+    arbitrary = oneof $ map return [Moved, Unmoved]
+
 --------------------------------------------------------------------------------
 -- Board operations
 --------------------------------------------------------------------------------
@@ -283,6 +302,14 @@ mapB' f board@(Board  { rows }) = board {rows = map (\row -> map f row) rows }
 
 anyB :: (Square -> Bool) -> Board -> Bool
 anyB f = foldB (\acc square -> acc || f square) False
+
+getCastleState :: Color -> Board -> CastleState
+getCastleState Black = blackCastleState
+getCastleState White = whiteCastleState
+
+setCastleState :: Color -> CastleState -> Board -> Board
+setCastleState Black blackCastleState board = board { blackCastleState}
+setCastleState White whiteCastleState board = board { whiteCastleState}
 
 --------------------------------------------------------------------------------
 -- Misc
