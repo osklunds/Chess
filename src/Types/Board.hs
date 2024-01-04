@@ -334,6 +334,11 @@ applyNormalMove src dst board = assert condition newBoard
 
 updateCastleState :: Pos -> Board -> Board
 updateCastleState (Pos 0 4) board@(Board { blackCastleState }) = board { blackCastleState = blackCastleState { king = Moved } }
+updateCastleState (Pos 0 0) board@(Board { blackCastleState }) = board { blackCastleState = blackCastleState { leftRook = Moved } }
+updateCastleState (Pos 0 7) board@(Board { blackCastleState }) = board { blackCastleState = blackCastleState { rightRook = Moved } }
+updateCastleState (Pos 7 4) board@(Board { whiteCastleState }) = board { whiteCastleState = whiteCastleState { king = Moved } }
+updateCastleState (Pos 7 0) board@(Board { whiteCastleState }) = board { whiteCastleState = whiteCastleState { leftRook = Moved } }
+updateCastleState (Pos 7 7) board@(Board { whiteCastleState }) = board { whiteCastleState = whiteCastleState { rightRook = Moved } }
 updateCastleState _pos board = board
 
 applyPromote :: Pos -> Pos -> Kind -> Board -> Board
