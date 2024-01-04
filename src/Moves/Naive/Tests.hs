@@ -142,6 +142,39 @@ mirrorMove (NormalMove src dst) = NormalMove (mirrorPos src) (mirrorPos dst)
 mirrorMove (Promote src dst kind) = Promote (mirrorPos src) (mirrorPos dst) kind
 mirrorMove (Castle color side) = Castle (invert color) side
 
+-- To test that the test implementation is correct
+prop_mirrorBoard :: Property
+prop_mirrorBoard = counterexample (show actMirroredBoard)
+                                  (expMirroredBoard == actMirroredBoard)
+    where
+         board = read            "  M       U     U  \n\
+                                 \  0 1 2 3 4 5 6 7  \n\
+                                 \0 ♜ ♜           ♜ 0\n\
+                                 \1   ♛ ♙   ♗   ♞ ♚ 1\n\
+                                 \2                 2\n\
+                                 \3           ♕ ♗   3\n\
+                                 \4   ♖ ♙   ♗ ♞     4\n\
+                                 \5   ♛   ♟   ♟   ♜ 5\n\
+                                 \6       ♝ ♝ ♗ ♜ ♘ 6\n\
+                                 \7 ♖     ♜ ♔       7\n\
+                                 \  0 1 2 3 4 5 6 7  \n\
+                                 \  U       M     U"
+
+         expMirroredBoard = read "  U       M     U  \n\
+                                 \  0 1 2 3 4 5 6 7  \n\
+                                 \0 ♖     ♜ ♔       0\n\
+                                 \1       ♝ ♝ ♗ ♜ ♘ 1\n\
+                                 \2   ♛   ♟   ♟   ♜ 2\n\
+                                 \3   ♖ ♙   ♗ ♞     3\n\
+                                 \4           ♕ ♗   4\n\
+                                 \5                 5\n\
+                                 \6   ♛ ♙   ♗   ♞ ♚ 6\n\
+                                 \7 ♜ ♜           ♜ 7\n\
+                                 \  0 1 2 3 4 5 6 7  \n\
+                                 \  M       U     U"
+
+         actMirroredBoard = mirrorBoard board
+
 prop_noNonMoves :: Color -> Board -> Bool
 prop_noNonMoves color board = all isMove moves
     where
