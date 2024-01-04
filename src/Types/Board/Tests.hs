@@ -85,10 +85,11 @@ prop_show = counterexample (expString ++ "\n" ++ actString) result
         actString = show board
         result = expString == actString
 
-prop_read :: Bool
-prop_read = expBoard == read inputString
+prop_read :: Property
+prop_read = counterexample (show expBoard ++ "\n" ++ show actBoard) result
     where
-        inputString = "  a b c d e f g h  \n\
+        inputString = "  U       U     U\n\
+                      \  a b c d e f g h  \n\
                       \8 ♜ ♞ ♝ ♛ ♚ ♝ ♞ ♜ 8\n\
                       \7 ♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟ 7\n\
                       \6                 6\n\
@@ -97,11 +98,14 @@ prop_read = expBoard == read inputString
                       \3                 3\n\
                       \2 ♙ ♙ ♙ ♙   ♙ ♙ ♙ 2\n\
                       \1 ♜ ♘ ♗ ♕ ♔ ♗ ♘ ♖ 1\n\
-                      \  a b c d e f g h"
+                      \  a b c d e f g h\n\
+                      \  U       U     U"
+        actBoard = read inputString
         expBoard = setB (Pos 3 4) (Piece Black Knight) $
                    setB (Pos 7 0) (Piece Black Rook) $
                    setB (Pos 6 4) Empty $
                    defaultBoard
+        result = expBoard == actBoard
 
 --------------------------------------------------------------------------------
 -- applyMove

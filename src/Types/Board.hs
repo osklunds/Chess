@@ -31,6 +31,7 @@ where
 import Control.Monad
 import Control.Exception
 import Data.Char
+import Data.List
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
 
@@ -93,22 +94,45 @@ instance Show CastleMoved where
 --------------------------------------------------------------------------------
 
 instance Read Board where
-  readsPrec _ str = [(fromString str, "")]
+  -- TODO: Helper for readsPrec
+    readsPrec _ str = [(readBoard str, "")]
 
-fromString :: String -> Board
-fromString board = Board { rows = map f rows'', blackCastleState, whiteCastleState}
+readBoard :: String -> Board
+readBoard board = Board { rows = map f rows'', blackCastleState, whiteCastleState}
     where
-        rows   = lines board
-        rows'  = tail rows
-        rows'' = init rows'
+        allLines = lines board
+        (Just (blackCastleStateStr, tempLines)) = uncons allLines
+        (Just (rows, whiteCastleStateStr)) = unsnoc tempLines
+    
+        (Just (_indexes1, rows')) = uncons rows
+        (Just (rows'', _indexes2)) = unsnoc rows'
 
         f row  = [read [c] | (c,i) <- rowWithIndexes, not (isDigit c), even i]
             where
                 rowWithIndexes = zip row [0..]
 
-        -- TODO: Read instead
-        blackCastleState = CastleState { leftRook = Unmoved, king = Unmoved, rightRook = Unmoved }
-        whiteCastleState = blackCastleState
+        blackCastleState = read blackCastleStateStr
+        whiteCastleState = read whiteCastleStateStr
+
+instance Read CastleState where
+    readsPrec _ str = [(readCastleState str, "")]
+
+readCastleState :: String -> CastleState
+readCastleState [' ',' ',leftRookChar,
+                 ' ',' ',' ',' ',' ',' ',' ',kingChar,
+                 ' ',' ',' ',' ',' ',rightRookChar
+                ] =
+    CastleState { leftRook = read [leftRookChar],
+                  king = read [kingChar],
+                  rightRook = read [rightRookChar]
+                }
+                     
+instance Read CastleMoved where
+    readsPrec _ str = [(readCastleMoved str, "")]
+
+readCastleMoved :: String -> CastleMoved
+readCastleMoved "M" = Moved
+readCastleMoved "U" = Unmoved
 
 --------------------------------------------------------------------------------
 -- Arbitrary
