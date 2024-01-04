@@ -184,11 +184,20 @@ queenSideCastle color = castleHelper laneNeededforCastle cols QueenSide color
 
 castleHelper :: [Square] -> [Int] -> Side -> MovesFun
 castleHelper laneNeededforCastle cols castleSide color board
-    | actualLane == laneNeededforCastle = [Castle color castleSide]
+    | laneMatches && unmoved = [Castle color castleSide]
     | otherwise = []
     where
+        -- TODO: Change lane to row
         actualLane = getBList [Pos (homeRow color) col | col <- cols] board
+        laneMatches = actualLane == laneNeededforCastle
 
+        castleState = getCastleState color board
+        kingState = king castleState
+        rookState = case castleSide of
+                    KingSide -> rightRook castleState
+                    QueenSide -> leftRook castleState
+        unmoved = all (== Unmoved) [kingState, rookState]
+            
 getBList :: [Pos] -> Board -> [Square]
 getBList poss board = [getB pos board | pos <- poss]
 
