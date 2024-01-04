@@ -123,10 +123,72 @@ prop_read = counterexample (show expBoard ++ "\n" ++ show actBoard) result
 -- applyMove
 --------------------------------------------------------------------------------
 
-prop_applyMoveKingMoved :: Property
-prop_applyMoveKingMoved = verifyBoardsEqual expBoardAfter actBoardAfter
+prop_applyMoveBlackLeftRookNormal :: Property
+prop_applyMoveBlackLeftRookNormal = verifyBoardsEqual expBoardAfter actBoardAfter
     where
-        boardBefore = read "  M       U     U\n\
+        boardBefore = read "  U       U     U  \n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \0 ♜       ♚     ♜ 0\n\
+                           \1             ♘   1\n\
+                           \2       ♝ ♘ ♙     2\n\
+                           \3         ♜     ♖ 3\n\
+                           \4 ♖ ♞         ♘   4\n\
+                           \5         ♛       5\n\
+                           \6     ♜ ♛   ♟     6\n\
+                           \7         ♔     ♖ 7\n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \  U       M     M"
+
+        expBoardAfter = read "  M       U     U  \n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \0         ♚     ♜ 0\n\
+                             \1             ♘   1\n\
+                             \2       ♝ ♘ ♙     2\n\
+                             \3         ♜     ♖ 3\n\
+                             \4 ♜ ♞         ♘   4\n\
+                             \5         ♛       5\n\
+                             \6     ♜ ♛   ♟     6\n\
+                             \7         ♔     ♖ 7\n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \  U       M     M"
+
+        actBoardAfter = applyMove (NormalMove (Pos 0 0) (Pos 4 0)) boardBefore
+
+prop_applyMoveBlackRightRookNormal :: Property
+prop_applyMoveBlackRightRookNormal = verifyBoardsEqual expBoardAfter actBoardAfter
+    where
+        boardBefore = read "  U       U     U  \n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \0 ♚       ♛     ♜ 0\n\
+                           \1     ♖ ♕         1\n\
+                           \2   ♘ ♝       ♝   2\n\
+                           \3   ♙   ♟       ♙ 3\n\
+                           \4 ♘     ♖     ♞   4\n\
+                           \5 ♔         ♜     5\n\
+                           \6   ♜   ♗   ♘     6\n\
+                           \7 ♛ ♞     ♝     ♝ 7\n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \  M       M     U"
+
+        expBoardAfter = read "  U       U     M  \n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \0 ♚       ♛       0\n\
+                             \1     ♖ ♕       ♜ 1\n\
+                             \2   ♘ ♝       ♝   2\n\
+                             \3   ♙   ♟       ♙ 3\n\
+                             \4 ♘     ♖     ♞   4\n\
+                             \5 ♔         ♜     5\n\
+                             \6   ♜   ♗   ♘     6\n\
+                             \7 ♛ ♞     ♝     ♝ 7\n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \  M       M     U"
+
+        actBoardAfter = applyMove (NormalMove (Pos 0 7) (Pos 1 7)) boardBefore
+
+prop_applyMoveBlackKingNormal :: Property
+prop_applyMoveBlackKingNormal = verifyBoardsEqual expBoardAfter actBoardAfter
+    where
+        boardBefore = read "  U       U     U\n\
                            \  0 1 2 3 4 5 6 7  \n\
                            \0   ♕     ♚     ♜ 0\n\
                            \1         ♙ ♗ ♟ ♘ 1\n\
@@ -139,7 +201,7 @@ prop_applyMoveKingMoved = verifyBoardsEqual expBoardAfter actBoardAfter
                            \  0 1 2 3 4 5 6 7\n\
                            \  U       M     M"
 
-        expBoardAfter = read "  M       M     U\n\
+        expBoardAfter = read "  U       M     U\n\
                              \  0 1 2 3 4 5 6 7  \n\
                              \0   ♕       ♚   ♜ 0\n\
                              \1         ♙ ♗ ♟ ♘ 1\n\
@@ -153,6 +215,11 @@ prop_applyMoveKingMoved = verifyBoardsEqual expBoardAfter actBoardAfter
                              \  U       M     M"
 
         actBoardAfter = applyMove (NormalMove (Pos 0 4) (Pos 0 5)) boardBefore
+
+
+
+
+
 
 -- TODO: Rework these tests to be less smart
 
