@@ -19,7 +19,7 @@ import Lib
 prop_board1 :: Property
 prop_board1 = verifyMoves expMoves Black board
   where
-    board = read  "  U       U     U  \n\
+    board = read  "  M       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
                   \0               ♝ 0\n\
                   \1 ♟ ♞           ♝ 1\n\
@@ -30,7 +30,7 @@ prop_board1 = verifyMoves expMoves Black board
                   \6 ♟     ♘ ♞ ♟ ♝ ♟ 6\n\
                   \7   ♞   ♜   ♞ ♖ ♝ 7\n\
                   \  0 1 2 3 4 5 6 7\n\
-                  \  U       U     U"
+                  \  U       M     U"
     expMoves = -- King at (4 7)
                (normalMovesFrom (Pos 4 7) [(Pos 3 6), (Pos 4 6)]) ++
                -- Note that (Pos 3 7) and (Pos 6 4) are missing as destinations
@@ -192,7 +192,7 @@ prop_srcIsSameColor color board = all srcIsSameColor moves
 prop_pawns :: Property
 prop_pawns = verifyMoves expMoves Black board
   where
-    board = read  "  U       U     U  \n\
+    board = read  "  M       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
                   \0 ♚             ♔ 0\n\
                   \1   ♟     ♟   ♗ ♟ 1\n\
