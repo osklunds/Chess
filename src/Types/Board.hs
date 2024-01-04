@@ -160,9 +160,9 @@ arbitraryBoard = do
 
     middleRows <- replicateM 6 $ replicateM 8 arbitrary
 
-    -- TODO: Generate
-    let blackCastleState = CastleState { leftRook = Unmoved, king = Unmoved, rightRook = Unmoved }
-    let whiteCastleState = blackCastleState
+    blackCastleState <- arbitrary
+    whiteCastleState <- arbitrary
+
     let board = Board { rows = [row0'] ++ middleRows ++ [row7'], blackCastleState, whiteCastleState }
     let noKings = mapB' (\sq -> if isKing sq then Empty else sq) board
     
