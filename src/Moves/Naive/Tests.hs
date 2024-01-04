@@ -665,6 +665,32 @@ prop_noCastlingSinceRightRookMoved = verifyCastlingMoves expMoves White board .&
         board' = setCastleState White allCastleAvailableState board
         expMoves' = expMoves ++ [Castle White KingSide]
 
+prop_noCastlingSinceKingMoved :: Property
+prop_noCastlingSinceKingMoved = verifyCastlingMoves expMoves Black board .&&.
+                                verifyCastlingMoves expMoves' Black board'
+    where
+        board = read  "  U       M     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0 ♜       ♚     ♜ 0\n\
+                      \1           ♞ ♞ ♜ 1\n\
+                      \2     ♟     ♖     2\n\
+                      \3     ♜ ♞     ♖   3\n\
+                      \4 ♜               4\n\
+                      \5     ♖ ♕       ♘ 5\n\
+                      \6 ♗     ♔ ♘       6\n\
+                      \7         ♖       7\n\
+                      \  0 1 2 3 4 5 6 7\n\
+                      \  U       U     U"
+        expMoves = []
+
+        -- Sanity check
+        board' = setCastleState Black allCastleAvailableState board
+        expMoves' = expMoves ++ [Castle Black QueenSide, Castle Black KingSide]
+
+-- TODO: Test when no castling since king not in correct pos, rooks not in
+-- correct pos etc. Already partially covered by other tests though.
+
+ 
 --------------------------------------------------------------------------------
 -- Helpers
 --------------------------------------------------------------------------------
