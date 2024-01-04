@@ -492,6 +492,70 @@ prop_applyMoveWhiteQueenSideCastle = verifyBoardsEqual expBoardAfter actBoardAft
         actBoardAfter = applyMove (Castle White QueenSide) boardBefore
 
 --------------------------------------------------------------------------------
+-- applyMove - promote
+--------------------------------------------------------------------------------
+
+prop_applyMovePromoteNoCapture :: Property
+prop_applyMovePromoteNoCapture = verifyBoardsEqual expBoardAfter actBoardAfter
+    where
+        boardBefore = read "  U       U     U  \n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \0         ♚     ♜ 0\n\
+                           \1 ♕   ♝ ♘   ♞     1\n\
+                           \2   ♘ ♖   ♝     ♝ 2\n\
+                           \3           ♝ ♛ ♘ 3\n\
+                           \4 ♗ ♙ ♗ ♞ ♜ ♖   ♟ 4\n\
+                           \5   ♘     ♝   ♙   5\n\
+                           \6    [♟]  ♗ ♖     6\n\
+                           \7 ♖  [ ]  ♔       7\n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \  U       U     U"
+
+        expBoardAfter = read "  U       U     U  \n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \0         ♚     ♜ 0\n\
+                             \1 ♕   ♝ ♘   ♞     1\n\
+                             \2   ♘ ♖   ♝     ♝ 2\n\
+                             \3           ♝ ♛ ♘ 3\n\
+                             \4 ♗ ♙ ♗ ♞ ♜ ♖   ♟ 4\n\
+                             \5   ♘     ♝   ♙   5\n\
+                             \6    [ ]  ♗ ♖     6\n\
+                             \7 ♖  [♜]  ♔       7\n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \  U       U     U"
+        actBoardAfter = applyMove (Promote (Pos 6 2) (Pos 7 2) Rook) boardBefore
+
+prop_applyMovePromoteCapture :: Property
+prop_applyMovePromoteCapture = verifyBoardsEqual expBoardAfter actBoardAfter
+    where
+        boardBefore = read "  U       M     U  \n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \0      [♝]  ♝ ♞   0\n\
+                           \1   ♜ ♕  [♙]  ♟   1\n\
+                           \2   ♝ ♛ ♛ ♖ ♛   ♗ 2\n\
+                           \3     ♛       ♝   3\n\
+                           \4 ♞ ♕   ♞       ♚ 4\n\
+                           \5 ♟     ♔ ♗ ♘     5\n\
+                           \6 ♖       ♖   ♛   6\n\
+                           \7   ♕       ♛     7\n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \  U       U     M"
+
+        expBoardAfter = read "  U       M     U  \n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \0      [♗]  ♝ ♞   0\n\
+                             \1   ♜ ♕  [ ]  ♟   1\n\
+                             \2   ♝ ♛ ♛ ♖ ♛   ♗ 2\n\
+                             \3     ♛       ♝   3\n\
+                             \4 ♞ ♕   ♞       ♚ 4\n\
+                             \5 ♟     ♔ ♗ ♘     5\n\
+                             \6 ♖       ♖   ♛   6\n\
+                             \7   ♕       ♛     7\n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \  U       U     M"
+        actBoardAfter = applyMove (Promote (Pos 1 4) (Pos 0 3) Bishop) boardBefore
+
+--------------------------------------------------------------------------------
 -- Arbitrary
 --------------------------------------------------------------------------------
 
