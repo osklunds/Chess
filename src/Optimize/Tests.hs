@@ -109,15 +109,15 @@ evalSt :: ArbState -> Int
 evalSt state = (foldl (+) 0 state + foldl (*) 1 state)
 
 prop_equalsMiniMax :: Int -> Bool
-prop_equalsMiniMax seed = all (== (head optVals)) optVals
+prop_equalsMiniMax seed = all (== firstOptVal) optVals
   where
-    g       = mkStdGen seed
-    (n,g')  = uniformR (1 :: Int, 6) g
-    (d,_)   = uniformR (1 :: Int, 6) g'
-    initSt  = []
-    genF    = genSts n
-    evalF   = evalSt
-    optVals = map (\optFun -> fst $ optFun genF evalF d initSt) optFuns
+    g = mkStdGen seed
+    (n,g') = uniformR (1 :: Int, 6) g
+    (d,_) = uniformR (1 :: Int, 6) g'
+    initSt = []
+    genF = genSts n
+    evalF = evalSt
+    (firstOptVal:optVals) = map (\optFun -> fst $ optFun genF evalF d initSt) optFuns
 
 
 --------------------------------------------------------------------------------
