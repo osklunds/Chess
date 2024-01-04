@@ -233,7 +233,7 @@ oneIn n = do
     return $ n == n'
 
 instance Arbitrary Side where
-    arbitrary = oneof $ map return [KingSide, QueenSide]
+    arbitrary = elements [KingSide, QueenSide]
 
 instance Arbitrary CastleState where
     arbitrary = do
@@ -243,7 +243,7 @@ instance Arbitrary CastleState where
         return $ CastleState { leftRook, king, rightRook }
 
 instance Arbitrary CastleMoved where
-    arbitrary = oneof $ map return [Moved, Unmoved]
+    arbitrary = frequency [(1, return Moved), (4, return Unmoved)]
 
 --------------------------------------------------------------------------------
 -- Board operations
