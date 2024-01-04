@@ -121,9 +121,13 @@ swapColor (Piece White kind) = Piece Black kind
 swapColor (Piece Black kind) = Piece White kind
 
 mirrorBoard :: Board -> Board
-mirrorBoard board = foldl mirrorBoardAtPos
-                          board
-                          [Pos row col | row <- [0..3], col <- [0..7]]
+mirrorBoard board = board'''
+    where
+        board' = foldl mirrorBoardAtPos
+                       board
+                       [Pos row col | row <- [0..3], col <- [0..7]]
+        board'' = setCastleState Black (getCastleState White board) board'
+        board''' = setCastleState White (getCastleState Black board) board''
 
 mirrorBoardAtPos :: Board -> Pos -> Board
 mirrorBoardAtPos board pos = swapPiecesAtPositions board pos mirroredPos
