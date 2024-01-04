@@ -504,33 +504,6 @@ prop_noCastlingSinceKingWouldPassThreat = verifyCastlingMoves expMoves White boa
                       \  U       U     U"
         expMoves = [Castle White KingSide]
 
-prop_noCastlingSinceLeftRookMoved :: Property
-prop_noCastlingSinceLeftRookMoved = verifyCastlingMoves expMoves White board .&&.
-                                    verifyCastlingMoves expMoves' White board'
-    where
-        board = read  "  U       U     U  \n\
-                      \  0 1 2 3 4 5 6 7  \n\
-                      \0 ♜         ♚   ♜ 0\n\
-                      \1 ♟   ♘     ♗ ♘   1\n\
-                      \2   ♕   ♙ ♗   ♟ ♞ 2\n\
-                      \3 ♘ ♗         ♙   3\n\
-                      \4         ♞   ♟   4\n\
-                      \5   ♗     ♗ ♙     5\n\
-                      \6       ♙     ♘   6\n\
-                      \7 ♖       ♔     ♖ 7\n\
-                      \  0 1 2 3 4 5 6 7\n\
-                      \  M       U     U"
-        expMoves = [Castle White KingSide]
-
-        -- Sanity check
-        board' = setCastleState White allCastleAvailableState board
-        expMoves' = expMoves ++ [Castle White QueenSide]
-
-allCastleAvailableState = (CastleState { leftRook = Unmoved,
-                                          king = Unmoved,
-                                          rightRook = Unmoved
-                                        })
-
 prop_noCastlingSinceKingIsChecked :: Property
 prop_noCastlingSinceKingIsChecked = verifyCastlingMoves expMoves White board
     where
@@ -642,6 +615,33 @@ prop_noCastlingOtherRow = movesFromBoardWithKingAtRow 0 `listEq` allCastlings &&
                 
         noCastlings = []
         allCastlings = [Castle Black KingSide, Castle Black QueenSide]
+
+prop_noCastlingSinceLeftRookMoved :: Property
+prop_noCastlingSinceLeftRookMoved = verifyCastlingMoves expMoves White board .&&.
+                                    verifyCastlingMoves expMoves' White board'
+    where
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0 ♜         ♚   ♜ 0\n\
+                      \1 ♟   ♘     ♗ ♘   1\n\
+                      \2   ♕   ♙ ♗   ♟ ♞ 2\n\
+                      \3 ♘ ♗         ♙   3\n\
+                      \4         ♞   ♟   4\n\
+                      \5   ♗     ♗ ♙     5\n\
+                      \6       ♙     ♘   6\n\
+                      \7 ♖       ♔     ♖ 7\n\
+                      \  0 1 2 3 4 5 6 7\n\
+                      \  M       U     U"
+        expMoves = [Castle White KingSide]
+
+        -- Sanity check
+        board' = setCastleState White allCastleAvailableState board
+        expMoves' = expMoves ++ [Castle White QueenSide]
+
+allCastleAvailableState = (CastleState { leftRook = Unmoved,
+                                          king = Unmoved,
+                                          rightRook = Unmoved
+                                        })
 
 --------------------------------------------------------------------------------
 -- Helpers
