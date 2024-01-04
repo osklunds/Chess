@@ -368,6 +368,70 @@ prop_applyMoveWhiteKingNormal = verifyBoardsEqual expBoardAfter actBoardAfter
         actBoardAfter = applyMove (NormalMove (Pos 7 4) (Pos 7 5)) boardBefore
 
 --------------------------------------------------------------------------------
+-- applyMove - castle
+--------------------------------------------------------------------------------
+
+prop_applyMoveBlackKingSideCastle :: Property
+prop_applyMoveBlackKingSideCastle = verifyBoardsEqual expBoardAfter actBoardAfter
+    where
+        boardBefore = read "  U       U     U  \n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \0 ♜       ♚     ♜ 0\n\
+                           \1 ♜ ♝             1\n\
+                           \2 ♟   ♞ ♟ ♛     ♖ 2\n\
+                           \3   ♜     ♝       3\n\
+                           \4         ♙       4\n\
+                           \5   ♖   ♛ ♞       5\n\
+                           \6   ♟ ♗ ♞     ♘   6\n\
+                           \7 ♖   ♗   ♔     ♖ 7\n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \  U       U     U"
+
+        expBoardAfter = read "  U       M     M  \n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \0 ♜         ♜ ♚   0\n\
+                             \1 ♜ ♝             1\n\
+                             \2 ♟   ♞ ♟ ♛     ♖ 2\n\
+                             \3   ♜     ♝       3\n\
+                             \4         ♙       4\n\
+                             \5   ♖   ♛ ♞       5\n\
+                             \6   ♟ ♗ ♞     ♘   6\n\
+                             \7 ♖   ♗   ♔     ♖ 7\n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \  U       U     U"
+        actBoardAfter = applyMove (Castle Black KingSide) boardBefore
+
+prop_applyMoveBlackQueenSideCastle :: Property
+prop_applyMoveBlackQueenSideCastle = verifyBoardsEqual expBoardAfter actBoardAfter
+    where
+        boardBefore = read "  U       U     M  \n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \0 ♜       ♚       0\n\
+                           \1         ♖ ♗ ♙   1\n\
+                           \2             ♗ ♕ 2\n\
+                           \3   ♙   ♜ ♝       3\n\
+                           \4     ♟     ♟     4\n\
+                           \5         ♞ ♟ ♟ ♗ 5\n\
+                           \6       ♕   ♗ ♝   6\n\
+                           \7         ♔     ♖ 7\n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \  M       U     U"
+
+        expBoardAfter = read "  M       M     M  \n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \0     ♚ ♜         0\n\
+                             \1         ♖ ♗ ♙   1\n\
+                             \2             ♗ ♕ 2\n\
+                             \3   ♙   ♜ ♝       3\n\
+                             \4     ♟     ♟     4\n\
+                             \5         ♞ ♟ ♟ ♗ 5\n\
+                             \6       ♕   ♗ ♝   6\n\
+                             \7         ♔     ♖ 7\n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \  M       U     U"
+        actBoardAfter = applyMove (Castle Black QueenSide) boardBefore
+
+--------------------------------------------------------------------------------
 -- Arbitrary
 --------------------------------------------------------------------------------
 
