@@ -19,7 +19,8 @@ import Lib
 prop_board1 :: Property
 prop_board1 = verifyMoves expMoves Black board
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0               ♝ 0\n\
                   \1 ♟ ♞           ♝ 1\n\
                   \2   ♔     ♝       2\n\
@@ -28,7 +29,8 @@ prop_board1 = verifyMoves expMoves Black board
                   \5     ♖         ♜ 5\n\
                   \6 ♟     ♘ ♞ ♟ ♝ ♟ 6\n\
                   \7   ♞   ♜   ♞ ♖ ♝ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7\n\
+                  \  U       U     U"
     expMoves = -- King at (4 7)
                (normalMovesFrom (Pos 4 7) [(Pos 3 6), (Pos 4 6)]) ++
                -- Note that (Pos 3 7) and (Pos 6 4) are missing as destinations
@@ -190,7 +192,8 @@ prop_srcIsSameColor color board = all srcIsSameColor moves
 prop_pawns :: Property
 prop_pawns = verifyMoves expMoves Black board
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0 ♚             ♔ 0\n\
                   \1   ♟     ♟   ♗ ♟ 1\n\
                   \2       ♖   ♗     2\n\
@@ -199,7 +202,8 @@ prop_pawns = verifyMoves expMoves Black board
                   \5 ♜       ♛   ♘ ♞ 5\n\
                   \6   ♗ ♟ ♟     ♟   6\n\
                   \7     ♜     ♘   ♖ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7\n\
+                  \  U       U     U"
     expMoves = -- Pawn at (3 0)
                (normalMovesFrom (Pos 3 0) [(Pos 4 0), (Pos 4 1)]) ++
 
@@ -252,7 +256,8 @@ prop_pawns = verifyMoves expMoves Black board
 prop_knights :: Property
 prop_knights = verifyMoves expMoves Black board
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0 ♗       ♚     ♜ 0\n\
                   \1     ♝   ♜ ♜   ♙ 1\n\
                   \2 ♜     ♗     ♕ ♝ 2\n\
@@ -261,7 +266,8 @@ prop_knights = verifyMoves expMoves Black board
                   \5       ♖   ♘   ♝ 5\n\
                   \6 ♟ ♙         ♖   6\n\
                   \7 ♗   ♞   ♔     ♖ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7\n\
+                  \  U       U     U"
     expMoves = -- Knight at (4 4)
                (normalMovesFrom (Pos 4 4) [(Pos 2 5), (Pos 3 6), (Pos 5 6),
                                            (Pos 6 5), (Pos 6 3), (Pos 5 2),
@@ -312,7 +318,8 @@ prop_knights = verifyMoves expMoves Black board
 prop_allKindsPreventKingMove :: Property
 prop_allKindsPreventKingMove = verifyMoves expMoves White board
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1   ♛       ♝     1\n\
                   \2                 2\n\
@@ -321,13 +328,15 @@ prop_allKindsPreventKingMove = verifyMoves expMoves White board
                   \5       ♔         5\n\
                   \6 ♜     ♙         6\n\
                   \7                 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7\n\
+                  \  U       U     U"
     expMoves = normalMovesFrom (Pos 5 3) [(Pos 6 4)]
 
 prop_kingMovesAwayIfChecked :: Property
 prop_kingMovesAwayIfChecked = verifyMoves expMoves White board
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1 ♟ ♟ ♟ ♙ ♟ ♟ ♟ ♟ 1\n\
                   \2                 2\n\
@@ -336,14 +345,16 @@ prop_kingMovesAwayIfChecked = verifyMoves expMoves White board
                   \5 ♜     ♔         5\n\
                   \6                 6\n\
                   \7               ♚ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7\n\
+                  \  U       U     U"
     expMoves = normalMovesFrom (Pos 5 3) [(Pos 4 2), (Pos 4 3), (Pos 4 4),
                                           (Pos 6 2), (Pos 6 3), (Pos 6 4)]
 
 prop_blocksWithOtherIfKingIsChecked :: Property
 prop_blocksWithOtherIfKingIsChecked = verifyMoves expMoves White board
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0 ♚     ♘         0\n\
                   \1 ♟ ♟ ♟ ♟ ♟ ♟ ♙ ♟ 1\n\
                   \2                 2\n\
@@ -352,14 +363,16 @@ prop_blocksWithOtherIfKingIsChecked = verifyMoves expMoves White board
                   \5 ♜             ♔ 5\n\
                   \6       ♙     ♜ ♝ 6\n\
                   \7               ♛ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7\n\
+                  \  U       U     U"
     expMoves = (normalMovesFrom (Pos 6 3) [(Pos 5 3)]) ++
                (normalMovesFrom (Pos 4 2) [(Pos 5 2)])
 
 prop_capturesThreatIfKingIsChecked :: Property
 prop_capturesThreatIfKingIsChecked = verifyMoves expMoves White board
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0 ♚   ♘     ♗     0\n\
                   \1               ♙ 1\n\
                   \2               ♛ 2\n\
@@ -368,13 +381,15 @@ prop_capturesThreatIfKingIsChecked = verifyMoves expMoves White board
                   \5 ♜             ♔ 5\n\
                   \6             ♜ ♝ 6\n\
                   \7               ♛ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7\n\
+                  \  U       U     U"
     expMoves = normalMovesFrom (Pos 0 5) [(Pos 5 0)]
 
 prop_kingCanCaptureThreat :: Property
 prop_kingCanCaptureThreat = verifyMoves expMoves White board
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0 ♚   ♘     ♗     0\n\
                   \1               ♙ 1\n\
                   \2           ♝     2\n\
@@ -383,13 +398,15 @@ prop_kingCanCaptureThreat = verifyMoves expMoves White board
                   \5             ♜ ♔ 5\n\
                   \6                 6\n\
                   \7             ♝   7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7\n\
+                  \  U       U     U"
     expMoves = normalMovesFrom (Pos 5 7) [(Pos 5 6)]
 
 prop_checkedMultipleTypesOfMoves :: Property
 prop_checkedMultipleTypesOfMoves = verifyMoves expMoves White board
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0 ♚   ♘     ♗     0\n\
                   \1               ♙ 1\n\
                   \2                 2\n\
@@ -398,14 +415,16 @@ prop_checkedMultipleTypesOfMoves = verifyMoves expMoves White board
                   \5             ♜ ♔ 5\n\
                   \6           ♙     6\n\
                   \7                 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7\n\
+                  \  U       U     U"
     expMoves = (normalMovesFrom (Pos 5 7) [(Pos 5 6), (Pos 4 7), (Pos 6 7)]) ++
                (normalMovesFrom (Pos 6 5) [(Pos 5 6)])
 
 prop_kingPinned :: Property
 prop_kingPinned = verifyMoves expMoves White board
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2       ♚         2\n\
@@ -414,7 +433,8 @@ prop_kingPinned = verifyMoves expMoves White board
                   \5   ♜   ♗   ♔     5\n\
                   \6                 6\n\
                   \7                 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7\n\
+                  \  U       U     U"
     expMoves = (normalMovesFrom (Pos 5 5) [(Pos 5 4), (Pos 4 4), (Pos 4 5),
                                            (Pos 4 6), (Pos 5 6), (Pos 6 6),
                                            (Pos 6 5), (Pos 6 4)])
@@ -433,7 +453,8 @@ prop_movesAreSubsetOfCheckUnawareMoves color board =
 prop_noCastlingSinceKingWouldPassThreat :: Property
 prop_noCastlingSinceKingWouldPassThreat = verifyCastlingMoves expMoves White board
     where
-        board = read  "  0 1 2 3 4 5 6 7  \n\
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
                       \0   ♜ ♚     ♖ ♘   0\n\
                       \1 ♕   ♞ ♘ ♟ ♝ ♘   1\n\
                       \2       ♞ ♛       2\n\
@@ -442,13 +463,15 @@ prop_noCastlingSinceKingWouldPassThreat = verifyCastlingMoves expMoves White boa
                       \5   ♙       ♜     5\n\
                       \6           ♖     6\n\
                       \7 ♖       ♔     ♖ 7\n\
-                      \  0 1 2 3 4 5 6 7"
+                      \  0 1 2 3 4 5 6 7\n\
+                      \  U       U     U"
         expMoves = [Castle White KingSide]
 
 prop_noCastlingSinceKingIsChecked :: Property
 prop_noCastlingSinceKingIsChecked = verifyCastlingMoves expMoves White board
     where
-        board = read  "  0 1 2 3 4 5 6 7  \n\
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
                       \0 ♜         ♚   ♜ 0\n\
                       \1 ♟   ♘     ♗ ♘   1\n\
                       \2   ♕   ♙ ♗   ♟ ♞ 2\n\
@@ -457,13 +480,15 @@ prop_noCastlingSinceKingIsChecked = verifyCastlingMoves expMoves White board
                       \5   ♗     ♗ ♙     5\n\
                       \6       ♙   ♝ ♘   6\n\
                       \7 ♖       ♔     ♖ 7\n\
-                      \  0 1 2 3 4 5 6 7"
+                      \  0 1 2 3 4 5 6 7\n\
+                      \  U       U     U"
         expMoves = []
 
 prop_noCastlingSinceDstAttacked :: Property
 prop_noCastlingSinceDstAttacked = verifyCastlingMoves expMoves Black board
     where
-        board = read  "  0 1 2 3 4 5 6 7  \n\
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
                       \0 ♜       ♚     ♜ 0\n\
                       \1           ♝     1\n\
                       \2   ♛     ♝   ♖   2\n\
@@ -472,13 +497,15 @@ prop_noCastlingSinceDstAttacked = verifyCastlingMoves expMoves Black board
                       \5 ♙     ♞         5\n\
                       \6   ♟   ♜ ♘ ♕     6\n\
                       \7   ♖ ♜   ♗     ♜ 7\n\
-                      \  0 1 2 3 4 5 6 7"
+                      \  0 1 2 3 4 5 6 7\n\
+                      \  U       U     U"
         expMoves = [Castle Black QueenSide]
 
 prop_bothCastlingsPossible :: Property
 prop_bothCastlingsPossible = verifyCastlingMoves expMoves Black board
     where
-        board = read  "  0 1 2 3 4 5 6 7  \n\
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
                       \0 ♜       ♚     ♜ 0\n\
                       \1     ♟ ♟ ♜ ♝     1\n\
                       \2 ♝   ♕     ♗   ♙ 2\n\
@@ -487,13 +514,15 @@ prop_bothCastlingsPossible = verifyCastlingMoves expMoves Black board
                       \5 ♘ ♙   ♖ ♙       5\n\
                       \6         ♙ ♔     6\n\
                       \7   ♜   ♞         7\n\
-                      \  0 1 2 3 4 5 6 7"
+                      \  0 1 2 3 4 5 6 7\n\
+                      \  U       U     U"
         expMoves = [Castle Black QueenSide, Castle Black KingSide]
 
 prop_castlingKingSide :: Property
 prop_castlingKingSide = verifyCastlingMoves expMoves Black board
     where
-        board = read  "  0 1 2 3 4 5 6 7  \n\
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
                       \0 ♜   ♘   ♚     ♜ 0\n\
                       \1   ♞ ♛       ♝ ♟ 1\n\
                       \2       ♔   ♛ ♖   2\n\
@@ -502,13 +531,15 @@ prop_castlingKingSide = verifyCastlingMoves expMoves Black board
                       \5       ♕     ♞   5\n\
                       \6   ♞   ♝     ♜ ♘ 6\n\
                       \7                 7\n\
-                      \  0 1 2 3 4 5 6 7"
+                      \  0 1 2 3 4 5 6 7\n\
+                      \  U       U     U"
         expMoves = [Castle Black KingSide]
 
 prop_castlingQueenSide :: Property
 prop_castlingQueenSide = verifyCastlingMoves expMoves Black board
     where
-        board = read  "  0 1 2 3 4 5 6 7  \n\
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
                       \0 ♜       ♚       0\n\
                       \1 ♟ ♟ ♟ ♟ ♜ ♝     1\n\
                       \2         ♞ ♕     2\n\
@@ -517,7 +548,8 @@ prop_castlingQueenSide = verifyCastlingMoves expMoves Black board
                       \5 ♜     ♖ ♜ ♝ ♜ ♜ 5\n\
                       \6 ♘   ♛   ♗ ♘   ♞ 6\n\
                       \7           ♘     7\n\
-                      \  0 1 2 3 4 5 6 7"
+                      \  0 1 2 3 4 5 6 7\n\
+                      \  U       U     U"
         expMoves = [Castle Black QueenSide]
 
 prop_noCastlingOtherRow :: Bool
@@ -527,7 +559,8 @@ prop_noCastlingOtherRow = movesFromBoardWithKingAtRow 0 `listEq` allCastlings &&
                           movesFromBoardWithKingAtRow 2 `listEq` noCastlings &&
                           movesFromBoardWithKingAtRow 7 `listEq` noCastlings
     where
-        board = read  "  0 1 2 3 4 5 6 7  \n\
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
                       \0 ♜             ♜ 0\n\
                       \1 ♜             ♜ 1\n\
                       \2 ♜             ♜ 2\n\
@@ -536,7 +569,8 @@ prop_noCastlingOtherRow = movesFromBoardWithKingAtRow 0 `listEq` allCastlings &&
                       \5 ♜         ♔   ♜ 5\n\
                       \6 ♜             ♜ 6\n\
                       \7 ♜             ♜ 7\n\
-                      \  0 1 2 3 4 5 6 7"
+                      \  0 1 2 3 4 5 6 7\n\
+                      \  U       U     U"
         movesFromBoardWithKingAtRow row = movesFunOnlyCastling Black board'
             where
                 board' = setB (Pos row 4) (Piece Black King) $
