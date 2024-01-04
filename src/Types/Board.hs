@@ -367,10 +367,18 @@ applyCastle color side board = board'
         (rookCol,newRookCol,newKingCol) = case side of
                                             KingSide -> (7,5,6)
                                             QueenSide -> (0,3,2)
-        board' = setB' (Pos row kingCol)    Empty $
-                 setB' (Pos row newKingCol) (Piece color King) $
-                 setB' (Pos row rookCol)    Empty $
-                 setB' (Pos row newRookCol) (Piece color Rook) board
+
+        kingSrc = Pos row kingCol
+        kingDst = Pos row newKingCol
+        rookSrc = Pos row rookCol
+        rookDst = Pos row newRookCol
+        board' = setB' kingSrc Empty $
+                 setB' kingDst (Piece color King) $
+                 setB' rookSrc Empty $
+                 setB' rookDst (Piece color Rook) $
+                 updateCastleState kingSrc $
+                 updateCastleState rookSrc $
+                 board
 
 defaultBoard :: Board
 defaultBoard = Board { rows, blackCastleState, whiteCastleState }
