@@ -123,6 +123,39 @@ prop_read = counterexample (show expBoard ++ "\n" ++ show actBoard) result
 -- applyMove
 --------------------------------------------------------------------------------
 
+prop_applyMoveKingMoved :: Property
+prop_applyMoveKingMoved = verifyBoardsEqual expBoardAfter actBoardAfter
+    where
+        boardBefore = read "  M       U     U\n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \0   ♕     ♚     ♜ 0\n\
+                           \1         ♙ ♗ ♟ ♘ 1\n\
+                           \2   ♜   ♛ ♞ ♖ ♝   2\n\
+                           \3 ♟   ♛   ♕       3\n\
+                           \4 ♔ ♜   ♗       ♙ 4\n\
+                           \5               ♞ 5\n\
+                           \6   ♖ ♞       ♗   6\n\
+                           \7 ♖               7\n\
+                           \  0 1 2 3 4 5 6 7\n\
+                           \  U       M     M"
+
+        expBoardAfter = read "  M       M     U\n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \0   ♕       ♚   ♜ 0\n\
+                             \1         ♙ ♗ ♟ ♘ 1\n\
+                             \2   ♜   ♛ ♞ ♖ ♝   2\n\
+                             \3 ♟   ♛   ♕       3\n\
+                             \4 ♔ ♜   ♗       ♙ 4\n\
+                             \5               ♞ 5\n\
+                             \6   ♖ ♞       ♗   6\n\
+                             \7 ♖               7\n\
+                             \  0 1 2 3 4 5 6 7\n\
+                             \  U       M     M"
+
+        actBoardAfter = applyMove (NormalMove (Pos 0 4) (Pos 0 5)) boardBefore
+
+-- TODO: Rework these tests to be less smart
+
 prop_applyNormalMove :: TwoDifferentPos -> Board -> Property
 prop_applyNormalMove (TwoDifferentPos src dst) b = condition ==> result
     where
@@ -262,6 +295,12 @@ moveDistribution pred b = collect moveAvailable True
 --------------------------------------------------------------------------------
 -- Helpers
 --------------------------------------------------------------------------------
+
+verifyBoardsEqual :: Board -> Board -> Property
+verifyBoardsEqual exp act = counterexample errorString result
+    where
+        errorString = "Expected:\n" ++ show exp ++ "\n\nActual:\n" ++ show act
+        result = exp == act
 
 equalExcept :: Board -> Board -> [Pos] -> Bool
 equalExcept b1 b2 ps = all (\p -> getB p b1 == getB p b2) $ otherPositions ps

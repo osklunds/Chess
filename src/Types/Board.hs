@@ -324,10 +324,17 @@ applyMove move board = checkedBoard newBoard
                     (Castle color side)    -> applyCastle color side board
 
 applyNormalMove :: Pos -> Pos -> Board -> Board
-applyNormalMove src dst b = assert (not $ isEmpty atSrc)
-                                   (setB' dst atSrc $ setB' src Empty b)
+applyNormalMove src dst board = assert condition newBoard
     where
-        atSrc = getB src b
+        condition = not $ isEmpty atSrc
+        atSrc = getB src board
+
+        squaresUpdated = setB' dst atSrc $ setB' src Empty board
+        newBoard = updateCastleState src squaresUpdated
+
+updateCastleState :: Pos -> Board -> Board
+updateCastleState (Pos 0 4) board@(Board { blackCastleState }) = board { blackCastleState = blackCastleState { king = Moved } }
+updateCastleState _pos board = board
 
 applyPromote :: Pos -> Pos -> Kind -> Board -> Board
 applyPromote src dst kind board = assert condition newBoard
