@@ -123,6 +123,67 @@ prop_read = counterexample (show expBoard ++ "\n" ++ show actBoard) result
 -- applyMove
 --------------------------------------------------------------------------------
 
+prop_applyNormalNoCapture :: Property
+prop_applyNormalNoCapture = verifyBoardsEqual expBoardAfter actBoardAfter
+    where
+        boardBefore = read "  U       U     U  \n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \0 ♜       ♚     ♜ 0\n\
+                           \1 ♙         ♜ ♛   1\n\
+                           \2       ♙ ♔ ♘ ♛   2\n\
+                           \3   ♜ ♗ ♘   ♟   ♟ 3\n\
+                           \4[♞]♘ ♜ ♙         4\n\
+                           \5       ♘ ♘ ♞ ♘ ♛ 5\n\
+                           \6  [ ]  ♛ ♘ ♙   ♟ 6\n\
+                           \7 ♖             ♖ 7\n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \  M       U     M"
+
+        expBoardAfter = read "  U       U     U  \n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \0 ♜       ♚     ♜ 0\n\
+                             \1 ♙         ♜ ♛   1\n\
+                             \2       ♙ ♔ ♘ ♛   2\n\
+                             \3   ♜ ♗ ♘   ♟   ♟ 3\n\
+                             \4[ ]♘ ♜ ♙         4\n\
+                             \5       ♘ ♘ ♞ ♘ ♛ 5\n\
+                             \6  [♞]  ♛ ♘ ♙   ♟ 6\n\
+                             \7 ♖             ♖ 7\n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \  M       U     M"
+
+        actBoardAfter = applyMove (NormalMove (Pos 4 0) (Pos 6 1)) boardBefore
+
+prop_applyNormalCapture :: Property
+prop_applyNormalCapture = verifyBoardsEqual expBoardAfter actBoardAfter
+    where
+        boardBefore = read "  U       U     U  \n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \0       ♕       ♝ 0\n\
+                           \1 ♝ ♗ ♘         ♗ 1\n\
+                           \2   ♜       ♔ ♚ ♝ 2\n\
+                           \3    [♖]♜     ♘   3\n\
+                           \4 ♕               4\n\
+                           \5 ♛         ♙     5\n\
+                           \6   ♛[♝]          6\n\
+                           \7   ♗ ♛     ♗     7\n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \  M       U     M"
+
+        expBoardAfter = read "  U       U     U  \n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \0       ♕       ♝ 0\n\
+                             \1 ♝ ♗ ♘         ♗ 1\n\
+                             \2   ♜       ♔ ♚ ♝ 2\n\
+                             \3    [ ]♜     ♘   3\n\
+                             \4 ♕               4\n\
+                             \5 ♛         ♙     5\n\
+                             \6   ♛[♖]          6\n\
+                             \7   ♗ ♛     ♗     7\n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \  M       U     M"
+        actBoardAfter = applyMove (NormalMove (Pos 3 2) (Pos 6 2)) boardBefore
+
 prop_applyMoveBlackLeftRookNormal :: Property
 prop_applyMoveBlackLeftRookNormal = verifyBoardsEqual expBoardAfter actBoardAfter
     where
