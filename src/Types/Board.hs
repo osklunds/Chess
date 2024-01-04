@@ -127,10 +127,10 @@ instance Read CastleState where
     readsPrec _ str = [(readCastleState str, "")]
 
 readCastleState :: String -> CastleState
-readCastleState [' ',' ',leftRookChar,
-                 ' ',' ',' ',' ',' ',' ',' ',kingChar,
-                 ' ',' ',' ',' ',' ',rightRookChar
-                ] =
+readCastleState (' ':' ':leftRookChar:
+                 ' ':' ':' ':' ':' ':' ':' ':kingChar:
+                 ' ':' ':' ':' ':' ':rightRookChar:_
+                ) =
     CastleState { leftRook = read [leftRookChar],
                   king = read [kingChar],
                   rightRook = read [rightRookChar]
