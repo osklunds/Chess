@@ -80,8 +80,8 @@ prop_show = counterexample (expString ++ "\n" ++ actString) result
                 setB (Pos 6 0) Empty $
                 setCastleState Black castleState $
                 defaultBoard
-        expString = "  M       U     U  \n\
-                    \  a b c d e f g h  \n\
+        expString = "  M       U     U\n\
+                    \  a b c d e f g h\n\
                     \8 ♜ ♞ ♝   ♚ ♝ ♞ ♜ 8\n\
                     \7 ♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟ 7\n\
                     \6                 6\n\
@@ -90,7 +90,7 @@ prop_show = counterexample (expString ++ "\n" ++ actString) result
                     \3                 3\n\
                     \2   ♙ ♙ ♙ ♙ ♙ ♝ ♙ 2\n\
                     \1 ♖ ♘ ♗ ♕ ♔ ♗ ♘ ♖ 1\n\
-                    \  a b c d e f g h  \n\
+                    \  a b c d e f g h\n\
                     \  U       U     U"
         actString = show board
         result = expString == actString
