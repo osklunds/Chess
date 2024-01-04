@@ -246,6 +246,35 @@ prop_applyMoveWhiteLeftRookNormal = verifyBoardsEqual expBoardAfter actBoardAfte
                              \  M       U     U"
         actBoardAfter = applyMove (NormalMove (Pos 7 0) (Pos 6 0)) boardBefore
 
+prop_applyMoveWhiteRightRookNormal :: Property
+prop_applyMoveWhiteRightRookNormal = verifyBoardsEqual expBoardAfter actBoardAfter
+    where
+        boardBefore = read "  U       U     U  \n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \0 ♞       ♚     ♜ 0\n\
+                           \1     ♘     ♝   ♕ 1\n\
+                           \2         ♞       2\n\
+                           \3         ♕       3\n\
+                           \4       ♗         4\n\
+                           \5     ♕ ♝   ♜   ♞ 5\n\
+                           \6 ♝   ♔     ♞   ♙ 6\n\
+                           \7               ♖ 7\n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \  M       M     U"
+
+        expBoardAfter = read "  U       U     U  \n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \0 ♞       ♚     ♜ 0\n\
+                             \1     ♘     ♝   ♕ 1\n\
+                             \2         ♞       2\n\
+                             \3         ♕       3\n\
+                             \4       ♗         4\n\
+                             \5     ♕ ♝   ♜   ♞ 5\n\
+                             \6 ♝   ♔     ♞   ♙ 6\n\
+                             \7 ♖               7\n\
+                             \  0 1 2 3 4 5 6 7  \n\
+                             \  M       M     M"
+        actBoardAfter = applyMove (NormalMove (Pos 7 7) (Pos 7 0)) boardBefore
 
 
 
