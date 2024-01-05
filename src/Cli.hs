@@ -205,7 +205,11 @@ printBoardWithMove move = putStrLn . (showBoardWithMarkers markers) . board
 
 showBoardWithMarkers :: [(Int,Int)] -> Board -> String
 showBoardWithMarkers markers board =
-  "  a b c d e f g h\n" ++ rows ++ "  a b c d e f g h"
+  "  " ++ show (getCastleState Black board) ++ "\n" ++
+  "  a b c d e f g h\n" ++
+  rows ++
+  "  a b c d e f g h\n" ++
+  "  " ++ show (getCastleState White board)
   where
     rowIndexes = [0..7]
     rows       = concatMap (showRow markers board) rowIndexes
