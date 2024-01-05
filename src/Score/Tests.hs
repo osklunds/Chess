@@ -12,7 +12,8 @@ import Score
 prop_scoreNormal :: Bool
 prop_scoreNormal = scoreForBoard board == score
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       M     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0   ♕           ♝ 0\n\
                   \1 ♟ ♞           ♝ 1\n\
                   \2   ♔     ♝       2\n\
@@ -21,7 +22,8 @@ prop_scoreNormal = scoreForBoard board == score
                   \5     ♖       ♗ ♜ 5\n\
                   \6       ♘ ♞ ♟ ♝ ♟ 6\n\
                   \7       ♜   ♞ ♖ ♝ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \  U       M     M"
 
     score =          0-10 +0+0+0+0+3
                     +1+3+0+0+0+0+0+3
@@ -35,7 +37,8 @@ prop_scoreNormal = scoreForBoard board == score
 prop_scoreCheck :: Bool
 prop_scoreCheck = scoreForBoard board == score
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0   ♕           ♝ 0\n\
                   \1 ♟ ♞           ♝ 1\n\
                   \2   ♔[♜]  ♝       2\n\
@@ -44,7 +47,8 @@ prop_scoreCheck = scoreForBoard board == score
                   \5     ♖       ♗ ♜ 5\n\
                   \6       ♘ ♞ ♟ ♝ ♟ 6\n\
                   \7       ♜   ♞ ♖ ♝ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \  U       M     U"
 
     score =          0-10 +0+0+0+0+3
                     +1+3+0+0+0+0+0+3
@@ -58,7 +62,8 @@ prop_scoreCheck = scoreForBoard board == score
 prop_scoreCheckmate :: Bool
 prop_scoreCheckmate = scoreForBoard board == maxBound
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       M     M  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0 ♝ ♕           ♝ 0\n\
                   \1   ♞           ♝ 1\n\
                   \2   ♔[♜]  ♝       2\n\
@@ -67,12 +72,14 @@ prop_scoreCheckmate = scoreForBoard board == maxBound
                   \5     ♖       ♗ ♜ 5\n\
                   \6       ♘ ♞ ♟ ♝ ♟ 6\n\
                   \7       ♜   ♞ ♖ ♝ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \  U       U     U"
 
 prop_scoreDraw :: Bool
 prop_scoreDraw = scoreForBoard board == 0
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       M     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0 ♝[♛]          ♝ 0\n\
                   \1   ♞           ♝ 1\n\
                   \2   ♔     ♝       2\n\
@@ -81,7 +88,8 @@ prop_scoreDraw = scoreForBoard board == 0
                   \5               ♜ 5\n\
                   \6         ♞ ♟ ♝ ♟ 6\n\
                   \7       ♜   ♞   ♝ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \  U       M     M"
 
 --------------------------------------------------------------------------------
 -- Helper functions
