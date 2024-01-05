@@ -1,6 +1,8 @@
 
 -- Used for determining the result of a game.
 
+-- TODO: Feels like this is partially duplicated from MoveSelection. Is this module/logic needed?
+
 module GameResult
 ( Result(..) 
 , gameResult
