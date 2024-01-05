@@ -107,6 +107,7 @@ computerTurn st = do
     let computerColor = T.invert $ playerColor st
     let move = moveColor 3 computerColor $ board curGs
     let (newGs,result) = G.applyMove move curGs
+    putStrLn ""
     printBoardWithMove move newGs
 
     case result of
