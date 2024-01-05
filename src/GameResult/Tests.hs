@@ -11,7 +11,8 @@ import Types
 prop_resultNormal :: Bool
 prop_resultNormal = gameResult Black board == Normal
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       M     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -20,12 +21,14 @@ prop_resultNormal = gameResult Black board == Normal
                   \5             ♖   5\n\
                   \6                 6\n\
                   \7               ♚ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \  M       U     M"
 
 prop_resultCheck :: Bool
 prop_resultCheck = gameResult Black board == Check
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -34,12 +37,14 @@ prop_resultCheck = gameResult Black board == Check
                   \5               ♖ 5\n\
                   \6                 6\n\
                   \7               ♚ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \  U       U     U"
 
 prop_resultCheckmate :: Bool
 prop_resultCheckmate = gameResult Black board == Checkmate
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -48,12 +53,14 @@ prop_resultCheckmate = gameResult Black board == Checkmate
                   \5             ♖ ♖ 5\n\
                   \6                 6\n\
                   \7               ♚ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \  U       U     U"
 
 prop_resultNotCheckmateCanCapture :: Bool
 prop_resultNotCheckmateCanCapture = gameResult Black board == Check
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -62,12 +69,14 @@ prop_resultNotCheckmateCanCapture = gameResult Black board == Check
                   \5             ♖ ♖ 5\n\
                   \6                 6\n\
                   \7               ♚ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \  U       U     U"
 
 prop_resultDraw :: Bool
 prop_resultDraw = gameResult Black board == Draw
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -76,12 +85,14 @@ prop_resultDraw = gameResult Black board == Draw
                   \5             ♖   5\n\
                   \6             ♖   6\n\
                   \7               ♚ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \  U       U     U"
 
 prop_resultNotDrawOtherCanMove :: Bool
 prop_resultNotDrawOtherCanMove = gameResult Black board == Normal
   where
-    board = read  "  0 1 2 3 4 5 6 7  \n\
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
                   \0                 0\n\
                   \1                 1\n\
                   \2   ♔             2\n\
@@ -90,7 +101,8 @@ prop_resultNotDrawOtherCanMove = gameResult Black board == Normal
                   \5             ♖   5\n\
                   \6             ♖   6\n\
                   \7               ♚ 7\n\
-                  \  0 1 2 3 4 5 6 7"
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \  U       U     U"
 
 
 
