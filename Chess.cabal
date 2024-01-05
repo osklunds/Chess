@@ -18,8 +18,8 @@ extra-source-files:  README.md
 
 executable Chess
     main-is:             Main.hs
+    optimization: 2
     ghc-options:
-        -O3
         -Wno-missing-home-modules
         -freverse-errors
         -fno-ignore-asserts
