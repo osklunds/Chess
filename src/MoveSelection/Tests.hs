@@ -231,13 +231,18 @@ castleToWinBoard = read  "  U       U     U  \n\
                          \6 ♟   ♘         ♞ 6\n\
                          \7     ♖   ♘       7\n\
                          \  0 1 2 3 4 5 6 7  \n\
-                         \  U       U     U"
+                         \  M       M     M"
 
 prop_doNotCastleIfThreatened :: Bool
-prop_doNotCastleIfThreatened = verifyDoesNotMakeMove move board
+prop_doNotCastleIfThreatened = verifyDoesNotCastle board
     where
         board = setB (Pos 4 7) (Piece White Bishop) castleToWinBoard
-        move = Castle Black QueenSide
+
+prop_doNotCastleIfHasMoved :: Bool
+prop_doNotCastleIfHasMoved = verifyDoesNotCastle board
+    where
+        newCastleState = CastleState { leftRook = Moved, king = Unmoved, rightRook = Moved }
+        board = setCastleState Black newCastleState castleToWinBoard
 
 
 -- TODO: Test move that needs two steps ahead thinking
@@ -280,10 +285,12 @@ verifyMakesOneOfMoves expMoves board = all pred depths
   where
     pred depth = makeMove depth board `elem` expMoves
 
-verifyDoesNotMakeMove :: Move -> Board -> Bool
-verifyDoesNotMakeMove move board = all pred depths
+verifyDoesNotCastle :: Board -> Bool
+verifyDoesNotCastle board = all pred depths
     where
-        pred depth = makeMove depth board /= move
+        -- I used to check "does not make move", but that is risky with castle since
+        -- if color by mistake is flipped, it will return true for the wrong reason.
+        pred depth = not $ isCastle $ makeMove depth board
 
 
 return []
