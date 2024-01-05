@@ -50,6 +50,9 @@ genStates (State {board, turn, numberOfMoves}) = states
     -- Optimization. If "turn" has no king anyway, turn lost in a previous
     -- state and there's no need to check moves now.
     -- TODO: Move that to movesF
+
+    -- TODO: Need in invariant in board that checks castlestate consistency, to
+    -- detect if someone external doesn't use applyMove to update the board
     states  = map (\move -> State { board         = applyMove move board
                                   , reachBy       = Just move
                                   , numberOfMoves = numberOfMoves + 1
