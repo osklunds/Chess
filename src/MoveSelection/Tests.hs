@@ -24,7 +24,7 @@ verifyCapturesPiece kind = verifyMakesMove expMove board'
     dst = Pos 6 4
     expMove = NormalMove src dst
 
-    board  = read  "  U       U     U  \n\
+    board  = read  "  U       M     U  \n\
                    \  0 1 2 3 4 5 6 7  \n\
                    \0                 0\n\
                    \1 ♔               1\n\
@@ -35,7 +35,7 @@ verifyCapturesPiece kind = verifyMakesMove expMove board'
                    \6        [ ]      6\n\
                    \7                 7\n\
                    \  0 1 2 3 4 5 6 7  \n\
-                   \  U       U     U"
+                   \  U       M     M"
     piece  = Piece White kind
     board' = setB dst piece board
 
@@ -52,7 +52,7 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
                                  Pos 2 1, Pos 2 0]
     piece             = Piece Black kind
 
-    board   = read  "  U       U     U  \n\
+    board   = read  "  M       M     M  \n\
                     \  0 1 2 3 4 5 6 7  \n\
                     \0               ♚ 0\n\
                     \1 ♔               1\n\
@@ -63,7 +63,7 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
                     \6       ♙         6\n\
                     \7                 7\n\
                     \  0 1 2 3 4 5 6 7  \n\
-                    \  U       U     U"
+                    \  M       M     M"
     board'  = setB curPos piece board
     move    = makeMove depth board'
     board'' = applyMove move board'
