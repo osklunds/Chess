@@ -247,6 +247,9 @@ prop_doNotCastleIfHasMoved = verifyDoesNotCastle board
 
 -- TODO: Test move that needs two steps ahead thinking
 
+-- TODO: Use a real game as inspiration. For tricky situations, test that the
+-- computer does the correct thing
+
 
 --------------------------------------------------------------------------------
 -- Arbitrary
