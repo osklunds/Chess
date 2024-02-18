@@ -340,7 +340,7 @@ prop_deferPromoteBug5 = verifyMakesMove expMove board
 
 prop_deferPromoteBugArbitrary :: Int -> Pos -> Pos -> Property
 prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
-    condition ==> (verifyMakesMove expMove withPawn)
+    condition ==> (verifyMakesMove expMove board4)
     where
         -- Positions
         pawnCol = pawnCol' `mod` 8
@@ -365,23 +365,22 @@ prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
                     not (whiteKingPos `elem` [Pos 6 0, Pos 6 1] &&
                          blackKingPos `elem` [Pos 4 0, Pos 4 1])
     
-        emptyBoard = read  "  U       U     U  \n\
-                           \  0 1 2 3 4 5 6 7  \n\
-                           \0                 0\n\
-                           \1                 1\n\
-                           \2                 2\n\
-                           \3                 3\n\
-                           \4                 4\n\
-                           \5                 5\n\
-                           \6                 6\n\
-                           \7                 7\n\
-                           \  0 1 2 3 4 5 6 7  \n\
-                           \  U       U     U"
-        withBlackKing = setB blackKingPos (Piece Black King) emptyBoard
-        withWhiteKing = setB whiteKingPos (Piece White King) withBlackKing
-        withPawn = setB pawnStart (Piece Black Pawn) withWhiteKing
+        board1 = read  "  U       U     U  \n\
+                       \  0 1 2 3 4 5 6 7  \n\
+                       \0                 0\n\
+                       \1                 1\n\
+                       \2                 2\n\
+                       \3                 3\n\
+                       \4                 4\n\
+                       \5                 5\n\
+                       \6                 6\n\
+                       \7                 7\n\
+                       \  0 1 2 3 4 5 6 7  \n\
+                       \  U       U     U"
+        board2 = setB blackKingPos (Piece Black King) board1
+        board3 = setB whiteKingPos (Piece White King) board2
+        board4 = setB pawnStart (Piece Black Pawn) board3
         expMove = Promote pawnStart pawnEnd Queen
-        
 
 posDist :: Pos -> Pos -> Int
 posDist (Pos r1 c1) (Pos r2 c2) = max (abs (r1 - r2)) (abs (c1 - c2))
