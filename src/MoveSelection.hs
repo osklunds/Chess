@@ -70,7 +70,10 @@ genStates currentState = states
 
 -- TODO: This code works, but it really needs some cleanup
 
-data StateScore = StateScoreMax | StateScoreMin | StateScore Color State deriving (Show)
+data StateScore = StateScoreMax |
+                  StateScoreMin |
+                  StateScore Color State
+                  deriving (Show)
 
 evalState :: Color -> OptTypes.EvalFun State StateScore
 evalState color state = StateScore color state
@@ -122,9 +125,9 @@ compareScoreLists [] [] = EQ
 -- So far the score lists were equal, now, favor the shorter one
 compareScoreLists [] _  = GT
 compareScoreLists _ []  = LT
-compareScoreLists (s1:rest1) (s2:rest2)
-    | result == EQ = compareScoreLists rest1 rest2
-    | otherwise = result
+compareScoreLists (s1:rest1) (s2:rest2) = if result /= EQ
+                                              then result
+                                              else compareScoreLists rest1 rest2
     where
         result = compare s1 s2
         
