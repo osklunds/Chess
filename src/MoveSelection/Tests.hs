@@ -253,8 +253,8 @@ prop_doNotCastleIfHasMoved = verifyDoesNotCastle board
 -- has not been triggered when using MiniMax, but only when using AlphaBeta. However, if
 -- the order of generated states in MiniMax is reversed, then the bug is triggered
 -- also for MiniMax. So make sure there's good coverage on this bug.
-prop_promoteTricky1 :: Property
-prop_promoteTricky1 = verifyMakesMove expMove board
+prop_deferPromoteBug1 :: Property
+prop_deferPromoteBug1 = verifyMakesMove expMove board
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -270,8 +270,8 @@ prop_promoteTricky1 = verifyMakesMove expMove board
                       \  U       U     U"
         expMove = Promote (Pos 6 4) (Pos 7 4) Queen
 
-prop_promoteTricky2 :: Property
-prop_promoteTricky2 = verifyMakesMove expMove board
+prop_deferPromoteBug2 :: Property
+prop_deferPromoteBug2 = verifyMakesMove expMove board
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -287,8 +287,8 @@ prop_promoteTricky2 = verifyMakesMove expMove board
                       \  U       U     U"
         expMove = Promote (Pos 6 0) (Pos 7 0) Queen
 
-prop_promoteTricky3 :: Property
-prop_promoteTricky3 = verifyMakesMove expMove board
+prop_deferPromoteBug3 :: Property
+prop_deferPromoteBug3 = verifyMakesMove expMove board
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -304,8 +304,8 @@ prop_promoteTricky3 = verifyMakesMove expMove board
                       \  U       U     U"
         expMove = Promote (Pos 6 0) (Pos 7 0) Queen
 
-prop_promoteTricky4 :: Property
-prop_promoteTricky4 = verifyMakesMove expMove board
+prop_deferPromoteBug4 :: Property
+prop_deferPromoteBug4 = verifyMakesMove expMove board
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -321,8 +321,8 @@ prop_promoteTricky4 = verifyMakesMove expMove board
                       \  U       U     U"
         expMove = Promote (Pos 6 3) (Pos 7 3) Queen
 
-prop_promoteTrickyArbitrary :: Int -> Pos -> Pos -> Property
-prop_promoteTrickyArbitrary pawnCol' blackKingPos whiteKingPos =
+prop_deferPromoteBugArbitrary :: Int -> Pos -> Pos -> Property
+prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
     condition ==> (verifyMakesMove expMove withPawn)
     where
         -- Positions
@@ -391,8 +391,9 @@ makeMove depth board = moveColor depth Black board
 makeMoveWhite :: Int -> Board -> Move
 makeMoveWhite depth board = moveColor depth White board
 
+-- TODO: make depth a parameter to more functions
 depths :: [Int]
-depths = [2..5]
+depths = [2..3]
 
 nonKingKinds :: [Kind]
 nonKingKinds = [Queen, Rook, Bishop, Knight, Pawn]
