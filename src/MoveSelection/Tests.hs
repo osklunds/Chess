@@ -244,13 +244,17 @@ prop_doNotCastleIfHasMoved = verifyDoesNotCastle board
         newCastleState = CastleState { leftRook = Moved, king = Unmoved, rightRook = Moved }
         board = setCastleState Black newCastleState castleToWinBoard
 
+--------------------------------------------------------------------------------
+-- Promote defer bug
+--------------------------------------------------------------------------------
+
 -- For the board below, the move selection algorithm has "historically" not done
 -- the obvious promote move and insted defered it forever, when depth > 2. The bug
 -- has not been triggered when using MiniMax, but only when using AlphaBeta. However, if
 -- the order of generated states in MiniMax is reversed, then the bug is triggered
 -- also for MiniMax. So make sure there's good coverage on this bug.
-prop_promoteTricky :: Property
-prop_promoteTricky = verifyMakesMove expMove board
+prop_promoteTricky1 :: Property
+prop_promoteTricky1 = verifyMakesMove expMove board
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -265,6 +269,84 @@ prop_promoteTricky = verifyMakesMove expMove board
                       \  0 1 2 3 4 5 6 7  \n\
                       \  U       U     U"
         expMove = Promote (Pos 6 4) (Pos 7 4) Queen
+
+prop_promoteTricky2 :: Property
+prop_promoteTricky2 = verifyMakesMove expMove board
+    where
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0                 0\n\
+                      \1                 1\n\
+                      \2             ♔   2\n\
+                      \3                 3\n\
+                      \4         ♚       4\n\
+                      \5                 5\n\
+                      \6 ♟               6\n\
+                      \7                 7\n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \  U       U     U"
+        expMove = Promote (Pos 6 0) (Pos 7 0) Queen
+
+prop_promoteTricky3 :: Property
+prop_promoteTricky3 = verifyMakesMove expMove board
+    where
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0                 0\n\
+                      \1                 1\n\
+                      \2             ♔   2\n\
+                      \3                 3\n\
+                      \4                 4\n\
+                      \5                 5\n\
+                      \6 ♟               6\n\
+                      \7             ♚   7\n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \  U       U     U"
+        expMove = Promote (Pos 6 0) (Pos 7 0) Queen
+
+prop_promoteTricky4 :: Property
+prop_promoteTricky4 = verifyMakesMove expMove board
+    where
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0                 0\n\
+                      \1                 1\n\
+                      \2             ♔   2\n\
+                      \3                 3\n\
+                      \4                 4\n\
+                      \5                 5\n\
+                      \6       ♟         6\n\
+                      \7   ♚             7\n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \  U       U     U"
+        expMove = Promote (Pos 6 3) (Pos 7 3) Queen
+
+prop_promoteTrickyArbitrary :: Int -> Pos -> Pos -> Property
+prop_promoteTrickyArbitrary pawnCol' blackKingPos whiteKingPos =
+    condition ==> (verifyMakesMove expMove withPawn)
+    where
+        pawnCol = pawnCol' `mod` 8
+        pawnPos = Pos 6 pawnCol
+
+        -- TODO: also not next to each other
+        condition = blackKingPos /= whiteKingPos && pawnPos /= blackKingPos
+    
+        emptyBoard = read  "  U       U     U  \n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \0                 0\n\
+                           \1                 1\n\
+                           \2                 2\n\
+                           \3                 3\n\
+                           \4                 4\n\
+                           \5                 5\n\
+                           \6                 6\n\
+                           \7                 7\n\
+                           \  0 1 2 3 4 5 6 7  \n\
+                           \  U       U     U"
+        withBlackKing = setB blackKingPos (Piece Black King) emptyBoard
+        withWhiteKing = setB whiteKingPos (Piece White King) withBlackKing
+        withPawn = setB pawnPos (Piece Black Pawn) withWhiteKing
+        expMove = Promote pawnPos (Pos 7 pawnCol) Queen
 
 -- TODO: Test move that needs two steps ahead thinking
 
