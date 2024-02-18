@@ -296,7 +296,7 @@ makeMoveWhite :: Int -> Board -> Move
 makeMoveWhite depth board = moveColor depth White board
 
 depths :: [Int]
-depths = [3]
+depths = [2..5]
 
 nonKingKinds :: [Kind]
 nonKingKinds = [Queen, Rook, Bishop, Knight, Pawn]
