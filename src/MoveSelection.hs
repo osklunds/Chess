@@ -70,7 +70,7 @@ genStates currentState = states
 
 -- TODO: This code works, but it really needs some cleanup
 
-data StateScore = StateScoreMax | StateScoreMin | StateScore Color State deriving (Eq, Show)
+data StateScore = StateScoreMax | StateScoreMin | StateScore Color State deriving (Show)
 
 evalState :: Color -> OptTypes.EvalFun State StateScore
 evalState color state = StateScore color state
@@ -79,6 +79,8 @@ instance Bounded StateScore where
   minBound = StateScoreMin
   maxBound = StateScoreMax
 
+instance Eq StateScore where
+    _ == _ = error "There should be no need for equality checks"
 
 instance Ord StateScore where
     compare StateScoreMin StateScoreMin = EQ
