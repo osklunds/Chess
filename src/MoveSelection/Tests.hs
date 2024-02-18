@@ -336,7 +336,7 @@ prop_deferPromoteBug5 = verifyMakesMove expMove board
                       \7                 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
                       \  U       U     U"
-        expMove = Promote (Pos 6 3) (Pos 7 3) Rook
+        expMove = Promote (Pos 6 5) (Pos 7 5) Rook
 
 prop_deferPromoteBugArbitrary :: Int -> Pos -> Pos -> Property
 prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =

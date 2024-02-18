@@ -18,15 +18,16 @@ import Types
 import Moves
 import Score
 import Optimize
+import qualified Optimize.Types as OptTypes
 
 --------------------------------------------------------------------------------
--- State
+-- "The great composition"
 --------------------------------------------------------------------------------
 
 data State = State { board :: Board
                    , prevStates :: [State]
                    , reachBy :: Maybe Move
-                   , turn    :: Color }
+                   , turn :: Color }
            deriving (Eq, Ord, Show)
 
 -- depth must be 2 or larger in order to detect check and checkmate
@@ -36,10 +37,14 @@ moveColor depth color board = fromJust $ reachBy nextState
     initialState = State { board
                          , prevStates = []
                          , reachBy = Nothing
-                         , turn    = color }
+                         , turn = color }
     nextState = optimize genStates (evalState color) depth initialState
 
-genStates :: State -> [State]
+--------------------------------------------------------------------------------
+-- State generation
+--------------------------------------------------------------------------------
+
+genStates :: OptTypes.GenFun State
 genStates currentState = states
     where
         (State {board, prevStates, turn}) = currentState
@@ -65,14 +70,14 @@ genStates currentState = states
 
 -- TODO: This code works, but it really needs some cleanup
 
-evalState :: Color -> State -> Score
-evalState color state = ScoreState color state
+data StateScore = StateScoreMax | StateScoreMin | StateScore Color State deriving (Eq, Show)
 
-data Score = ScoreMax | ScoreMin | ScoreState Color State deriving (Eq, Show)
+evalState :: Color -> OptTypes.EvalFun State StateScore
+evalState color state = StateScore color state
 
-instance Bounded Score where
-  minBound = ScoreMin
-  maxBound = ScoreMax
+instance Bounded StateScore where
+  minBound = StateScoreMin
+  maxBound = StateScoreMax
 
 
 -- TODO: Need to make it more advanced so that
@@ -102,14 +107,14 @@ instance Bounded Score where
 -- some code branches, run random boards, and when crashes, save that board.
 -- Can also check decisions, like should the list be reversed? Find a board
 -- where it makes a difference (crash here) and investigate that board.
-instance Ord Score where
-    compare ScoreMin ScoreMin = EQ
-    compare ScoreMin _        = LT
-    compare _        ScoreMin = GT
+instance Ord StateScore where
+    compare StateScoreMin StateScoreMin = EQ
+    compare StateScoreMin _             = LT
+    compare _             StateScoreMin = GT
 
-    compare ScoreMax ScoreMax = EQ
-    compare ScoreMax _        = GT
-    compare _        ScoreMax = LT
+    compare StateScoreMax StateScoreMax = EQ
+    compare StateScoreMax _             = GT
+    compare _             StateScoreMax = LT
 
     compare state1 state2
         | result == EQ = comparePreviousScores state1 state2
@@ -117,8 +122,8 @@ instance Ord Score where
         where
             result = compareFinalScores state1 state2
 
-compareFinalScores :: Score -> Score -> Ordering
-compareFinalScores (ScoreState color state1) (ScoreState _color state2) =
+compareFinalScores :: StateScore -> StateScore -> Ordering
+compareFinalScores (StateScore color state1) (StateScore _color state2) =
     compare (scoreForColorInState color state1)
             (scoreForColorInState color state2)
 compareFinalScores s1 s2 =
@@ -127,8 +132,8 @@ compareFinalScores s1 s2 =
 scoreForColorInState :: Color -> State -> Int
 scoreForColorInState color state = scoreForColor color (turn state) (board state)
 
-comparePreviousScores :: Score -> Score -> Ordering
-comparePreviousScores (ScoreState color state1) (ScoreState _color state2) =
+comparePreviousScores :: StateScore -> StateScore -> Ordering
+comparePreviousScores (StateScore color state1) (StateScore _color state2) =
     compareScoreLists prevScores1 prevScores2
     where
         makePrevScores :: State -> [Int]
