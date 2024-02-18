@@ -325,11 +325,21 @@ prop_promoteTrickyArbitrary :: Int -> Pos -> Pos -> Property
 prop_promoteTrickyArbitrary pawnCol' blackKingPos whiteKingPos =
     condition ==> (verifyMakesMove expMove withPawn)
     where
+        -- Positions
         pawnCol = pawnCol' `mod` 8
-        pawnPos = Pos 6 pawnCol
+        pawnStart = Pos 6 pawnCol
+        pawnEnd = Pos 7 pawnCol
 
-        -- TODO: also not next to each other
-        condition = blackKingPos /= whiteKingPos && pawnPos /= blackKingPos
+        -- Conditions
+        notTooClose p1 p2 = posDist p1 p2 >= 2
+        
+        condition = notTooClose blackKingPos whiteKingPos &&
+                    notTooClose blackKingPos pawnStart &&
+                    notTooClose blackKingPos pawnEnd &&
+
+                    notTooClose whiteKingPos blackKingPos &&
+                    notTooClose whiteKingPos pawnStart &&
+                    notTooClose whiteKingPos pawnEnd
     
         emptyBoard = read  "  U       U     U  \n\
                            \  0 1 2 3 4 5 6 7  \n\
@@ -345,9 +355,13 @@ prop_promoteTrickyArbitrary pawnCol' blackKingPos whiteKingPos =
                            \  U       U     U"
         withBlackKing = setB blackKingPos (Piece Black King) emptyBoard
         withWhiteKing = setB whiteKingPos (Piece White King) withBlackKing
-        withPawn = setB pawnPos (Piece Black Pawn) withWhiteKing
-        expMove = Promote pawnPos (Pos 7 pawnCol) Queen
+        withPawn = setB pawnStart (Piece Black Pawn) withWhiteKing
+        expMove = Promote pawnStart pawnEnd Queen
+        
 
+posDist :: Pos -> Pos -> Int
+posDist (Pos r1 c1) (Pos r2 c2) = max (abs (r1 - r2)) (abs (c1 - c2))
+    
 -- TODO: Test move that needs two steps ahead thinking
 
 -- TODO: Use a real game as inspiration. For tricky situations, test that the
