@@ -321,6 +321,8 @@ prop_deferPromoteBug4 = verifyMakesMove expMove board
                       \  U       U     U"
         expMove = Promote (Pos 6 3) (Pos 7 3) Queen
 
+-- TOOD: This test worked in the initial commit about solving the promote bug.
+-- I must have broken something since then.
 prop_deferPromoteBug5 :: Property
 prop_deferPromoteBug5 = verifyMakesMove expMove board
     where
