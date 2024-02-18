@@ -80,33 +80,6 @@ instance Bounded StateScore where
   maxBound = StateScoreMax
 
 
--- TODO: Need to make it more advanced so that
--- M1,M2 is better than M2,M1, where M1 is promote, and M2 is a dummy move
--- In the end, the order doesn't matter if just evaluating score and num moves
--- to reach there, but if they are equal, it should be better to get a higher
--- score earlier in the game. Or is it the second to last that should be
--- compared? A separate unit test (not necesarily about chess) to test this
--- might be needed.
-
--- The solution could be that store board score for each level/depth. The
--- score at the deepest depth is what is prio, but if that is equal,
--- compared the second deepest, and so on.
-
--- Or to use move evaluation in the optimization algorithm
-
--- The solution to go for, for now, is that if two moves have the same score in
--- the end, then the move with the highest score *first* wins, if equal then
--- second, and so on. The reasoning is that long term they are the same. So do
--- the shortest term good move because in the next round, you are allowed to
--- think one more step, and then it's good to start from a better board. A more
--- concrete reason is to force the computer to "make progress".
-
--- TODO: Add test coverage where number of moves matter
--- TODO: Can solve test coverage for "edge cases" below here, by generating
--- random boards and if it crashes, it tests that code branch. So comment out
--- some code branches, run random boards, and when crashes, save that board.
--- Can also check decisions, like should the list be reversed? Find a board
--- where it makes a difference (crash here) and investigate that board.
 instance Ord StateScore where
     compare StateScoreMin StateScoreMin = EQ
     compare StateScoreMin _             = LT
@@ -152,11 +125,33 @@ comparePreviousScores (StateScore color state1) (StateScore _color state2) =
             where
                 result = compare s1 s2
         
+-- Old notes
 
+-- TODO: Need to make it more advanced so that
+-- M1,M2 is better than M2,M1, where M1 is promote, and M2 is a dummy move
+-- In the end, the order doesn't matter if just evaluating score and num moves
+-- to reach there, but if they are equal, it should be better to get a higher
+-- score earlier in the game. Or is it the second to last that should be
+-- compared? A separate unit test (not necesarily about chess) to test this
+-- might be needed.
 
+-- The solution could be that store board score for each level/depth. The
+-- score at the deepest depth is what is prio, but if that is equal,
+-- compared the second deepest, and so on.
 
-    
-       -- 1. Score in final board
-       -- 2. Score in 1st, 2nd, 3rd etc board
-       -- 3. If one chain runs out of boards, then the shorter wins
+-- Or to use move evaluation in the optimization algorithm
+
+-- The solution to go for, for now, is that if two moves have the same score in
+-- the end, then the move with the highest score *first* wins, if equal then
+-- second, and so on. The reasoning is that long term they are the same. So do
+-- the shortest term good move because in the next round, you are allowed to
+-- think one more step, and then it's good to start from a better board. A more
+-- concrete reason is to force the computer to "make progress".
+
+-- TODO: Add test coverage where number of moves matter
+-- TODO: Can solve test coverage for "edge cases" below here, by generating
+-- random boards and if it crashes, it tests that code branch. So comment out
+-- some code branches, run random boards, and when crashes, save that board.
+-- Can also check decisions, like should the list be reversed? Find a board
+-- where it makes a difference (crash here) and investigate that board.
 
