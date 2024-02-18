@@ -100,6 +100,8 @@ instance Bounded Score where
 -- TODO: Can solve test coverage for "edge cases" below here, by generating
 -- random boards and if it crashes, it tests that code branch. So comment out
 -- some code branches, run random boards, and when crashes, save that board.
+-- Can also check decisions, like should the list be reversed? Find a board
+-- where it makes a difference (crash here) and investigate that board.
 instance Ord Score where
     compare ScoreMin ScoreMin = EQ
     compare ScoreMin _        = LT
