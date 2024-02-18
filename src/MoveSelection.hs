@@ -12,56 +12,68 @@ where
 
 import Data.Maybe
 import Test.QuickCheck
+import Debug.Trace
 
 import Types
 import Moves
 import Score
 import Optimize
 
+--------------------------------------------------------------------------------
+-- State
+--------------------------------------------------------------------------------
 
-data State = State { board         :: Board
-                   , reachBy       :: Maybe Move
-                   , numberOfMoves :: Int
-                   , turn          :: Color }
-           deriving (Eq, Ord)
-
-newtype Score = Score (Int, -- Numerical score
-                       Int) -- Number of moves to reach
-                deriving (Eq)
-
+data State = State { board :: Board
+                   , prevStates :: [State]
+                   , reachBy :: Maybe Move
+                   , turn    :: Color }
+           deriving (Eq, Ord, Show)
 
 -- depth must be 2 or larger in order to detect check and checkmate
 moveColor :: Int -> Color -> Board -> Move
 moveColor depth color board = fromJust $ reachBy nextState
   where
-    initialState = State { board         = board
-                         , reachBy       = Nothing
-                         , numberOfMoves = 0
-                         , turn          = color }
-    nextState    = optimize genStates (evalState color) depth initialState
+    initialState = State { board
+                         , prevStates = []
+                         , reachBy = Nothing
+                         , turn    = color }
+    nextState = optimize genStates (evalState color) depth initialState
 
 genStates :: State -> [State]
-genStates (State {board, turn, numberOfMoves}) = states
-  where
-    hasKing = anyB (== (Piece turn King)) board
-    moves   = case hasKing of
-                True  -> movesFun turn board
-                False -> []
-    -- Optimization. If "turn" has no king anyway, turn lost in a previous
-    -- state and there's no need to check moves now.
-    -- TODO: Move that to movesF
+genStates currentState = states
+    where
+        (State {board, prevStates, turn}) = currentState
 
-    -- TODO: Need in invariant in board that checks castlestate consistency, to
-    -- detect if someone external doesn't use applyMove to update the board
-    states  = map (\move -> State { board         = applyMove move board
-                                  , reachBy       = Just move
-                                  , numberOfMoves = numberOfMoves + 1
-                                  , turn          = invert turn}) moves
+        hasKing = anyB (== (Piece turn King)) board
+        moves = case hasKing of
+                    True  -> movesFun turn board
+                    False -> []
+        -- Optimization. If "turn" has no king anyway, turn lost in a previous
+        -- state and there's no need to check moves now.
+        -- TODO: Move that to movesF
 
--- TODO: Perhaps score fun should take state?
+        -- TODO: Need in invariant in board that checks castlestate consistency, to
+        -- detect if someone external doesn't use applyMove to update the board
+        states = map (\move -> State { board = applyMove move board
+                                     , prevStates = currentState:prevStates
+                                     , reachBy = Just move
+                                     , turn    = invert turn}) moves
+
+--------------------------------------------------------------------------------
+-- Score
+--------------------------------------------------------------------------------
+
+-- TODO: This code works, but it really needs some cleanup
+
 evalState :: Color -> State -> Score
-evalState color (State {board, numberOfMoves, turn}) =
-  Score (scoreForColor color turn board, numberOfMoves)
+evalState color state = ScoreState color state
+
+data Score = ScoreMax | ScoreMin | ScoreState Color State deriving (Eq, Show)
+
+instance Bounded Score where
+  minBound = ScoreMin
+  maxBound = ScoreMax
+
 
 -- TODO: Need to make it more advanced so that
 -- M1,M2 is better than M2,M1, where M1 is promote, and M2 is a dummy move
@@ -84,14 +96,60 @@ evalState color (State {board, numberOfMoves, turn}) =
 -- think one more step, and then it's good to start from a better board. A more
 -- concrete reason is to force the computer to "make progress".
 
+-- TODO: Add test coverage where number of moves matter
+-- TODO: Can solve test coverage for "edge cases" below here, by generating
+-- random boards and if it crashes, it tests that code branch. So comment out
+-- some code branches, run random boards, and when crashes, save that board.
 instance Ord Score where
-  compare (Score (numScore1,numMoves1)) (Score (numScore2,numMoves2))
-    = compare (numScore1,numMoves2) (numScore2,numMoves1)
+    compare ScoreMin ScoreMin = EQ
+    compare ScoreMin _        = LT
+    compare _        ScoreMin = GT
 
-instance Bounded Score where
-  minBound = Score (minBound,maxBound)
-  maxBound = Score (maxBound,minBound)
+    compare ScoreMax ScoreMax = EQ
+    compare ScoreMax _        = GT
+    compare _        ScoreMax = LT
 
--- TODO: GameState should be extended with e.g. last moves (to detect 3 draw),
--- if player has move king and rooks, no capture for 50 turns etc, and let
--- move selection take this into account.
+    compare state1 state2
+        | result == EQ = comparePreviousScores state1 state2
+        | otherwise    = result
+        where
+            result = compareFinalScores state1 state2
+
+compareFinalScores :: Score -> Score -> Ordering
+compareFinalScores (ScoreState color state1) (ScoreState _color state2) =
+    compare (scoreForColorInState color state1)
+            (scoreForColorInState color state2)
+compareFinalScores s1 s2 =
+    trace (show s1 ++ show s2) EQ
+
+scoreForColorInState :: Color -> State -> Int
+scoreForColorInState color state = scoreForColor color (turn state) (board state)
+
+comparePreviousScores :: Score -> Score -> Ordering
+comparePreviousScores (ScoreState color state1) (ScoreState _color state2) =
+    compareScoreLists prevScores1 prevScores2
+    where
+        makePrevScores :: State -> [Int]
+        makePrevScores state = reverse $ map (scoreForColorInState color) $ prevStates state
+
+        prevScores1 = makePrevScores state1
+        prevScores2 = makePrevScores state2
+
+        compareScoreLists :: [Int] -> [Int] -> Ordering
+        compareScoreLists [] [] = EQ
+        compareScoreLists [] _  = GT
+        compareScoreLists _ []  = LT
+        compareScoreLists (s1:rest1) (s2:rest2)
+            | result == EQ = compareScoreLists rest1 rest2
+            | otherwise = result
+            where
+                result = compare s1 s2
+        
+
+
+
+    
+       -- 1. Score in final board
+       -- 2. Score in 1st, 2nd, 3rd etc board
+       -- 3. If one chain runs out of boards, then the shorter wins
+
