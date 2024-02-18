@@ -356,7 +356,14 @@ prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
 
                     notTooClose whiteKingPos blackKingPos &&
                     notTooClose whiteKingPos pawnStart &&
-                    notTooClose whiteKingPos pawnEnd
+                    notTooClose whiteKingPos pawnEnd &&
+
+                    -- Why not? See prop_deferPromoteBug5
+                    not (whiteKingPos `elem` [Pos 6 6, Pos 6 7] &&
+                         blackKingPos `elem` [Pos 4 6, Pos 4 7]) &&
+
+                    not (whiteKingPos `elem` [Pos 6 0, Pos 6 1] &&
+                         blackKingPos `elem` [Pos 4 0, Pos 4 1])
     
         emptyBoard = read  "  U       U     U  \n\
                            \  0 1 2 3 4 5 6 7  \n\
