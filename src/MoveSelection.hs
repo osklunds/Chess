@@ -91,17 +91,17 @@ instance Ord StateScore where
     compare StateScoreMax _             = GT
     compare _             StateScoreMax = LT
 
-    compare state1 state2
-        | result == EQ = comparePreviousScores state1 state2
-        | otherwise    = result
+    compare state1 state2 = if resultFinalStates /= EQ
+                                then resultFinalStates
+                                else comparePreviousScores state1 state2
         where
-            result = compareFinalScores state1 state2
+            resultFinalStates = compareStates state1 state2
 
-compareFinalScores :: StateScore -> StateScore -> Ordering
-compareFinalScores (StateScore color state1) (StateScore _color state2) =
-    compare (scoreForColorInState color state1)
-            (scoreForColorInState color state2)
-compareFinalScores s1 s2 =
+compareStates :: StateScore -> StateScore -> Ordering
+compareStates (StateScore color state1) (StateScore _color state2) =
+    compareScoreLists [scoreForColorInState color state1]
+                      [scoreForColorInState color state2]
+compareStates s1 s2 =
     trace (show s1 ++ show s2) EQ
 
 scoreForColorInState :: Color -> State -> Int
@@ -117,15 +117,15 @@ comparePreviousScores (StateScore color state1) (StateScore _color state2) =
         prevScores1 = makePrevScores state1
         prevScores2 = makePrevScores state2
 
-        compareScoreLists :: [Int] -> [Int] -> Ordering
-        compareScoreLists [] [] = EQ
-        compareScoreLists [] _  = GT
-        compareScoreLists _ []  = LT
-        compareScoreLists (s1:rest1) (s2:rest2)
-            | result == EQ = compareScoreLists rest1 rest2
-            | otherwise = result
-            where
-                result = compare s1 s2
+compareScoreLists :: [Int] -> [Int] -> Ordering
+compareScoreLists [] [] = EQ
+compareScoreLists [] _  = GT
+compareScoreLists _ []  = LT
+compareScoreLists (s1:rest1) (s2:rest2)
+    | result == EQ = compareScoreLists rest1 rest2
+    | otherwise = result
+    where
+        result = compare s1 s2
         
 -- Old notes
 
