@@ -101,24 +101,25 @@ compareStates :: StateScore -> StateScore -> Ordering
 compareStates (StateScore color state1) (StateScore _color state2) =
     compareScoreLists [scoreForColorInState color state1]
                       [scoreForColorInState color state2]
-compareStates s1 s2 =
-    trace (show s1 ++ show s2) EQ
-
-scoreForColorInState :: Color -> State -> Int
-scoreForColorInState color state = scoreForColor color (turn state) (board state)
+compareStates s1 s2 = error $ "Two non StateScores are being compared" ++ show s1 ++ show s2
 
 comparePreviousScores :: StateScore -> StateScore -> Ordering
 comparePreviousScores (StateScore color state1) (StateScore _color state2) =
     compareScoreLists prevScores1 prevScores2
     where
         makePrevScores :: State -> [Int]
-        makePrevScores state = reverse $ map (scoreForColorInState color) $ prevStates state
+        makePrevScores (State { prevStates }) =
+            reverse $ map (scoreForColorInState color) prevStates
 
         prevScores1 = makePrevScores state1
         prevScores2 = makePrevScores state2
 
+scoreForColorInState :: Color -> State -> Int
+scoreForColorInState color state = scoreForColor color (turn state) (board state)
+
 compareScoreLists :: [Int] -> [Int] -> Ordering
 compareScoreLists [] [] = EQ
+-- So far the score lists were equal, now, favor the shorter one
 compareScoreLists [] _  = GT
 compareScoreLists _ []  = LT
 compareScoreLists (s1:rest1) (s2:rest2)
