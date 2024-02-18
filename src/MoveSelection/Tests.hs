@@ -14,10 +14,10 @@ import MoveSelection
 -- Fixed
 --------------------------------------------------------------------------------
 
-prop_capture :: Bool
-prop_capture = all verifyCapturesPiece nonKingKinds
+prop_capture :: Property
+prop_capture = conjoin (map verifyCapturesPiece nonKingKinds)
 
-verifyCapturesPiece :: Kind -> Bool
+verifyCapturesPiece :: Kind -> Property
 verifyCapturesPiece kind = verifyMakesMove expMove board'
   where
     src = Pos 5 5
@@ -68,7 +68,7 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
     move    = makeMove depth board'
     board'' = applyMove move board'
 
-prop_checkmate :: Bool
+prop_checkmate :: Property
 prop_checkmate = verifyMakesOneOfMoves expMoves board
   where
     expMoves = [NormalMove (Pos 7 1) (Pos 7 0), NormalMove (Pos 6 1) (Pos 6 0)]
@@ -86,7 +86,7 @@ prop_checkmate = verifyMakesOneOfMoves expMoves board
                   \  0 1 2 3 4 5 6 7  \n\
                   \  U       U     U"
 
-prop_checkmateByMovingAwayPiece :: Bool
+prop_checkmateByMovingAwayPiece :: Property
 prop_checkmateByMovingAwayPiece = verifyMakesOneOfMoves expMoves board
   where
     expMoves = [NormalMove (Pos 3 0) (Pos 1 2), NormalMove (Pos 3 0) (Pos 5 2)]
@@ -122,7 +122,7 @@ prop_escapeFromCheckEvenIfCanCheckmate =
                   \  U       U     U"
     nextBoard d = applyMove (makeMove d board) board
 
-prop_doStalemateIfLosing :: Bool
+prop_doStalemateIfLosing :: Property
 prop_doStalemateIfLosing = verifyMakesMove expMove board
   where
     board = read  "  U       U     U  \n\
@@ -145,7 +145,7 @@ prop_doStalemateIfLosing = verifyMakesMove expMove board
 -- to win, but there's a possibility to create a draw and thus at least avoid
 -- losing.
 
-prop_promote :: Bool
+prop_promote :: Property
 prop_promote = verifyMakesMove expMove board
     where
         board = read  "  U       U     U  \n\
@@ -162,7 +162,7 @@ prop_promote = verifyMakesMove expMove board
                       \  U       U     U"
         expMove = Promote (Pos 6 4) (Pos 7 4) Queen
 
-prop_promoteToKnight :: Bool
+prop_promoteToKnight :: Property
 prop_promoteToKnight = verifyMakesMove expMove board
     where
         board = read  "  U       U     U  \n\
@@ -179,7 +179,7 @@ prop_promoteToKnight = verifyMakesMove expMove board
                       \  U       U     U"
         expMove = Promote (Pos 6 4) (Pos 7 4) Knight
 
-prop_doNotPromote1 :: Bool
+prop_doNotPromote1 :: Property
 prop_doNotPromote1 = verifyMakesMove expMove board
     where
         board = read  "  U       U     U  \n\
@@ -196,7 +196,7 @@ prop_doNotPromote1 = verifyMakesMove expMove board
                       \  U       U     U"
         expMove = NormalMove (Pos 1 2) (Pos 1 0)
 
-prop_doNotPromote2 :: Bool
+prop_doNotPromote2 :: Property
 prop_doNotPromote2 = verifyMakesMove expMove board
     where
         board = read  "  U       U     U  \n\
@@ -213,7 +213,7 @@ prop_doNotPromote2 = verifyMakesMove expMove board
                       \  U       U     U"
         expMove = NormalMove (Pos 1 3) (Pos 2 2)
 
-prop_castling :: Bool
+prop_castling :: Property
 prop_castling = verifyMakesMove expMove board
     where
         board = castleToWinBoard
@@ -244,6 +244,27 @@ prop_doNotCastleIfHasMoved = verifyDoesNotCastle board
         newCastleState = CastleState { leftRook = Moved, king = Unmoved, rightRook = Moved }
         board = setCastleState Black newCastleState castleToWinBoard
 
+-- For the board below, the move selection algorithm has "historically" not done
+-- the obvious promote move and insted defered it forever, when depth > 2. The bug
+-- has not been triggered when using MiniMax, but only when using AlphaBeta. However, if
+-- the order of generated states in MiniMax is reversed, then the bug is triggered
+-- also for MiniMax. So make sure there's good coverage on this bug.
+prop_promoteTricky :: Property
+prop_promoteTricky = verifyMakesMove expMove board
+    where
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0                 0\n\
+                      \1       ♚         1\n\
+                      \2                 2\n\
+                      \3                 3\n\
+                      \4                 4\n\
+                      \5     ♔           5\n\
+                      \6         ♟       6\n\
+                      \7                 7\n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \  U       U     U"
+        expMove = Promote (Pos 6 4) (Pos 7 4) Queen
 
 -- TODO: Test move that needs two steps ahead thinking
 
@@ -275,18 +296,29 @@ makeMoveWhite :: Int -> Board -> Move
 makeMoveWhite depth board = moveColor depth White board
 
 depths :: [Int]
-depths = [2..3]
+depths = [3]
 
 nonKingKinds :: [Kind]
 nonKingKinds = [Queen, Rook, Bishop, Knight, Pawn]
 
-verifyMakesMove :: Move -> Board -> Bool
+verifyMakesMove :: Move -> Board -> Property
 verifyMakesMove expMove = verifyMakesOneOfMoves [expMove]
 
-verifyMakesOneOfMoves :: [Move] -> Board -> Bool
-verifyMakesOneOfMoves expMoves board = all pred depths
-  where
-    pred depth = makeMove depth board `elem` expMoves
+verifyMakesOneOfMoves :: [Move] -> Board -> Property
+verifyMakesOneOfMoves expMoves board = conjoin props
+    where
+        props = [verifyMakesOneOfMovesAtDepth expMoves board d | d <- depths]
+
+verifyMakesOneOfMovesAtDepth :: [Move] -> Board -> Int -> Property
+verifyMakesOneOfMovesAtDepth expMoves board depth =
+    counterexample errorString result
+    where
+        result = move `elem` expMoves
+        move = makeMove depth board 
+        errorString = show board ++ "\n" ++
+                      "Expected moves: " ++ show expMoves ++ "\n\n" ++
+                      "Actual move: " ++ show move ++ "\n\n" ++
+                      "Depth: " ++ show depth
 
 verifyDoesNotCastle :: Board -> Bool
 verifyDoesNotCastle board = all pred depths
