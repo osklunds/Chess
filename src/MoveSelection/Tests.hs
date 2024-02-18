@@ -324,6 +324,9 @@ prop_deferPromoteBug4 = verifyMakesMove expMove board
 -- TOOD: This test worked in the initial commit about solving the promote bug.
 -- I must have broken something since then.
 -- Actually no... just changing the expected value causes actual value to change... what??
+-- Could it be that if king is moved, in the next turn, you can make it a queen?
+-- Yes, 2 deep OK. 3 deep moves king because thinks can make queen, but 4 deep,
+-- sees that white will capture the queen, so 4 is OK.
 prop_deferPromoteBug5 :: Property
 prop_deferPromoteBug5 = verifyMakesMove expMove board
     where
