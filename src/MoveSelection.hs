@@ -100,6 +100,12 @@ instance Ord StateScore where
         where
             resultFinalStates = compareStates state1 state2
 
+-- TODO: Can solve test coverage for "edge cases" below here, by generating
+-- random boards and if it crashes, it tests that code branch. So comment out
+-- some code branches, run random boards, and when crashes, save that board.
+-- Can also check decisions, like should the list be reversed? Find a board
+-- where it makes a difference (crash here) and investigate that board.
+
 compareStates :: StateScore -> StateScore -> Ordering
 compareStates (StateScore color state1) (StateScore _color state2) =
     compareScoreLists [scoreForColorInState color state1]
@@ -153,11 +159,4 @@ compareScoreLists (s1:rest1) (s2:rest2) = if result /= EQ
 -- the shortest term good move because in the next round, you are allowed to
 -- think one more step, and then it's good to start from a better board. A more
 -- concrete reason is to force the computer to "make progress".
-
--- TODO: Add test coverage where number of moves matter
--- TODO: Can solve test coverage for "edge cases" below here, by generating
--- random boards and if it crashes, it tests that code branch. So comment out
--- some code branches, run random boards, and when crashes, save that board.
--- Can also check decisions, like should the list be reversed? Find a board
--- where it makes a difference (crash here) and investigate that board.
 
