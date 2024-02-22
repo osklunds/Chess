@@ -68,6 +68,25 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
     move    = makeMove depth board'
     board'' = applyMove move board'
 
+
+-- TODO: Without the pawn, the test fails
+prop_captureKing :: Property
+prop_captureKing = verifyMakesMove expMove board
+  where
+    expMove = NormalMove (Pos 0 2) (Pos 0 0)
+    board = read  "  U       U     U  \n\
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \0 ♔   ♜           0\n\
+                  \1                 1\n\
+                  \2                 2\n\
+                  \3         ♙       3\n\
+                  \4               ♚ 4\n\
+                  \5                 5\n\
+                  \6                 6\n\
+                  \7   ♜             7\n\
+                  \  0 1 2 3 4 5 6 7  \n\
+                  \  U       U     U"
+
 prop_checkmate :: Property
 prop_checkmate = verifyMakesOneOfMoves expMoves board
   where
@@ -426,6 +445,34 @@ prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
 
 posDist :: Pos -> Pos -> Int
 posDist (Pos r1 c1) (Pos r2 c2) = max (abs (r1 - r2)) (abs (c1 - c2))
+
+--------------------------------------------------------------------------------
+-- Whitebox testing
+--------------------------------------------------------------------------------
+
+prop_numberOfMovesTieBreak :: Property
+prop_numberOfMovesTieBreak = verifyMakesMove' expMove board 3
+    where
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0 ♜ ♖   ♝ ♚     ♜ 0\n\
+                      \1       ♘     ♛   1\n\
+                      \2 ♛   ♗     ♕   ♘ 2\n\
+                      \3             ♟   3\n\
+                      \4           ♛ ♘ ♕ 4\n\
+                      \5   ♞ ♛     ♟ ♝   5\n\
+                      \6     ♘     ♝ ♜ ♖ 6\n\
+                      \7       ♞ ♔     ♖ 7\n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \  U       U     U"
+        expMove = NormalMove (Pos 1 6) (Pos 1 3)
+
+        -- TODO: This shows a bug - doesn't do check?
+
+
+
+
+                                  
     
 -- TODO: Test move that needs two steps ahead thinking
 
