@@ -438,11 +438,11 @@ posDist (Pos r1 c1) (Pos r2 c2) = max (abs (r1 - r2)) (abs (c1 - c2))
 --------------------------------------------------------------------------------
 
 prop_legalMove :: Board -> Property
-prop_legalMove board = not (null legalMoves) ==> result
+prop_legalMove board = not (null legalMoves) ==>
+                       -- TODO: Test for more depths when the algorithm is faster
+                       conjoin [verifyMakesOneOfMoves' legalMoves board d | d <- [1..3]]
     where
         legalMoves = movesFun Black board
-        -- TODO: Test for more depths when the algorithm is faster
-        result = and [makeMove d board `elem` legalMoves | d <- [1..1]]
 
 -- TODO: escape from check
 
