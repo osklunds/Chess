@@ -328,7 +328,18 @@ prop_deferPromoteBug4 = verifyMakesMove expMove board
 -- Yes, 2 deep OK. 3 deep moves king because thinks can make queen, but 4 deep,
 -- sees that white will capture the queen, so 4 is OK.
 prop_deferPromoteBug5 :: Property
-prop_deferPromoteBug5 = verifyMakesMove expMove board
+prop_deferPromoteBug5 = conjoin [verifyMakesMove' expMoveSmart board 2,
+                                 verifyMakesMove' expMoveDumb  board 3,
+                                 verifyMakesMove' expMoveSmart board 4,
+                                 verifyMakesMove' expMoveSmart board 5,
+                                 verifyMakesMove' expMoveSmart board 6,
+                                 verifyMakesMove' expMoveSmart board 7
+                                ]
+    -- If thinking 3 steps ahead, Black sees that now, if I promote to a queen,
+    -- there will be a stalemate. So if I first move my king, then I can promote
+    -- to queen in the next move. But what 3 steps ahead misses is that then
+    -- White can capture the just-promoted-queen. If thinking 4+ steps ahead,
+    -- Black does not make that mistake.
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -342,7 +353,25 @@ prop_deferPromoteBug5 = verifyMakesMove expMove board
                       \7                 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
                       \  U       U     U"
-        expMove = Promote (Pos 6 5) (Pos 7 5) Rook
+        expMoveSmart = Promote (Pos 6 5) (Pos 7 5) Rook
+        expMoveDumb = NormalMove (Pos 4 7) (Pos 4 6)
+
+prop_deferPromoteBug6 :: Property
+prop_deferPromoteBug6 = verifyMakesMove expMove board
+    where
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0                 0\n\
+                      \1                 1\n\
+                      \2                 2\n\
+                      \3                 3\n\
+                      \4                 4\n\
+                      \5   ♚             5\n\
+                      \6       ♟         6\n\
+                      \7 ♔               7\n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \  U       U     U"
+        expMove = Promote (Pos 6 3) (Pos 7 3) Rook
 
 prop_deferPromoteBugArbitrary :: Int -> Pos -> Pos -> Property
 prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
@@ -369,7 +398,14 @@ prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
                          blackKingPos `elem` [Pos 4 6, Pos 4 7]) &&
 
                     not (whiteKingPos `elem` [Pos 6 0, Pos 6 1] &&
-                         blackKingPos `elem` [Pos 4 0, Pos 4 1])
+                         blackKingPos `elem` [Pos 4 0, Pos 4 1]) &&
+                    
+                    -- Why not? See prop_deferPromoteBug6
+                    not (whiteKingPos == (Pos 7 0) &&
+                         blackKingPos `elem` [Pos 5 0, Pos 5 1]) &&
+
+                    not (whiteKingPos == (Pos 7 7) &&
+                         blackKingPos `elem` [Pos 5 6, Pos 5 7])
     
         board1 = read  "  U       U     U  \n\
                        \  0 1 2 3 4 5 6 7  \n\
@@ -430,13 +466,15 @@ nonKingKinds = [Queen, Rook, Bishop, Knight, Pawn]
 verifyMakesMove :: Move -> Board -> Property
 verifyMakesMove expMove = verifyMakesOneOfMoves [expMove]
 
-verifyMakesOneOfMoves :: [Move] -> Board -> Property
-verifyMakesOneOfMoves expMoves board = conjoin props
-    where
-        props = [verifyMakesOneOfMovesAtDepth expMoves board d | d <- depths]
+verifyMakesMove' :: Move -> Board -> Int -> Property
+verifyMakesMove' expMove = verifyMakesOneOfMoves' [expMove]
 
-verifyMakesOneOfMovesAtDepth :: [Move] -> Board -> Int -> Property
-verifyMakesOneOfMovesAtDepth expMoves board depth =
+verifyMakesOneOfMoves :: [Move] -> Board -> Property
+verifyMakesOneOfMoves expMoves board =
+    conjoin [verifyMakesOneOfMoves' expMoves board d | d <- depths]
+
+verifyMakesOneOfMoves' :: [Move] -> Board -> Int -> Property
+verifyMakesOneOfMoves' expMoves board depth =
     counterexample errorString result
     where
         result = move `elem` expMoves
