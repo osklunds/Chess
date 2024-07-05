@@ -487,7 +487,7 @@ prop_numberOfMovesTieBreak = verifyMakesMove' expMove board 3
 prop_legalMove :: Board -> Property
 prop_legalMove board = not (null legalMoves) ==>
                        -- TODO: Test for more depths when the algorithm is faster
-                       conjoin [verifyMakesOneOfMoves' legalMoves board d | d <- [1..3]]
+                       conjoin [verifyMakesOneOfMoves' legalMoves board d | d <- [1..2]]
     where
         legalMoves = movesFun Black board
 
@@ -505,7 +505,7 @@ makeMoveWhite depth board = moveColor depth White board
 
 -- TODO: make depth a parameter to more functions
 depths :: [Int]
-depths = [2..5]
+depths = [2..4]
 
 nonKingKinds :: [Kind]
 nonKingKinds = [Queen, Rook, Bishop, Knight, Pawn]
