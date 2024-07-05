@@ -3,7 +3,7 @@
 
 Chess AI written in Haskell.
 
-## Ideas to work in
+# Ideas to work in
 
 - Rules
     - Promoting
@@ -37,3 +37,6 @@ Chess AI written in Haskell.
     - ~~Move Score to top-level~~
     - Test promotes with MoveSelection
 
+# Dev
+
+cabal repl --ghc-options="-fobject-code -O2"
