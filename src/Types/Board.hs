@@ -337,14 +337,17 @@ setTurn newTurn board = board { turn = newTurn }
 --------------------------------------------------------------------------------
 
 applyMove :: Move -> Board -> Board
-applyMove move board = checkedBoard $ setTurn (invert oldTurn) newBoard
+applyMove move board = assert valid $ checkedBoard
+                                    $ setTurn (invert oldTurn) newBoard
     where
-        -- TODO: Assert that src is same as turn
         oldTurn = turn board
-        newBoard = case move of
-                    (NormalMove src dst)   -> applyNormalMove src dst board
-                    (Promote src dst kind) -> applyPromote src dst kind board
-                    (Castle color side)    -> applyCastle color side board
+        (newBoard, valid) = case move of
+             (NormalMove src dst)   -> (applyNormalMove src dst board,
+                                        isColor oldTurn $ getB src board)
+             (Promote src dst kind) -> (applyPromote src dst kind board,
+                                        isColor oldTurn $ getB src board)
+             (Castle color side)    -> (applyCastle color side board,
+                                        color == oldTurn)
 
 applyNormalMove :: Pos -> Pos -> Board -> Board
 applyNormalMove src dst board = assert condition newBoard
