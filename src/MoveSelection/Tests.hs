@@ -462,6 +462,8 @@ prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
         board4 = setB pawnStart (Piece Black Pawn) board3
         expMove = Promote pawnStart pawnEnd Queen
 
+-- These bugs started to appear after adding turn to board
+-- Happenening quite frequently
 -- *** Failed! Falsified (after 62 tests and 5 shrinks):    
 -- 3
 -- Pos 4 0
@@ -484,6 +486,30 @@ prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
 -- Actual move: NormalMove (Pos 4 0) (Pos 5 0)
 
 -- Depth: 3
+
+-- *** Failed! Falsified (after 87 tests and 2 shrinks):  
+-- 0
+-- Pos 4 5
+-- Pos 7 7
+--   U       U     U
+--   a b c d e f g h
+-- 8                 8
+-- 7                 7
+-- 6                 6
+-- 5                 5
+-- 4           ♚     4
+-- 3                 3
+-- 2 ♟               2
+-- 1               ♔ 1
+--   a b c d e f g h
+--   U       U     U
+-- [Black]
+-- Expected moves: [Promote (Pos 6 0) (Pos 7 0) Queen]
+
+-- Actual move: NormalMove (Pos 4 5) (Pos 5 6)
+
+-- Depth: 3
+
 posDist :: Pos -> Pos -> Int
 posDist (Pos r1 c1) (Pos r2 c2) = max (abs (r1 - r2)) (abs (c1 - c2))
 

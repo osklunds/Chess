@@ -22,7 +22,8 @@ prop_resultNormal = gameResult Black board == Normal
                   \6                 6\n\
                   \7               ♚ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  M       U     M"
+                  \  M       U     M\n\
+                  \[Black]"
 
 prop_resultCheck :: Bool
 prop_resultCheck = gameResult Black board == Check
@@ -38,7 +39,8 @@ prop_resultCheck = gameResult Black board == Check
                   \6                 6\n\
                   \7               ♚ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
 
 prop_resultCheckmate :: Bool
 prop_resultCheckmate = gameResult Black board == Checkmate
@@ -54,7 +56,8 @@ prop_resultCheckmate = gameResult Black board == Checkmate
                   \6                 6\n\
                   \7               ♚ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
 
 prop_resultNotCheckmateCanCapture :: Bool
 prop_resultNotCheckmateCanCapture = gameResult Black board == Check
@@ -70,7 +73,8 @@ prop_resultNotCheckmateCanCapture = gameResult Black board == Check
                   \6                 6\n\
                   \7               ♚ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
 
 prop_resultDraw :: Bool
 prop_resultDraw = gameResult Black board == Draw
@@ -86,7 +90,8 @@ prop_resultDraw = gameResult Black board == Draw
                   \6             ♖   6\n\
                   \7               ♚ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
 
 prop_resultNotDrawOtherCanMove :: Bool
 prop_resultNotDrawOtherCanMove = gameResult Black board == Normal
@@ -102,7 +107,8 @@ prop_resultNotDrawOtherCanMove = gameResult Black board == Normal
                   \6             ♖   6\n\
                   \7               ♚ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
 
 
 
