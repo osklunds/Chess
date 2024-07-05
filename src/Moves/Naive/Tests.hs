@@ -30,7 +30,8 @@ prop_board1 = verifyMoves expMoves Black board
                   \6 ♟     ♘ ♞ ♟ ♝ ♟ 6\n\
                   \7   ♞   ♜   ♞ ♖ ♝ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       M     U"
+                  \  U       M     U\n\
+                  \[Black]"
     expMoves = -- King at (4 7)
                (normalMovesFrom (Pos 4 7) [(Pos 3 6), (Pos 4 6)]) ++
                -- Note that (Pos 3 7) and (Pos 6 4) are missing as destinations
@@ -106,10 +107,10 @@ prop_blackAndWhiteGiveSameMoves :: Board -> Bool
 prop_blackAndWhiteGiveSameMoves board =
     blackMoves `listEq` mirroredWhiteMoves
     where
-        blackMoves         = movesFun Black board
+        blackMoves         = movesFunForColor Black board
         swappedColors      = swapColors board
         mirroredBoard      = mirrorBoard swappedColors
-        whiteMoves         = movesFun White mirroredBoard
+        whiteMoves         = movesFunForColor White mirroredBoard
         mirroredWhiteMoves = map mirrorMove whiteMoves
 
 swapColors :: Board -> Board
@@ -121,13 +122,14 @@ swapColor (Piece White kind) = Piece Black kind
 swapColor (Piece Black kind) = Piece White kind
 
 mirrorBoard :: Board -> Board
-mirrorBoard board = board'''
+mirrorBoard board = board4
     where
-        board' = foldl mirrorBoardAtPos
+        board1 = foldl mirrorBoardAtPos
                        board
                        [Pos row col | row <- [0..3], col <- [0..7]]
-        board'' = setCastleState Black (getCastleState White board) board'
-        board''' = setCastleState White (getCastleState Black board) board''
+        board2 = setCastleState Black (getCastleState White board) board1
+        board3 = setCastleState White (getCastleState Black board) board2
+        board4 = setTurn (invert $ getTurn board3) board3
 
 mirrorBoardAtPos :: Board -> Pos -> Board
 mirrorBoardAtPos board pos = swapPiecesAtPositions board pos mirroredPos
@@ -158,7 +160,8 @@ prop_mirrorBoard = counterexample (show actMirroredBoard)
                                  \6       ♝ ♝ ♗ ♜ ♘ 6\n\
                                  \7 ♖     ♜ ♔       7\n\
                                  \  0 1 2 3 4 5 6 7  \n\
-                                 \  U       M     U"
+                                 \  U       M     U\n\
+                                 \[White]"
 
          expMirroredBoard = read "  U       M     U  \n\
                                  \  0 1 2 3 4 5 6 7  \n\
@@ -171,14 +174,15 @@ prop_mirrorBoard = counterexample (show actMirroredBoard)
                                  \6   ♛ ♙   ♗   ♞ ♚ 6\n\
                                  \7 ♜ ♜           ♜ 7\n\
                                  \  0 1 2 3 4 5 6 7  \n\
-                                 \  M       U     U"
+                                 \  M       U     U\n\
+                                 \[Black]"
 
          actMirroredBoard = mirrorBoard board
 
 prop_noNonMoves :: Color -> Board -> Bool
 prop_noNonMoves color board = all isMove moves
     where
-        moves = movesFun color board
+        moves = movesFunForColor color board
 
         isMove (NormalMove src dst) = src /= dst
         isMove (Promote src dst _kind) = src /= dst
@@ -187,7 +191,7 @@ prop_noNonMoves color board = all isMove moves
 prop_srcAndDstAreWithinBoard :: Color -> Board -> Bool
 prop_srcAndDstAreWithinBoard color board = all isMoveWithinBoard moves
     where
-        moves = movesFun color board
+        moves = movesFunForColor color board
 
         isWithinBoard (Pos row col) = 0 <= row && row < 8 && 0 <= col && col < 8
 
@@ -198,7 +202,7 @@ prop_srcAndDstAreWithinBoard color board = all isMoveWithinBoard moves
 prop_dstIsNotSameColor :: Color -> Board -> Bool
 prop_dstIsNotSameColor color board = all dstIsNotSameColor moves
     where
-        moves = movesFun color board
+        moves = movesFunForColor color board
 
         isNotSameColor pos = not (isColor color (getB pos board))
 
@@ -209,7 +213,7 @@ prop_dstIsNotSameColor color board = all dstIsNotSameColor moves
 prop_srcIsSameColor :: Color -> Board -> Bool
 prop_srcIsSameColor color board = all srcIsSameColor moves
     where
-        moves = movesFun color board
+        moves = movesFunForColor color board
 
         isSameColor pos = isColor color (getB pos board)
 
@@ -240,7 +244,8 @@ prop_pawns = verifyMoves expMoves Black board
                   \6   ♗ ♟ ♟     ♟   6\n\
                   \7     ♜     ♘   ♖ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
     expMoves = -- Pawn at (3 0)
                (normalMovesFrom (Pos 3 0) [(Pos 4 0), (Pos 4 1)]) ++
 
@@ -304,7 +309,8 @@ prop_knights = verifyMoves expMoves Black board
                   \6 ♟ ♙         ♖   6\n\
                   \7 ♗   ♞   ♔     ♖ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
     expMoves = -- Knight at (4 4)
                (normalMovesFrom (Pos 4 4) [(Pos 2 5), (Pos 3 6), (Pos 5 6),
                                            (Pos 6 5), (Pos 6 3), (Pos 5 2),
@@ -366,7 +372,8 @@ prop_allKindsPreventKingMove = verifyMoves expMoves White board
                   \6 ♜     ♙         6\n\
                   \7                 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[White]"
     expMoves = normalMovesFrom (Pos 5 3) [(Pos 6 4)]
 
 prop_kingMovesAwayIfChecked :: Property
@@ -383,7 +390,8 @@ prop_kingMovesAwayIfChecked = verifyMoves expMoves White board
                   \6                 6\n\
                   \7               ♚ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[White]"
     expMoves = normalMovesFrom (Pos 5 3) [(Pos 4 2), (Pos 4 3), (Pos 4 4),
                                           (Pos 6 2), (Pos 6 3), (Pos 6 4)]
 
@@ -401,7 +409,8 @@ prop_blocksWithOtherIfKingIsChecked = verifyMoves expMoves White board
                   \6       ♙     ♜ ♝ 6\n\
                   \7               ♛ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[White]"
     expMoves = (normalMovesFrom (Pos 6 3) [(Pos 5 3)]) ++
                (normalMovesFrom (Pos 4 2) [(Pos 5 2)])
 
@@ -419,7 +428,8 @@ prop_capturesThreatIfKingIsChecked = verifyMoves expMoves White board
                   \6             ♜ ♝ 6\n\
                   \7               ♛ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[White]"
     expMoves = normalMovesFrom (Pos 0 5) [(Pos 5 0)]
 
 prop_kingCanCaptureThreat :: Property
@@ -436,7 +446,8 @@ prop_kingCanCaptureThreat = verifyMoves expMoves White board
                   \6                 6\n\
                   \7             ♝   7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[White]"
     expMoves = normalMovesFrom (Pos 5 7) [(Pos 5 6)]
 
 prop_checkedMultipleTypesOfMoves :: Property
@@ -453,7 +464,8 @@ prop_checkedMultipleTypesOfMoves = verifyMoves expMoves White board
                   \6           ♙     6\n\
                   \7                 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[White]"
     expMoves = (normalMovesFrom (Pos 5 7) [(Pos 5 6), (Pos 4 7), (Pos 6 7)]) ++
                (normalMovesFrom (Pos 6 5) [(Pos 5 6)])
 
@@ -471,7 +483,8 @@ prop_kingPinned = verifyMoves expMoves White board
                   \6                 6\n\
                   \7                 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[White]"
     expMoves = (normalMovesFrom (Pos 5 5) [(Pos 5 4), (Pos 4 4), (Pos 4 5),
                                            (Pos 4 6), (Pos 5 6), (Pos 6 6),
                                            (Pos 6 5), (Pos 6 4)])
@@ -480,7 +493,7 @@ prop_movesAreSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
 prop_movesAreSubsetOfCheckUnawareMoves color board =
   moves `isSubsetOf` movesCheckUnaware
   where
-    moves             = movesFun color board
+    moves             = movesFunForColor color board
     movesCheckUnaware = CU.movesFun color board
 
 --------------------------------------------------------------------------------
@@ -501,7 +514,8 @@ prop_noCastlingSinceKingWouldPassThreat = verifyCastlingMoves expMoves White boa
                       \6           ♖     6\n\
                       \7 ♖       ♔     ♖ 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[White]"
         expMoves = [Castle White KingSide]
 
 prop_noCastlingSinceKingIsChecked :: Property
@@ -518,7 +532,8 @@ prop_noCastlingSinceKingIsChecked = verifyCastlingMoves expMoves White board
                       \6       ♙   ♝ ♘   6\n\
                       \7 ♖       ♔     ♖ 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[White]"
         expMoves = []
 
 prop_noCastlingSinceDstAttacked :: Property
@@ -535,7 +550,8 @@ prop_noCastlingSinceDstAttacked = verifyCastlingMoves expMoves Black board
                       \6   ♟   ♜ ♘ ♕     6\n\
                       \7   ♖ ♜   ♗     ♜ 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMoves = [Castle Black QueenSide]
 
 prop_bothCastlingsPossible :: Property
@@ -552,7 +568,8 @@ prop_bothCastlingsPossible = verifyCastlingMoves expMoves Black board
                       \6         ♙ ♔     6\n\
                       \7   ♜   ♞         7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMoves = [Castle Black QueenSide, Castle Black KingSide]
 
 prop_castlingKingSide :: Property
@@ -569,7 +586,8 @@ prop_castlingKingSide = verifyCastlingMoves expMoves Black board
                       \6   ♞   ♝     ♜ ♘ 6\n\
                       \7                 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMoves = [Castle Black KingSide]
 
 prop_castlingQueenSide :: Property
@@ -586,7 +604,8 @@ prop_castlingQueenSide = verifyCastlingMoves expMoves Black board
                       \6 ♘   ♛   ♗ ♘   ♞ 6\n\
                       \7           ♘     7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMoves = [Castle Black QueenSide]
 
 prop_noCastlingOtherRow :: Bool
@@ -607,7 +626,8 @@ prop_noCastlingOtherRow = movesFromBoardWithKingAtRow 0 `listEq` allCastlings &&
                       \6 ♜             ♜ 6\n\
                       \7 ♜             ♜ 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         movesFromBoardWithKingAtRow row = movesFunOnlyCastling Black board'
             where
                 board' = setB (Pos row 4) (Piece Black King) $
@@ -631,7 +651,8 @@ prop_noCastlingSinceLeftRookMoved = verifyCastlingMoves expMoves White board .&&
                       \6       ♙     ♘   6\n\
                       \7 ♖       ♔     ♖ 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  M       U     U"
+                      \  M       U     U\n\
+                      \[White]"
         expMoves = [Castle White KingSide]
 
         -- Sanity check
@@ -658,7 +679,8 @@ prop_noCastlingSinceRightRookMoved = verifyCastlingMoves expMoves White board .&
                       \6 ♖   ♙   ♖ ♖ ♖ ♙ 6\n\
                       \7         ♔     ♖ 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     M"
+                      \  U       U     M\n\
+                      \[White]"
         expMoves = []
 
         -- Sanity check
@@ -680,7 +702,8 @@ prop_noCastlingSinceKingMoved = verifyCastlingMoves expMoves Black board .&&.
                       \6 ♗     ♔ ♘       6\n\
                       \7         ♖       7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMoves = []
 
         -- Sanity check
@@ -726,6 +749,9 @@ normalMovesFrom src dsts = map (NormalMove src) dsts
 
 promotesFrom :: Pos -> [Pos] -> [Move]
 promotesFrom src dsts = [Promote src dst k | k <- [Rook, Bishop, Knight, Queen], dst <- dsts]
+
+movesFunForColor :: MovesFun
+movesFunForColor color board = movesFun color $ setTurn color board
 
 
 return []
