@@ -23,7 +23,8 @@ prop_scoreNormal = scoreForBoard board == score
                   \6       ♘ ♞ ♟ ♝ ♟ 6\n\
                   \7       ♜   ♞ ♖ ♝ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       M     M"
+                  \  U       M     M\n\
+                  \[Black]"
 
     score =          0-10 +0+0+0+0+3
                     +1+3+0+0+0+0+0+3
@@ -48,7 +49,8 @@ prop_scoreCheck = scoreForBoard board == score
                   \6       ♘ ♞ ♟ ♝ ♟ 6\n\
                   \7       ♜   ♞ ♖ ♝ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       M     U"
+                  \  U       M     U\n\
+                  \[Black]"
 
     score =          0-10 +0+0+0+0+3
                     +1+3+0+0+0+0+0+3
@@ -73,7 +75,8 @@ prop_scoreCheckmate = scoreForBoard board == maxBound
                   \6       ♘ ♞ ♟ ♝ ♟ 6\n\
                   \7       ♜   ♞ ♖ ♝ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
 
 prop_scoreDraw :: Bool
 prop_scoreDraw = scoreForBoard board == 0
@@ -89,7 +92,8 @@ prop_scoreDraw = scoreForBoard board == 0
                   \6         ♞ ♟ ♝ ♟ 6\n\
                   \7       ♜   ♞   ♝ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       M     M"
+                  \  U       M     M\n\
+                  \[Black]"
 
 prop_scoreNoOtherKing :: Bool
 prop_scoreNoOtherKing = scoreForBoard board == maxBound
@@ -105,7 +109,8 @@ prop_scoreNoOtherKing = scoreForBoard board == maxBound
                   \6 ♗ ♚ ♜   ♜       6\n\
                   \7     ♗ ♖         7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       M     M"
+                  \  U       M     M\n\
+                  \[Black]"
 
 prop_scoreNoOwnKing :: Bool
 prop_scoreNoOwnKing = scoreForBoard board == minBound
@@ -121,7 +126,8 @@ prop_scoreNoOwnKing = scoreForBoard board == minBound
                   \6 ♞ ♘ ♜         ♛ 6\n\
                   \7   ♜   ♘         7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       M     M"
+                  \  U       M     M\n\
+                  \[Black]"
 
 --------------------------------------------------------------------------------
 -- Helper functions
