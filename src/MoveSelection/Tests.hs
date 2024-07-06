@@ -4,6 +4,7 @@
 module MoveSelection.Tests where
 
 import Test.QuickCheck
+import Control.Exception
 
 import Types
 import Moves
@@ -410,110 +411,64 @@ prop_deferPromoteBug6 = verifyMakesMove expMove board
                       \[Black]"
         expMove = Promote (Pos 6 3) (Pos 7 3) Rook
 
-prop_deferPromoteBugArbitrary :: Int -> Pos -> Pos -> Property
-prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
-    condition ==> (verifyMakesMove expMove board4)
-    where
-        -- Positions
-        pawnCol = pawnCol' `mod` 8
-        pawnStart = Pos 6 pawnCol
-        pawnEnd = Pos 7 pawnCol
+-- Need to disable because generates so many cases where it's actually
+-- good to defer the promote
+-- prop_deferPromoteBugArbitrary :: Int -> Pos -> Pos -> Property
+-- prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
+--     condition ==> (verifyMakesMove expMove board4)
+--     where
+--         -- Positions
+--         pawnCol = pawnCol' `mod` 8
+--         pawnStart = Pos 6 pawnCol
+--         pawnEnd = Pos 7 pawnCol
 
-        -- Conditions
-        notTooClose p1 p2 = posDist p1 p2 >= 2
+--         -- Conditions
+--         notTooClose p1 p2 = posDist p1 p2 >= 2
         
-        condition = notTooClose blackKingPos whiteKingPos &&
-                    notTooClose blackKingPos pawnStart &&
-                    notTooClose blackKingPos pawnEnd &&
+--         condition = notTooClose blackKingPos whiteKingPos &&
+--                     notTooClose blackKingPos pawnStart &&
+--                     notTooClose blackKingPos pawnEnd &&
 
-                    notTooClose whiteKingPos blackKingPos &&
-                    notTooClose whiteKingPos pawnStart &&
-                    notTooClose whiteKingPos pawnEnd &&
+--                     notTooClose whiteKingPos blackKingPos &&
+--                     notTooClose whiteKingPos pawnStart &&
+--                     notTooClose whiteKingPos pawnEnd &&
 
-                    -- Why not? See prop_deferPromoteBug5
-                    not (whiteKingPos `elem` [Pos 6 6, Pos 6 7] &&
-                         blackKingPos `elem` [Pos 4 6, Pos 4 7]) &&
+--                     -- Why not? See prop_deferPromoteBug5
+--                     not (whiteKingPos `elem` [Pos 6 6, Pos 6 7] &&
+--                          blackKingPos `elem` [Pos 4 6, Pos 4 7]) &&
 
-                    not (whiteKingPos `elem` [Pos 6 0, Pos 6 1] &&
-                         blackKingPos `elem` [Pos 4 0, Pos 4 1]) &&
+--                     not (whiteKingPos `elem` [Pos 6 0, Pos 6 1] &&
+--                          blackKingPos `elem` [Pos 4 0, Pos 4 1]) &&
                     
-                    -- Why not? See prop_deferPromoteBug6
-                    not (whiteKingPos == (Pos 7 0) &&
-                         blackKingPos `elem` [Pos 5 0, Pos 5 1]) &&
+--                     -- Why not? See prop_deferPromoteBug6
+--                     not (whiteKingPos == (Pos 7 0) &&
+--                          blackKingPos `elem` [Pos 5 0, Pos 5 1]) &&
 
-                    not (whiteKingPos == (Pos 7 7) &&
-                         blackKingPos `elem` [Pos 5 6, Pos 5 7]) &&
+--                     not (whiteKingPos == (Pos 7 7) &&
+--                          blackKingPos `elem` [Pos 5 6, Pos 5 7]) &&
 
-                    -- Why not? See prop_deferPromoteBug7
-                    not (rowOf whiteKingPos == 7 &&
-                         rowOf blackKingPos == 5 &&
-                         colOf whiteKingPos == colOf blackKingPos)
+--                     -- Why not? See prop_deferPromoteBug7
+--                     not (rowOf whiteKingPos == 7 &&
+--                          rowOf blackKingPos == 5 &&
+--                          colOf whiteKingPos == colOf blackKingPos)
     
-        board1 = read  "  U       U     U  \n\
-                       \  0 1 2 3 4 5 6 7  \n\
-                       \0                 0\n\
-                       \1                 1\n\
-                       \2                 2\n\
-                       \3                 3\n\
-                       \4                 4\n\
-                       \5                 5\n\
-                       \6                 6\n\
-                       \7                 7\n\
-                       \  0 1 2 3 4 5 6 7  \n\
-                       \  U       U     U\n\
-                       \[Black]"
-        board2 = setB blackKingPos (Piece Black King) board1
-        board3 = setB whiteKingPos (Piece White King) board2
-        board4 = setB pawnStart (Piece Black Pawn) board3
-        expMove = Promote pawnStart pawnEnd Queen
-
--- These bugs started to appear after adding turn to board
--- Happenening quite frequently
--- *** Failed! Falsified (after 62 tests and 5 shrinks):    
--- 3
--- Pos 4 0
--- Pos 7 0
---   U       U     U
---   a b c d e f g h
--- 8                 8
--- 7                 7
--- 6                 6
--- 5                 5
--- 4 ♚               4
--- 3                 3
--- 2       ♟         2
--- 1 ♔               1
---   a b c d e f g h
---   U       U     U
--- [Black]
--- Expected moves: [Promote (Pos 6 3) (Pos 7 3) Queen]
-
--- Actual move: NormalMove (Pos 4 0) (Pos 5 0)
-
--- Depth: 3
-
--- *** Failed! Falsified (after 87 tests and 2 shrinks):  
--- 0
--- Pos 4 5
--- Pos 7 7
---   U       U     U
---   a b c d e f g h
--- 8                 8
--- 7                 7
--- 6                 6
--- 5                 5
--- 4           ♚     4
--- 3                 3
--- 2 ♟               2
--- 1               ♔ 1
---   a b c d e f g h
---   U       U     U
--- [Black]
--- Expected moves: [Promote (Pos 6 0) (Pos 7 0) Queen]
-
--- Actual move: NormalMove (Pos 4 5) (Pos 5 6)
-
--- Depth: 3
+--         board1 = read  "  U       U     U  \n\
+--                        \  0 1 2 3 4 5 6 7  \n\
+--                        \0                 0\n\
+--                        \1                 1\n\
+--                        \2                 2\n\
+--                        \3                 3\n\
+--                        \4                 4\n\
+--                        \5                 5\n\
+--                        \6                 6\n\
+--                        \7                 7\n\
+--                        \  0 1 2 3 4 5 6 7  \n\
+--                        \  U       U     U\n\
+--                        \[Black]"
+--         board2 = setB blackKingPos (Piece Black King) board1
+--         board3 = setB whiteKingPos (Piece White King) board2
+--         board4 = setB pawnStart (Piece Black Pawn) board3
+--         expMove = Promote pawnStart pawnEnd Queen
 
 prop_deferPromoteBug7 :: Property
 prop_deferPromoteBug7 = verifyMakesOneOfMoves [move1, move2] board
@@ -533,6 +488,62 @@ prop_deferPromoteBug7 = verifyMakesOneOfMoves [move1, move2] board
                       \[Black]"
         move1 = Promote (Pos 6 0) (Pos 7 0) Queen
         move2 = Promote (Pos 6 0) (Pos 7 0) Rook
+
+-- Here the correct move is actually to defer the promote
+prop_deferPromoteBug8 :: Property
+prop_deferPromoteBug8 = assert (board2 == board2') $
+                        assert (moves == [onlyMove]) $
+                        assert (board3 == board3') $
+                        verifyMakesMove' move1 board1 3 .&&.
+                        verifyMakesOneOfMoves' moves3 board3 3
+    where
+        board1 = read  "  U       U     U  \n\
+                       \  0 1 2 3 4 5 6 7  \n\
+                       \0                 0\n\
+                       \1                 1\n\
+                       \2                 2\n\
+                       \3                 3\n\
+                       \4               ♚ 4\n\
+                       \5                 5\n\
+                       \6 ♟               6\n\
+                       \7               ♔ 7\n\
+                       \  0 1 2 3 4 5 6 7  \n\
+                       \  U       U     U\n\
+                       \[Black]"
+        move1 = NormalMove (Pos 4 7) (Pos 5 6)
+        board2 = applyMove move1 board1
+        board2' = read  "  U       U     U  \n\
+                        \  0 1 2 3 4 5 6 7  \n\
+                        \0                 0\n\
+                        \1                 1\n\
+                        \2                 2\n\
+                        \3                 3\n\
+                        \4                 4\n\
+                        \5             ♚   5\n\
+                        \6 ♟               6\n\
+                        \7               ♔ 7\n\
+                        \  0 1 2 3 4 5 6 7  \n\
+                        \  U       U     U\n\
+                        \[White]"
+        moves = movesFun board2
+        onlyMove = NormalMove (Pos 7 7) (Pos 7 6)
+
+        board3 = applyMove onlyMove board2
+        board3' = read  "  U       U     U  \n\
+                        \  0 1 2 3 4 5 6 7  \n\
+                        \0                 0\n\
+                        \1                 1\n\
+                        \2                 2\n\
+                        \3                 3\n\
+                        \4                 4\n\
+                        \5             ♚   5\n\
+                        \6 ♟               6\n\
+                        \7             ♔   7\n\
+                        \  0 1 2 3 4 5 6 7  \n\
+                        \  U       U     U\n\
+                        \[Black]"
+        moves3 = [Promote (Pos 6 0) (Pos 7 0) Rook,
+                  Promote (Pos 6 0) (Pos 7 0) Queen]
 
 
 posDist :: Pos -> Pos -> Int
