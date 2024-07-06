@@ -37,6 +37,10 @@ Chess AI written in Haskell.
     - ~~Move Score to top-level~~
     - Test promotes with MoveSelection
 
+Note: I tried Data.MemoTrie, but it consumed several gigabytes, so it wasn't practical
+But see the memotrie branch
+So efficient calculation might be needed after all if caching is infeasable
+
 # Dev
 
 cabal repl --ghc-options="-fobject-code -O2"
