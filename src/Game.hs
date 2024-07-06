@@ -55,7 +55,7 @@ applyMove move (GameState {board, captured}) = (nextGameState, result)
                                   , captured = captured'}
 
         -- Determining result
-        (_scoreValue, result, _moves) = score board'
+        (_scoreValue, result) = score board'
 
 moveToCaptured :: Move -> Board -> Square
 moveToCaptured (NormalMove _src dst) board = getB dst board

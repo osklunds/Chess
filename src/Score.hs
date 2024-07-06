@@ -21,11 +21,10 @@ data Result = Normal
             | Checkmate
             deriving (Eq, Show)
 
-score :: Board -> (Int, Result, [Move])
-score board = (score, result, moves)
+score :: Board -> (Int, Result)
+score board = (score, result)
     where
-        moves = movesFun board
-        canMove = not $ null $ moves
+        canMove = not $ null $ movesFun board
         isThreatened = threatensKing $ invertTurn board
         scoreValue = calculateScore board
         (score, result) = case (canMove, isThreatened) of
