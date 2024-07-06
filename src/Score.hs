@@ -15,33 +15,29 @@ data FoldState = FoldState { scoreValue :: Int
                            }
 
 score :: Board -> Int
-score board = case gameResult board of
-                Normal    -> scoreValue
-                Check     -> scoreValue
-                Checkmate -> maxBound
-                Draw      -> 0
+score board = case canMove of
+                True ->
+                    scoreValue
+                False ->
+                    case isThreatened of
+                        True ->
+                            case getTurn board of
+                                Black -> minBound
+                                White -> maxBound
+                        False ->
+                            0
     where
+        canMove = not $ null $ movesFun board
+        isThreatened = threatensKing $ invertTurn board
         scoreValue = calculateScore board
-
-data Result = Normal | Check | Checkmate | Draw
-            deriving (Eq)
-
-gameResult :: Board -> Result
-gameResult board = case (canMove, isThreatened) of
-                            (True , True ) -> Check
-                            (True , False) -> Normal
-                            (False, True ) -> Checkmate
-                            (False, False) -> Draw
-  where
-    -- TODO: This is where moves can be re-used
-    canMove      = not $ null $ movesFun board
-    isThreatened = threatensKing $ invertTurn board
 
 -- Positive means Black is leading, negative means White is leading
 -- (Talk about controversy :D)
 calculateScore :: Board -> Int
 calculateScore board
    -- Test all combinations of black and white king existing
+   -- TODO: Should never happen that not 1 of each king. Assert
+   -- and fix board generation
    | not $ foundBlackKing finalState = minBound
    | not $ foundWhiteKing finalState = maxBound
    | otherwise                       = scoreValue finalState
