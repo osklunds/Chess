@@ -152,8 +152,8 @@ prop_boardWhereWhiteCantMove = scoreValueWhite == 0 &&
 getValues :: Board -> (Int, Bool, Int, Bool)
 getValues board = (scoreValueBlack, isThreatenedBlack, scoreValueWhite, isThreatenedWhite)
     where
-        (scoreValueBlack, isThreatenedBlack, _MovesBlack) = score $ setTurn Black board
-        (scoreValueWhite, isThreatenedWhite, _MovesWhite) = score $ setTurn White board
+        (scoreValueBlack, isThreatenedBlack, _movesBlack) = score $ setTurn Black board
+        (scoreValueWhite, isThreatenedWhite, _movesWhite) = score $ setTurn White board
 
 
 return []

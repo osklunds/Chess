@@ -124,7 +124,8 @@ comparePreviousScores (StateScore state1) (StateScore state2) =
         prevScores2 = makePrevScores state2
 
 scoreOfState :: State -> Int
-scoreOfState = score . board
+scoreOfState state = let (scoreValue, _isThretened, _moves) = score $ board state
+                     in scoreValue
 
 compareScoreLists :: [Int] -> [Int] -> Ordering
 compareScoreLists [] [] = EQ
