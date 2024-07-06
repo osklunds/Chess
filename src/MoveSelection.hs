@@ -6,7 +6,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 
 module MoveSelection
-( moveColor
+( selectMove
 )
 where
 
@@ -18,7 +18,7 @@ import Types
 import Moves
 import Score
 import Optimize
-import qualified Optimize.Types as OptTypes
+import qualified Optimize.Types
 
 --------------------------------------------------------------------------------
 -- "The great composition"
@@ -26,32 +26,32 @@ import qualified Optimize.Types as OptTypes
 
 data State = State { board :: Board
                    , prevStates :: [State]
-                   , reachBy :: Maybe Move
-                   , turn :: Color }
+                   , reachBy :: Maybe Move }
            deriving (Eq, Ord, Show)
 
 -- depth must be 2 or larger in order to detect check and checkmate
-moveColor :: Int -> Color -> Board -> Move
-moveColor depth color board = fromJust $ reachBy nextState
+-- TODO: Is the above comment really true?
+selectMove :: Int -> Board -> Move
+selectMove depth board = fromJust $ reachBy nextState
   where
     initialState = State { board
                          , prevStates = []
-                         , reachBy = Nothing
-                         , turn = color }
-    nextState = optimize genStates (evalState color) depth initialState
+                         , reachBy = Nothing }
+    nextState = optimize genStates evalState depth initialState
 
 --------------------------------------------------------------------------------
 -- State generation
 --------------------------------------------------------------------------------
 
-genStates :: OptTypes.GenFun State
+genStates :: Optimize.Types.GenFun State
 genStates currentState = states
     where
-        (State {board, prevStates, turn}) = currentState
+        (State {board, prevStates}) = currentState
 
+        turn = getTurn board
         hasKing = anyB (== (Piece turn King)) board
         moves = case hasKing of
-                    True  -> movesFun turn board
+                    True  -> movesFun board
                     False -> []
         -- Optimization. If "turn" has no king anyway, turn lost in a previous
         -- state and there's no need to check moves now.
@@ -61,8 +61,7 @@ genStates currentState = states
         -- detect if someone external doesn't use applyMove to update the board
         states = map (\move -> State { board = applyMove move board
                                      , prevStates = currentState:prevStates
-                                     , reachBy = Just move
-                                     , turn    = invert turn}) moves
+                                     , reachBy = Just move }) moves
 
 --------------------------------------------------------------------------------
 -- Score
@@ -72,11 +71,11 @@ genStates currentState = states
 
 data StateScore = StateScoreMax |
                   StateScoreMin |
-                  StateScore Color State
+                  StateScore State
                   deriving (Show)
 
-evalState :: Color -> OptTypes.EvalFun State StateScore
-evalState color state = StateScore color state
+evalState :: Optimize.Types.EvalFun State StateScore
+evalState state = StateScore state
 
 instance Bounded StateScore where
   minBound = StateScoreMin
@@ -107,24 +106,25 @@ instance Ord StateScore where
 -- where it makes a difference (crash here) and investigate that board.
 
 compareStates :: StateScore -> StateScore -> Ordering
-compareStates (StateScore color state1) (StateScore _color state2) =
-    compareScoreLists [scoreForColorInState color state1]
-                      [scoreForColorInState color state2]
-compareStates s1 s2 = error $ "Two non StateScores are being compared" ++ show s1 ++ show s2
+compareStates (StateScore state1) (StateScore state2) =
+    compareScoreLists [scoreOfState state1]
+                      [scoreOfState state2]
+compareStates s1 s2 = error $
+    "Two non StateScores are being compared" ++ show s1 ++ show s2
 
 comparePreviousScores :: StateScore -> StateScore -> Ordering
-comparePreviousScores (StateScore color state1) (StateScore _color state2) =
+comparePreviousScores (StateScore state1) (StateScore state2) =
     compareScoreLists prevScores1 prevScores2
     where
         makePrevScores :: State -> [Int]
         makePrevScores (State { prevStates }) =
-            reverse $ map (scoreForColorInState color) prevStates
+            reverse $ map scoreOfState prevStates
 
         prevScores1 = makePrevScores state1
         prevScores2 = makePrevScores state2
 
-scoreForColorInState :: Color -> State -> Int
-scoreForColorInState color state = scoreForColor color (turn state) (board state)
+scoreOfState :: State -> Int
+scoreOfState = score . board
 
 compareScoreLists :: [Int] -> [Int] -> Ordering
 compareScoreLists [] [] = EQ

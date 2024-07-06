@@ -67,7 +67,7 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
                     \  M       M     M\n\
                     \[Black]"
     board'  = setB curPos piece board
-    move    = makeMove depth board'
+    move    = selectMove depth board'
     board'' = applyMove move board'
 
 
@@ -145,7 +145,7 @@ prop_escapeFromCheckEvenIfCanCheckmate =
                   \  0 1 2 3 4 5 6 7  \n\
                   \  U       U     U\n\
                   \[Black]"
-    nextBoard d = applyMove (makeMove d board) board
+    nextBoard d = applyMove (selectMove d board) board
 
 prop_doStalemateIfLosing :: Property
 prop_doStalemateIfLosing = verifyMakesMove expMove board
@@ -557,19 +557,13 @@ prop_legalMove board = not (null legalMoves) ==>
                        -- TODO: Test for more depths when the algorithm is faster
                        conjoin [verifyMakesOneOfMoves' legalMoves board d | d <- [1..2]]
     where
-        legalMoves = movesFun Black board
+        legalMoves = movesFun board
 
 -- TODO: escape from check
 
 --------------------------------------------------------------------------------
 -- Helper functions
 --------------------------------------------------------------------------------
-
-makeMove :: Int -> Board -> Move
-makeMove depth board = moveColor depth Black board
-
-makeMoveWhite :: Int -> Board -> Move
-makeMoveWhite depth board = moveColor depth White board
 
 -- TODO: make depth a parameter to more functions
 depths :: [Int]
@@ -593,7 +587,7 @@ verifyMakesOneOfMoves' expMoves board depth =
     counterexample errorString result
     where
         result = move `elem` expMoves
-        move = makeMove depth board 
+        move = selectMove depth board 
         errorString = show board ++ "\n" ++
                       "Expected moves: " ++ show expMoves ++ "\n\n" ++
                       "Actual move: " ++ show move ++ "\n\n" ++
@@ -604,7 +598,7 @@ verifyDoesNotCastle board = all pred depths
     where
         -- I used to check "does not make move", but that is risky with castle since
         -- if color by mistake is flipped, it will return true for the wrong reason.
-        pred depth = not $ isCastle $ makeMove depth board
+        pred depth = not $ isCastle $ selectMove depth board
 
 
 return []
