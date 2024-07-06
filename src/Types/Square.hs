@@ -1,4 +1,8 @@
 
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TypeFamilies #-}
+
 module Types.Square
 ( Square(..)
 , Color(..)
@@ -21,6 +25,8 @@ where
 
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
+import GHC.Generics (Generic)
+import Data.MemoTrie
 
 --------------------------------------------------------------------------------
 -- Data types
@@ -28,11 +34,11 @@ import Test.QuickCheck.Gen
 
 data Square = Empty
             | Piece Color Kind
-            deriving (Eq, Ord)
+            deriving (Eq, Ord, Generic)
 
 data Color = Black
            | White
-           deriving (Eq, Show, Ord)
+           deriving (Eq, Show, Ord, Generic)
 
 data Kind = Pawn
           | Bishop
@@ -40,7 +46,7 @@ data Kind = Pawn
           | Rook
           | Queen
           | King
-          deriving (Eq, Show, Ord)
+          deriving (Eq, Show, Ord, Generic)
 
 --------------------------------------------------------------------------------
 -- Show
@@ -154,3 +160,25 @@ isQueen _               = False
 isKing :: Square -> Bool
 isKing (Piece _ King) = True
 isKing _              = False
+
+--------------------------------------------------------------------------------
+-- HasTrie
+--------------------------------------------------------------------------------
+
+instance HasTrie Square where
+    newtype (Square :->: b) = SquareTrie { unSquareTrie :: Reg Square :->: b } 
+    trie = trieGeneric SquareTrie 
+    untrie = untrieGeneric unSquareTrie
+    enumerate = enumerateGeneric unSquareTrie
+
+instance HasTrie Color where
+    newtype (Color :->: b) = ColorTrie { unColorTrie :: Reg Color :->: b } 
+    trie = trieGeneric ColorTrie 
+    untrie = untrieGeneric unColorTrie
+    enumerate = enumerateGeneric unColorTrie
+
+instance HasTrie Kind where
+    newtype (Kind :->: b) = KindTrie { unKindTrie :: Reg Kind :->: b } 
+    trie = trieGeneric KindTrie 
+    untrie = untrieGeneric unKindTrie
+    enumerate = enumerateGeneric unKindTrie

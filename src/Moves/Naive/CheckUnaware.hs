@@ -10,9 +10,13 @@ import Types
 import Moves.Common
 import Debug.Trace
 import Control.Exception
+import Data.MemoTrie
 
 movesFun :: MovesFun
-movesFun = concatApply [normalAndPromotesMovesFun, castlingsMovesFun]
+movesFun = memo movesFun'
+
+movesFun' :: MovesFun
+movesFun' = concatApply [normalAndPromotesMovesFun, castlingsMovesFun]
 
 concatApply :: [MovesFun] -> MovesFun
 concatApply movesFuns board = concat [movesFun board | movesFun <- movesFuns]

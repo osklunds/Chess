@@ -105,7 +105,7 @@ computerTurn :: State -> IO ()
 computerTurn st = do
     let gss@(curGs:_restGss) = gameStates st
     let computerColor = T.invert $ playerColor st
-    let move = selectMove 3 $ board curGs
+    let move = selectMove 4 $ board curGs
     let (newGs,result) = G.applyMove move curGs
     putStrLn ""
     printBoardWithMove move newGs

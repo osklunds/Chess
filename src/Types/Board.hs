@@ -1,6 +1,9 @@
 
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TypeFamilies #-}
 
 -- Representation of a board.
 -- All operations that return a board assert that the returned board is a legal
@@ -49,6 +52,8 @@ import Data.List
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
 import Debug.Trace
+import GHC.Generics (Generic)
+import Data.MemoTrie
 
 import Types.Pos
 import Types.Square
@@ -63,15 +68,17 @@ data Board = Board { rows :: [[Square]],
                      whiteCastleState :: CastleState,
                      turn :: Color
                    }
-             deriving (Eq, Ord)
+             deriving (Eq, Ord, Generic)
 
 data CastleState = CastleState { leftRook  :: CastleMoved,
                                  king      :: CastleMoved,
                                  rightRook :: CastleMoved
                                }
-                   deriving (Eq, Ord)
+                   deriving (Eq, Ord, Generic)
 
-data CastleMoved = Moved | Unmoved deriving (Eq, Ord)
+data CastleMoved = Moved
+                 | Unmoved
+                 deriving (Eq, Ord, Generic)
 
 --------------------------------------------------------------------------------
 -- Show
@@ -456,3 +463,25 @@ swapPiecesAtPositions board pos1 pos2 = checkedBoard newBoard
         atPos1 = getB pos1 board
         atPos2 = getB pos2 board
         newBoard = setB' pos1 atPos2 $ setB' pos2 atPos1 board
+
+--------------------------------------------------------------------------------
+-- HasTrie
+--------------------------------------------------------------------------------
+
+instance HasTrie Board where
+    newtype (Board :->: b) = BoardTrie { unBoardTrie :: Reg Board :->: b } 
+    trie = trieGeneric BoardTrie 
+    untrie = untrieGeneric unBoardTrie
+    enumerate = enumerateGeneric unBoardTrie
+
+instance HasTrie CastleState where
+    newtype (CastleState :->: b) = CastleStateTrie { unCastleStateTrie :: Reg CastleState :->: b } 
+    trie = trieGeneric CastleStateTrie 
+    untrie = untrieGeneric unCastleStateTrie
+    enumerate = enumerateGeneric unCastleStateTrie
+
+instance HasTrie CastleMoved where
+    newtype (CastleMoved :->: b) = CastleMovedTrie { unCastleMovedTrie :: Reg CastleMoved :->: b } 
+    trie = trieGeneric CastleMovedTrie 
+    untrie = untrieGeneric unCastleMovedTrie
+    enumerate = enumerateGeneric unCastleMovedTrie

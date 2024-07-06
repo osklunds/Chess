@@ -4,6 +4,8 @@ module Moves.Naive
 )
 where
 
+import Data.MemoTrie
+
 import Moves.Common
 import qualified Moves.Naive.CheckAware
 
