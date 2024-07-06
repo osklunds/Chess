@@ -442,7 +442,12 @@ prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
                          blackKingPos `elem` [Pos 5 0, Pos 5 1]) &&
 
                     not (whiteKingPos == (Pos 7 7) &&
-                         blackKingPos `elem` [Pos 5 6, Pos 5 7])
+                         blackKingPos `elem` [Pos 5 6, Pos 5 7]) &&
+
+                    -- Why not? See prop_deferPromoteBug7
+                    not (rowOf whiteKingPos == 7 &&
+                         rowOf blackKingPos == 5 &&
+                         colOf whiteKingPos == colOf blackKingPos)
     
         board1 = read  "  U       U     U  \n\
                        \  0 1 2 3 4 5 6 7  \n\
@@ -510,28 +515,24 @@ prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
 
 -- Depth: 3
 
--- *** Failed! Falsified (after 34 tests and 2 shrinks):  
--- 0
--- Pos 5 2
--- Pos 7 2
---   U       U     U
---   a b c d e f g h
--- 8                 8
--- 7                 7
--- 6                 6
--- 5                 5
--- 4                 4
--- 3     ♚           3
--- 2 ♟               2
--- 1     ♔           1
---   a b c d e f g h
---   U       U     U
--- [Black]
--- Expected moves: [Promote (Pos 6 0) (Pos 7 0) Queen]
-
--- Actual move: Promote (Pos 6 0) (Pos 7 0) Rook
-
--- Depth: 2
+prop_deferPromoteBug7 :: Property
+prop_deferPromoteBug7 = verifyMakesOneOfMoves [move1, move2] board
+    where
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0                 0\n\
+                      \1                 1\n\
+                      \2                 2\n\
+                      \3                 3\n\
+                      \4                 4\n\
+                      \5     ♚           5\n\
+                      \6 ♟               6\n\
+                      \7     ♔           7\n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \  U       U     U\n\
+                      \[Black]"
+        move1 = Promote (Pos 6 0) (Pos 7 0) Queen
+        move2 = Promote (Pos 6 0) (Pos 7 0) Rook
 
 
 posDist :: Pos -> Pos -> Int
