@@ -27,6 +27,7 @@ score board = case canMove of
                         False ->
                             0
     where
+        -- TODO: This is where moves can be re-used
         canMove = not $ null $ movesFun board
         isThreatened = threatensKing $ invertTurn board
         scoreValue = calculateScore board
