@@ -14,7 +14,7 @@ import Types as T hiding (Move)
 import qualified Types as T
 import MoveSelection
 import Game as G
-import GameResult as GR
+import Score
 
 data UserAction = Move T.Move
                 | Undo
@@ -30,10 +30,10 @@ start playerColor startBoard = do
 
     let st = State { gameStates = [gs], playerColor }
 
-    case playerColor of
-        White ->
+    case playerColor == getTurn startBoard of
+        True ->
             playerTurn st
-        Black ->
+        False ->
             computerTurn st
 
 playerTurn :: State -> IO ()
@@ -105,7 +105,7 @@ computerTurn :: State -> IO ()
 computerTurn st = do
     let gss@(curGs:_restGss) = gameStates st
     let computerColor = T.invert $ playerColor st
-    let move = moveColor 3 computerColor $ board curGs
+    let move = selectMove 3 $ board curGs
     let (newGs,result) = G.applyMove move curGs
     putStrLn ""
     printBoardWithMove move newGs

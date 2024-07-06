@@ -6,7 +6,6 @@
 module Game
 ( GameState
 , board
-, turn
 , captured
 , newGameState
 , ValidationResult(..)
@@ -15,13 +14,14 @@ module Game
 )
 where
 
-import GameResult as GR
-import Types as T
+import Types hiding (applyMove)
+import qualified Types
 import Moves
+import Score
+import Moves.Naive.CheckAware (threatensKing)
 
 
 data GameState = GameState { board    :: Board
-                           , turn     :: Color
                            , captured :: [Square]
                            }
 
@@ -29,35 +29,33 @@ data ValidationResult = Ok | IllegalMove | WouldBeInCheck
 
 
 newGameState :: Board -> GameState
-newGameState board = GameState { board, turn = White, captured = []}
+newGameState board = GameState { board, captured = []}
 
 validateMove :: Move -> GameState -> ValidationResult
-validateMove move (GameState {board, turn})
-  | not $ move `elem` legalMoves = IllegalMove
-  | threatensCurKing             = WouldBeInCheck
-  | otherwise                    = Ok
-  where
-    legalMoves       = movesFun turn board
-    newBoard         = T.applyMove move board
-    threatensCurKing = GR.isKingThreatened turn newBoard
+validateMove move (GameState { board })
+    | not $ move `elem` legalMoves = IllegalMove
+    | threatensCurKing             = WouldBeInCheck
+    | otherwise                    = Ok
+    where
+        legalMoves       = movesFun board
+        newBoard         = Types.applyMove move board
+        threatensCurKing = threatensKing newBoard
 
 applyMove :: Move -> GameState -> (GameState, Result)
-applyMove move (GameState {board, turn, captured}) = (nextGameState, result)
-  where
-    -- Next game state
-    capturedThisTurn = moveToCaptured move board
-    captured' = case capturedThisTurn of
-                  Empty -> captured
-                  _else -> capturedThisTurn:captured
-    board'    = T.applyMove move $ board
-    opponent  = invert turn
+applyMove move (GameState {board, captured}) = (nextGameState, result)
+    where
+        -- Next game state
+        capturedThisTurn = moveToCaptured move board
+        captured' = case capturedThisTurn of
+                      Empty -> captured
+                      _else -> capturedThisTurn:captured
+        board' = Types.applyMove move $ board
 
-    nextGameState = GameState { board    = board'
-                              , turn     = opponent
-                              , captured = captured'}
+        nextGameState = GameState { board    = board'
+                                  , captured = captured'}
 
-    -- Determining result
-    result = GR.gameResult opponent board'
+        -- Determining result
+        (_scoreValue, result, _moves) = score board'
 
 moveToCaptured :: Move -> Board -> Square
 moveToCaptured (NormalMove _src dst) board = getB dst board

@@ -91,7 +91,8 @@ prop_show = counterexample (expString ++ "\n" ++ actString) result
                     \2   ♙ ♙ ♙ ♙ ♙ ♝ ♙ 2\n\
                     \1 ♖ ♘ ♗ ♕ ♔ ♗ ♘ ♖ 1\n\
                     \  a b c d e f g h\n\
-                    \  U       U     U"
+                    \  U       U     U\n\
+                    \[White]"
         actString = show board
         result = expString == actString
 
@@ -109,13 +110,15 @@ prop_read = counterexample (show expBoard ++ "\n" ++ show actBoard) result
                       \2 ♙ ♙ ♙ ♙   ♙ ♙ ♙ 2\n\
                       \1 ♜ ♘ ♗ ♕ ♔ ♗ ♘ ♖ 1\n\
                       \  a b c d e f g h  \n\
-                      \  U       M     U"
+                      \  U       M     U\n\
+                      \[Black]"
         actBoard = read inputString
         expCastleState = (CastleState { leftRook = Unmoved, king = Moved, rightRook = Unmoved })
         expBoard = setB (Pos 3 4) (Piece Black Knight) $
                    setB (Pos 7 0) (Piece Black Rook) $
                    setB (Pos 6 4) Empty $
                    setCastleState White expCastleState $
+                   setTurn Black $
                    defaultBoard
         result = expBoard == actBoard
 
@@ -137,7 +140,8 @@ prop_applyNormalNoCapture = verifyBoardsEqual expBoardAfter actBoardAfter
                            \6  [ ]  ♛ ♘ ♙   ♟ 6\n\
                            \7 ♖             ♖ 7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  M       U     M"
+                           \  M       U     M\n\
+                           \[Black]"
 
         expBoardAfter = read "  U       U     U  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -150,7 +154,8 @@ prop_applyNormalNoCapture = verifyBoardsEqual expBoardAfter actBoardAfter
                              \6  [♞]  ♛ ♘ ♙   ♟ 6\n\
                              \7 ♖             ♖ 7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  M       U     M"
+                             \  M       U     M\n\
+                             \[White]"
 
         actBoardAfter = applyMove (NormalMove (Pos 4 0) (Pos 6 1)) boardBefore
 
@@ -168,7 +173,8 @@ prop_applyNormalCapture = verifyBoardsEqual expBoardAfter actBoardAfter
                            \6   ♛[♝]          6\n\
                            \7   ♗ ♛     ♗     7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  M       U     M"
+                           \  M       U     M\n\
+                           \[White]"
 
         expBoardAfter = read "  U       U     U  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -181,7 +187,8 @@ prop_applyNormalCapture = verifyBoardsEqual expBoardAfter actBoardAfter
                              \6   ♛[♖]          6\n\
                              \7   ♗ ♛     ♗     7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  M       U     M"
+                             \  M       U     M\n\
+                             \[Black]"
         actBoardAfter = applyMove (NormalMove (Pos 3 2) (Pos 6 2)) boardBefore
 
 prop_applyMoveBlackLeftRookNormal :: Property
@@ -198,7 +205,8 @@ prop_applyMoveBlackLeftRookNormal = verifyBoardsEqual expBoardAfter actBoardAfte
                            \6     ♜ ♛   ♟     6\n\
                            \7         ♔     ♖ 7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  U       M     M"
+                           \  U       M     M\n\
+                           \[Black]"
 
         expBoardAfter = read "  M       U     U  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -211,7 +219,8 @@ prop_applyMoveBlackLeftRookNormal = verifyBoardsEqual expBoardAfter actBoardAfte
                              \6     ♜ ♛   ♟     6\n\
                              \7         ♔     ♖ 7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  U       M     M"
+                             \  U       M     M\n\
+                             \[White]"
 
         actBoardAfter = applyMove (NormalMove (Pos 0 0) (Pos 4 0)) boardBefore
 
@@ -229,7 +238,8 @@ prop_applyMoveBlackRightRookNormal = verifyBoardsEqual expBoardAfter actBoardAft
                            \6   ♜   ♗   ♘     6\n\
                            \7 ♛ ♞     ♝     ♝ 7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  M       M     U"
+                           \  M       M     U\n\
+                           \[Black]"
 
         expBoardAfter = read "  U       U     M  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -242,7 +252,8 @@ prop_applyMoveBlackRightRookNormal = verifyBoardsEqual expBoardAfter actBoardAft
                              \6   ♜   ♗   ♘     6\n\
                              \7 ♛ ♞     ♝     ♝ 7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  M       M     U"
+                             \  M       M     U\n\
+                             \[White]"
 
         actBoardAfter = applyMove (NormalMove (Pos 0 7) (Pos 1 7)) boardBefore
 
@@ -260,7 +271,8 @@ prop_applyMoveBlackKingNormal = verifyBoardsEqual expBoardAfter actBoardAfter
                            \6   ♖ ♞       ♗   6\n\
                            \7 ♖               7\n\
                            \  0 1 2 3 4 5 6 7\n\
-                           \  U       M     M"
+                           \  U       M     M\n\
+                           \[Black]"
 
         expBoardAfter = read "  U       M     U\n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -273,7 +285,8 @@ prop_applyMoveBlackKingNormal = verifyBoardsEqual expBoardAfter actBoardAfter
                              \6   ♖ ♞       ♗   6\n\
                              \7 ♖               7\n\
                              \  0 1 2 3 4 5 6 7\n\
-                             \  U       M     M"
+                             \  U       M     M\n\
+                             \[White]"
 
         actBoardAfter = applyMove (NormalMove (Pos 0 4) (Pos 0 5)) boardBefore
 
@@ -291,7 +304,8 @@ prop_applyMoveWhiteLeftRookNormal = verifyBoardsEqual expBoardAfter actBoardAfte
                            \6 ♛ ♙ ♝     ♗ ♟ ♗ 6\n\
                            \7 ♖       ♔   ♗   7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  U       U     U"
+                           \  U       U     U\n\
+                           \[White]"
 
         expBoardAfter = read "  U       U     U  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -304,7 +318,8 @@ prop_applyMoveWhiteLeftRookNormal = verifyBoardsEqual expBoardAfter actBoardAfte
                              \6 ♖ ♙ ♝     ♗ ♟ ♗ 6\n\
                              \7         ♔   ♗   7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  M       U     U"
+                             \  M       U     U\n\
+                             \[Black]"
         actBoardAfter = applyMove (NormalMove (Pos 7 0) (Pos 6 0)) boardBefore
 
 prop_applyMoveWhiteRightRookNormal :: Property
@@ -321,7 +336,8 @@ prop_applyMoveWhiteRightRookNormal = verifyBoardsEqual expBoardAfter actBoardAft
                            \6 ♝   ♔     ♞   ♙ 6\n\
                            \7               ♖ 7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  M       M     U"
+                           \  M       M     U\n\
+                           \[White]"
 
         expBoardAfter = read "  U       U     U  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -334,7 +350,8 @@ prop_applyMoveWhiteRightRookNormal = verifyBoardsEqual expBoardAfter actBoardAft
                              \6 ♝   ♔     ♞   ♙ 6\n\
                              \7 ♖               7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  M       M     M"
+                             \  M       M     M\n\
+                             \[Black]"
         actBoardAfter = applyMove (NormalMove (Pos 7 7) (Pos 7 0)) boardBefore
 
 prop_applyMoveWhiteKingNormal :: Property
@@ -351,7 +368,8 @@ prop_applyMoveWhiteKingNormal = verifyBoardsEqual expBoardAfter actBoardAfter
                            \6   ♘ ♘ ♛ ♝ ♖   ♟ 6\n\
                            \7 ♖       ♔ ♜   ♖ 7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  U       U     U"
+                           \  U       U     U\n\
+                           \[White]"
 
         expBoardAfter = read "  U       U     U  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -364,7 +382,8 @@ prop_applyMoveWhiteKingNormal = verifyBoardsEqual expBoardAfter actBoardAfter
                              \6   ♘ ♘ ♛ ♝ ♖   ♟ 6\n\
                              \7 ♖         ♔   ♖ 7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  U       M     U"
+                             \  U       M     U\n\
+                           \[Black]"
         actBoardAfter = applyMove (NormalMove (Pos 7 4) (Pos 7 5)) boardBefore
 
 --------------------------------------------------------------------------------
@@ -385,7 +404,8 @@ prop_applyMoveBlackKingSideCastle = verifyBoardsEqual expBoardAfter actBoardAfte
                            \6   ♟ ♗ ♞     ♘   6\n\
                            \7 ♖   ♗   ♔     ♖ 7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  U       U     U"
+                           \  U       U     U\n\
+                           \[Black]"
 
         expBoardAfter = read "  U       M     M  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -398,7 +418,8 @@ prop_applyMoveBlackKingSideCastle = verifyBoardsEqual expBoardAfter actBoardAfte
                              \6   ♟ ♗ ♞     ♘   6\n\
                              \7 ♖   ♗   ♔     ♖ 7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  U       U     U"
+                             \  U       U     U\n\
+                             \[White]"
         actBoardAfter = applyMove (Castle Black KingSide) boardBefore
 
 prop_applyMoveBlackQueenSideCastle :: Property
@@ -415,7 +436,8 @@ prop_applyMoveBlackQueenSideCastle = verifyBoardsEqual expBoardAfter actBoardAft
                            \6       ♕   ♗ ♝   6\n\
                            \7         ♔     ♖ 7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  M       U     U"
+                           \  M       U     U\n\
+                           \[Black]"
 
         expBoardAfter = read "  M       M     M  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -428,7 +450,8 @@ prop_applyMoveBlackQueenSideCastle = verifyBoardsEqual expBoardAfter actBoardAft
                              \6       ♕   ♗ ♝   6\n\
                              \7         ♔     ♖ 7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  M       U     U"
+                             \  M       U     U\n\
+                             \[White]"
         actBoardAfter = applyMove (Castle Black QueenSide) boardBefore
 
 prop_applyMoveWhiteKingSideCastle :: Property
@@ -445,7 +468,8 @@ prop_applyMoveWhiteKingSideCastle = verifyBoardsEqual expBoardAfter actBoardAfte
                            \6   ♙ ♖   ♕ ♙     6\n\
                            \7   ♘     ♔     ♖ 7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  M       U     U"
+                           \  M       U     U\n\
+                           \[White]"
 
         expBoardAfter = read "  M       M     M  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -458,7 +482,8 @@ prop_applyMoveWhiteKingSideCastle = verifyBoardsEqual expBoardAfter actBoardAfte
                              \6   ♙ ♖   ♕ ♙     6\n\
                              \7   ♘       ♖ ♔   7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  M       M     M"
+                             \  M       M     M\n\
+                             \[Black]"
         actBoardAfter = applyMove (Castle White KingSide) boardBefore
 
 prop_applyMoveWhiteQueenSideCastle :: Property
@@ -475,7 +500,8 @@ prop_applyMoveWhiteQueenSideCastle = verifyBoardsEqual expBoardAfter actBoardAft
                            \6   ♜   ♞       ♛ 6\n\
                            \7 ♖       ♔     ♘ 7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  U       U     U"
+                           \  U       U     U\n\
+                           \[White]"
 
         expBoardAfter = read "  M       M     M  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -488,7 +514,8 @@ prop_applyMoveWhiteQueenSideCastle = verifyBoardsEqual expBoardAfter actBoardAft
                              \6   ♜   ♞       ♛ 6\n\
                              \7     ♔ ♖       ♘ 7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  M       M     U"
+                             \  M       M     U\n\
+                             \[Black]"
         actBoardAfter = applyMove (Castle White QueenSide) boardBefore
 
 --------------------------------------------------------------------------------
@@ -509,7 +536,8 @@ prop_applyMovePromoteNoCapture = verifyBoardsEqual expBoardAfter actBoardAfter
                            \6    [♟]  ♗ ♖     6\n\
                            \7 ♖  [ ]  ♔       7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  U       U     U"
+                           \  U       U     U\n\
+                           \[Black]"
 
         expBoardAfter = read "  U       U     U  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -522,7 +550,8 @@ prop_applyMovePromoteNoCapture = verifyBoardsEqual expBoardAfter actBoardAfter
                              \6    [ ]  ♗ ♖     6\n\
                              \7 ♖  [♜]  ♔       7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  U       U     U"
+                             \  U       U     U\n\
+                             \[White]"
         actBoardAfter = applyMove (Promote (Pos 6 2) (Pos 7 2) Rook) boardBefore
 
 prop_applyMovePromoteCapture :: Property
@@ -539,7 +568,8 @@ prop_applyMovePromoteCapture = verifyBoardsEqual expBoardAfter actBoardAfter
                            \6 ♖       ♖   ♛   6\n\
                            \7   ♕       ♛     7\n\
                            \  0 1 2 3 4 5 6 7  \n\
-                           \  U       U     M"
+                           \  U       U     M\n\
+                           \[White]"
 
         expBoardAfter = read "  U       M     U  \n\
                              \  0 1 2 3 4 5 6 7  \n\
@@ -552,7 +582,8 @@ prop_applyMovePromoteCapture = verifyBoardsEqual expBoardAfter actBoardAfter
                              \6 ♖       ♖   ♛   6\n\
                              \7   ♕       ♛     7\n\
                              \  0 1 2 3 4 5 6 7  \n\
-                             \  U       U     M"
+                             \  U       U     M\n\
+                             \[Black]"
         actBoardAfter = applyMove (Promote (Pos 1 4) (Pos 0 3) Bishop) boardBefore
 
 --------------------------------------------------------------------------------
@@ -579,10 +610,10 @@ prop_castleDistribution = moveDistribution pred
     where
         pred = (`elem` [Castle Black QueenSide, Castle Black KingSide])
 
-moveDistribution :: (Move -> Bool) -> Board -> Property
+moveDistribution :: (Move -> Bool) -> Board -> Property
 moveDistribution pred b = collect moveAvailable True
     where
-        moves = movesFun Black b
+        moves = movesFun b
         moveAvailable = any (pred) moves
 
 

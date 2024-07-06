@@ -23,6 +23,11 @@ module Types.Board
     -- Castle state
     , getCastleState
     , setCastleState
+
+    -- Turn
+    , getTurn
+    , setTurn
+    , invertTurn
     
     -- Other
     , applyMove
@@ -43,6 +48,7 @@ import Data.Char
 import Data.List
 import Test.QuickCheck.Arbitrary
 import Test.QuickCheck.Gen
+import Debug.Trace
 
 import Types.Pos
 import Types.Square
@@ -54,7 +60,8 @@ import Types.Move
 
 data Board = Board { rows :: [[Square]],
                      blackCastleState :: CastleState,
-                     whiteCastleState :: CastleState
+                     whiteCastleState :: CastleState,
+                     turn :: Color
                    }
              deriving (Eq, Ord)
 
@@ -74,12 +81,13 @@ instance Show Board where
   show = showBoard
 
 showBoard :: Board -> String
-showBoard (Board { rows, blackCastleState, whiteCastleState }) =
+showBoard (Board { rows, blackCastleState, whiteCastleState, turn }) =
     "  " ++ show blackCastleState ++ "\n" ++
     "  a b c d e f g h\n" ++
     (concatMap showRowAndIndex rowsAndIndexes) ++
     "  a b c d e f g h\n" ++
-    "  " ++ show whiteCastleState
+    "  " ++ show whiteCastleState ++ "\n" ++
+    "[" ++ show turn ++ "]"
     where
         rowsAndIndexes = zip rows [8,7..1]
 
@@ -107,11 +115,12 @@ instance Read Board where
     readsPrec _ str = [(readBoard str, "")]
 
 readBoard :: String -> Board
-readBoard board = Board { rows = map f rows'', blackCastleState, whiteCastleState}
+readBoard board = Board { rows = map f rows'', blackCastleState, whiteCastleState, turn }
     where
         allLines = lines board
-        (Just (blackCastleStateStr, tempLines)) = uncons allLines
-        (Just (rows, whiteCastleStateStr)) = unsnoc tempLines
+        (Just (blackCastleStateStr, tempLines1)) = uncons allLines
+        (Just (tempLines2, turnStr)) = unsnoc tempLines1
+        (Just (rows, whiteCastleStateStr)) = unsnoc tempLines2
     
         (Just (_indexes1, rows')) = uncons rows
         (Just (rows'', _indexes2)) = unsnoc rows'
@@ -122,6 +131,9 @@ readBoard board = Board { rows = map f rows'', blackCastleState, whiteCastleStat
 
         blackCastleState = read blackCastleStateStr
         whiteCastleState = read whiteCastleStateStr
+        turn = case turnStr of
+                "[Black]" -> Black
+                "[White]" -> White
 
 instance Read CastleState where
     readsPrec _ str = [(readCastleState str, "")]
@@ -162,8 +174,12 @@ arbitraryBoard = do
 
     blackCastleState <- arbitrary
     whiteCastleState <- arbitrary
+    turn <- arbitrary
 
-    let board = Board { rows = [row0'] ++ middleRows ++ [row7'], blackCastleState, whiteCastleState }
+    let board = Board { rows = [row0'] ++ middleRows ++ [row7'],
+                        blackCastleState,
+                        whiteCastleState,
+                        turn }
     let noKings = mapB' (\sq -> if isKing sq then Empty else sq) board
     
     castle <- oneIn 4
@@ -253,9 +269,9 @@ getB :: Pos -> Board -> Square
 getB (Pos row col) (Board { rows }) = (rows !! row) !! col
 
 setB :: Pos -> Square -> Board -> Board
-setB pos sq b = checkedBoard newBoard
+setB pos sq board = checkedBoard newBoard
     where
-        newBoard = setB' pos sq b
+        newBoard = setB' pos sq board
 
 setB' :: Pos -> Square -> Board -> Board
 setB' (Pos rowIdx colIdx) sq board@(Board { rows = oldRows }) = board { rows = newRows }
@@ -311,17 +327,31 @@ setCastleState :: Color -> CastleState -> Board -> Board
 setCastleState Black blackCastleState board = board { blackCastleState}
 setCastleState White whiteCastleState board = board { whiteCastleState}
 
+getTurn :: Board -> Color
+getTurn = turn
+
+setTurn :: Color -> Board -> Board
+setTurn newTurn board = board { turn = newTurn }
+
+invertTurn :: Board -> Board
+invertTurn board = board { turn = invert (turn board) }
+
 --------------------------------------------------------------------------------
 -- Misc
 --------------------------------------------------------------------------------
 
 applyMove :: Move -> Board -> Board
-applyMove move board = checkedBoard newBoard
+applyMove move board = assert valid $ checkedBoard
+                                    $ setTurn (invert oldTurn) newBoard
     where
-        newBoard = case move of
-                    (NormalMove src dst)   -> applyNormalMove src dst board
-                    (Promote src dst kind) -> applyPromote src dst kind board
-                    (Castle color side)    -> applyCastle color side board
+        oldTurn = turn board
+        (newBoard, valid) = case move of
+             (NormalMove src dst)   -> (applyNormalMove src dst board,
+                                        isColor oldTurn $ getB src board)
+             (Promote src dst kind) -> (applyPromote src dst kind board,
+                                        isColor oldTurn $ getB src board)
+             (Castle color side)    -> (applyCastle color side board,
+                                        color == oldTurn)
 
 applyNormalMove :: Pos -> Pos -> Board -> Board
 applyNormalMove src dst board = assert condition newBoard
@@ -381,7 +411,7 @@ applyCastle color side board = board'
                  board
 
 defaultBoard :: Board
-defaultBoard = Board { rows, blackCastleState, whiteCastleState }
+defaultBoard = Board { rows, blackCastleState, whiteCastleState, turn = White }
     where
         rows = [map (\kind -> Piece Black kind) defaultRow] ++
                [replicate 8 $ Piece Black Pawn] ++

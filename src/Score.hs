@@ -1,58 +1,76 @@
 
 module Score
-( scoreForColor
+( score
+, Result(..)
 )
 where
 
 import Types
-import GameResult
+import Moves
+import Moves.Naive.CheckAware (threatensKing)
 
 -- By keeping track of if found kings, a speed improvement was observed
-data FoldState = FoldState { score :: Int
-                           , foundKing :: Bool
-                           , foundOtherKing :: Bool
+data FoldState = FoldState { scoreValue :: Int
+                           , foundBlackKing :: Bool
+                           , foundWhiteKing :: Bool
                            }
+                 
+data Result = Normal
+            | Check
+            | Draw
+            | Checkmate
+            deriving (Eq, Show)
 
--- TODO: Remove the need to check for game result. But first needs
--- many tests in MoveSelection
-scoreForColor :: Color -> Color -> Board -> Int
-scoreForColor color turn board
-  | gameRes == Normal    = score
-  | gameRes == Check     = score
-  | gameRes == Checkmate = maxBound
-  | gameRes == Draw      = 0
-  where
-    gameRes = gameResult turn board
-    score   = calculateScore color board
+score :: Board -> (Int, Result, [Move])
+score board = (score, result, moves)
+    where
+        moves = movesFun board
+        canMove = not $ null $ moves
+        isThreatened = threatensKing $ invertTurn board
+        scoreValue = calculateScore board
+        (score, result) = case (canMove, isThreatened) of
+                            (False, False) -> (0, Draw)
+                            (False, True) -> (if getTurn board == Black
+                                                  then minBound
+                                                  else maxBound, Checkmate)
+                            (True, False) -> (scoreValue, Normal)
+                            (True, True) -> (scoreValue, Check)
 
-calculateScore :: Color -> Board -> Int
-calculateScore color board
-  | not $ foundKing finalState      = minBound
-  | not $ foundOtherKing finalState = maxBound
-  | otherwise                       = score finalState
-  where
-    initState = FoldState { score = 0
-                          , foundKing = False
-                          , foundOtherKing = False }
-    finalState = foldB (foldFun color) initState board
+-- Positive means Black is leading, negative means White is leading
+-- (Talk about controversy :D)
+calculateScore :: Board -> Int
+calculateScore board
+   -- Test all combinations of black and white king existing
+   -- TODO: Should never happen that not 1 of each king. Assert
+   -- and fix board generation
+   | not $ foundBlackKing finalState = minBound
+   | not $ foundWhiteKing finalState = maxBound
+   | otherwise                       = scoreValue finalState
+   where
+       initState = FoldState { scoreValue = 0
+                             , foundBlackKing = False
+                             , foundWhiteKing = False }
+       finalState = foldB foldFun initState board
 
-foldFun :: Color -> FoldState -> Square -> FoldState
-foldFun color state (Piece color' King)
-  | color == color' = state { foundKing = True }
-  | color /= color' = state { foundOtherKing = True }
-foldFun color state square = state { score = curScore + accScore }
+foldFun :: FoldState -> Square -> FoldState
+foldFun state (Piece color King)
+  | color == Black = state { foundBlackKing = True }
+  | color == White = state { foundWhiteKing = True }
+foldFun state square = state { scoreValue = curScore + accScore }
   where
-    curScore = scoreForSquare color square
-    accScore = score state
+    curScore = scoreForSquare square
+    accScore = scoreValue state
 
-scoreForSquare :: Color -> Square -> Int
-scoreForSquare _color Empty = 0
-scoreForSquare color (Piece color' kind) = case kind of
-                                              -- Kings are treated separately
-                                              Queen  -> 10*multiplier
-                                              Rook   -> 5*multiplier
-                                              Bishop -> 3*multiplier
-                                              Knight -> 3*multiplier
-                                              Pawn   -> 1*multiplier
-  where
-    multiplier = if color == color' then 1 else -1
+scoreForSquare :: Square -> Int
+scoreForSquare  Empty = 0
+scoreForSquare (Piece color kind) = case kind of
+                                        -- Kings are treated separately
+                                        Queen  -> 10*multiplier
+                                        Rook   -> 5*multiplier
+                                        Bishop -> 3*multiplier
+                                        Knight -> 3*multiplier
+                                        Pawn   -> 1*multiplier
+    where
+        multiplier = case color of
+                        Black -> 1
+                        White -> -1

@@ -4,6 +4,7 @@
 module MoveSelection.Tests where
 
 import Test.QuickCheck
+import Control.Exception
 
 import Types
 import Moves
@@ -35,7 +36,8 @@ verifyCapturesPiece kind = verifyMakesMove expMove board'
                    \6        [ ]      6\n\
                    \7                 7\n\
                    \  0 1 2 3 4 5 6 7  \n\
-                   \  U       M     M"
+                   \  U       M     M\n\
+                   \[Black]"
     piece  = Piece White kind
     board' = setB dst piece board
 
@@ -63,9 +65,10 @@ verifyEscapesFromThreat depth kind = all (\pos -> isEmpty $ getB pos board'')
                     \6       ♙         6\n\
                     \7                 7\n\
                     \  0 1 2 3 4 5 6 7  \n\
-                    \  M       M     M"
+                    \  M       M     M\n\
+                    \[Black]"
     board'  = setB curPos piece board
-    move    = makeMove depth board'
+    move    = selectMove depth board'
     board'' = applyMove move board'
 
 
@@ -85,7 +88,8 @@ prop_captureKing = verifyMakesMove expMove board
                   \6                 6\n\
                   \7   ♜             7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
 
 prop_checkmate :: Property
 prop_checkmate = verifyMakesOneOfMoves expMoves board
@@ -103,7 +107,8 @@ prop_checkmate = verifyMakesOneOfMoves expMoves board
                   \6   ♜ ♟           6\n\
                   \7   ♜ ♞           7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
 
 prop_checkmateByMovingAwayPiece :: Property
 prop_checkmateByMovingAwayPiece = verifyMakesOneOfMoves expMoves board
@@ -121,7 +126,8 @@ prop_checkmateByMovingAwayPiece = verifyMakesOneOfMoves expMoves board
                   \6       ♟         6\n\
                   \7 ♜ ♜   ♞         7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
 
 prop_escapeFromCheckEvenIfCanCheckmate :: Bool
 prop_escapeFromCheckEvenIfCanCheckmate =
@@ -138,8 +144,9 @@ prop_escapeFromCheckEvenIfCanCheckmate =
                   \6     ♜           6\n\
                   \7   ♜             7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
-    nextBoard d = applyMove (makeMove d board) board
+                  \  U       U     U\n\
+                  \[Black]"
+    nextBoard d = applyMove (selectMove d board) board
 
 prop_doStalemateIfLosing :: Property
 prop_doStalemateIfLosing = verifyMakesMove expMove board
@@ -155,7 +162,8 @@ prop_doStalemateIfLosing = verifyMakesMove expMove board
                   \6           ♛ ♙   6\n\
                   \7               ♔ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
-                  \  U       U     U"
+                  \  U       U     U\n\
+                  \[Black]"
     expMove = NormalMove (Pos 6 5) (Pos 7 6)
 -- The above board comes from
 -- https://www.chessgames.com/perl/chessgame?gid=1255706
@@ -178,7 +186,8 @@ prop_promote = verifyMakesMove expMove board
                       \6         ♟       6\n\
                       \7                 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMove = Promote (Pos 6 4) (Pos 7 4) Queen
 
 prop_promoteToKnight :: Property
@@ -195,7 +204,8 @@ prop_promoteToKnight = verifyMakesMove expMove board
                       \6   ♙ ♔ ♙ ♟       6\n\
                       \7   ♘ ♘           7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMove = Promote (Pos 6 4) (Pos 7 4) Knight
 
 prop_doNotPromote1 :: Property
@@ -212,7 +222,8 @@ prop_doNotPromote1 = verifyMakesMove expMove board
                       \6         ♟       6\n\
                       \7                 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMove = NormalMove (Pos 1 2) (Pos 1 0)
 
 prop_doNotPromote2 :: Property
@@ -229,7 +240,8 @@ prop_doNotPromote2 = verifyMakesMove expMove board
                       \6             ♟   6\n\
                       \7                 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMove = NormalMove (Pos 1 3) (Pos 2 2)
 
 prop_castling :: Property
@@ -250,7 +262,8 @@ castleToWinBoard = read  "  U       U     U  \n\
                          \6 ♟   ♘         ♞ 6\n\
                          \7     ♖   ♘       7\n\
                          \  0 1 2 3 4 5 6 7  \n\
-                         \  M       M     M"
+                         \  M       M     M\n\
+                         \[Black]"
 
 prop_doNotCastleIfThreatened :: Bool
 prop_doNotCastleIfThreatened = verifyDoesNotCastle board
@@ -286,7 +299,8 @@ prop_deferPromoteBug1 = verifyMakesMove expMove board
                       \6         ♟       6\n\
                       \7                 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMove = Promote (Pos 6 4) (Pos 7 4) Queen
 
 prop_deferPromoteBug2 :: Property
@@ -303,7 +317,8 @@ prop_deferPromoteBug2 = verifyMakesMove expMove board
                       \6 ♟               6\n\
                       \7                 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMove = Promote (Pos 6 0) (Pos 7 0) Queen
 
 prop_deferPromoteBug3 :: Property
@@ -320,7 +335,8 @@ prop_deferPromoteBug3 = verifyMakesMove expMove board
                       \6 ♟               6\n\
                       \7             ♚   7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMove = Promote (Pos 6 0) (Pos 7 0) Queen
 
 prop_deferPromoteBug4 :: Property
@@ -337,7 +353,8 @@ prop_deferPromoteBug4 = verifyMakesMove expMove board
                       \6       ♟         6\n\
                       \7   ♚             7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMove = Promote (Pos 6 3) (Pos 7 3) Queen
 
 -- TOOD: This test worked in the initial commit about solving the promote bug.
@@ -371,7 +388,8 @@ prop_deferPromoteBug5 = conjoin [verifyMakesMove' expMoveSmart board 2,
                       \6           ♟   ♔ 6\n\
                       \7                 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMoveSmart = Promote (Pos 6 5) (Pos 7 5) Rook
         expMoveDumb = NormalMove (Pos 4 7) (Pos 4 6)
 
@@ -389,59 +407,144 @@ prop_deferPromoteBug6 = verifyMakesMove expMove board
                       \6       ♟         6\n\
                       \7 ♔               7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMove = Promote (Pos 6 3) (Pos 7 3) Rook
 
-prop_deferPromoteBugArbitrary :: Int -> Pos -> Pos -> Property
-prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
-    condition ==> (verifyMakesMove expMove board4)
-    where
-        -- Positions
-        pawnCol = pawnCol' `mod` 8
-        pawnStart = Pos 6 pawnCol
-        pawnEnd = Pos 7 pawnCol
+-- Need to disable because generates so many cases where it's actually
+-- good to defer the promote
+-- prop_deferPromoteBugArbitrary :: Int -> Pos -> Pos -> Property
+-- prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
+--     condition ==> (verifyMakesMove expMove board4)
+--     where
+--         -- Positions
+--         pawnCol = pawnCol' `mod` 8
+--         pawnStart = Pos 6 pawnCol
+--         pawnEnd = Pos 7 pawnCol
 
-        -- Conditions
-        notTooClose p1 p2 = posDist p1 p2 >= 2
+--         -- Conditions
+--         notTooClose p1 p2 = posDist p1 p2 >= 2
         
-        condition = notTooClose blackKingPos whiteKingPos &&
-                    notTooClose blackKingPos pawnStart &&
-                    notTooClose blackKingPos pawnEnd &&
+--         condition = notTooClose blackKingPos whiteKingPos &&
+--                     notTooClose blackKingPos pawnStart &&
+--                     notTooClose blackKingPos pawnEnd &&
 
-                    notTooClose whiteKingPos blackKingPos &&
-                    notTooClose whiteKingPos pawnStart &&
-                    notTooClose whiteKingPos pawnEnd &&
+--                     notTooClose whiteKingPos blackKingPos &&
+--                     notTooClose whiteKingPos pawnStart &&
+--                     notTooClose whiteKingPos pawnEnd &&
 
-                    -- Why not? See prop_deferPromoteBug5
-                    not (whiteKingPos `elem` [Pos 6 6, Pos 6 7] &&
-                         blackKingPos `elem` [Pos 4 6, Pos 4 7]) &&
+--                     -- Why not? See prop_deferPromoteBug5
+--                     not (whiteKingPos `elem` [Pos 6 6, Pos 6 7] &&
+--                          blackKingPos `elem` [Pos 4 6, Pos 4 7]) &&
 
-                    not (whiteKingPos `elem` [Pos 6 0, Pos 6 1] &&
-                         blackKingPos `elem` [Pos 4 0, Pos 4 1]) &&
+--                     not (whiteKingPos `elem` [Pos 6 0, Pos 6 1] &&
+--                          blackKingPos `elem` [Pos 4 0, Pos 4 1]) &&
                     
-                    -- Why not? See prop_deferPromoteBug6
-                    not (whiteKingPos == (Pos 7 0) &&
-                         blackKingPos `elem` [Pos 5 0, Pos 5 1]) &&
+--                     -- Why not? See prop_deferPromoteBug6
+--                     not (whiteKingPos == (Pos 7 0) &&
+--                          blackKingPos `elem` [Pos 5 0, Pos 5 1]) &&
 
-                    not (whiteKingPos == (Pos 7 7) &&
-                         blackKingPos `elem` [Pos 5 6, Pos 5 7])
+--                     not (whiteKingPos == (Pos 7 7) &&
+--                          blackKingPos `elem` [Pos 5 6, Pos 5 7]) &&
+
+--                     -- Why not? See prop_deferPromoteBug7
+--                     not (rowOf whiteKingPos == 7 &&
+--                          rowOf blackKingPos == 5 &&
+--                          colOf whiteKingPos == colOf blackKingPos)
     
+--         board1 = read  "  U       U     U  \n\
+--                        \  0 1 2 3 4 5 6 7  \n\
+--                        \0                 0\n\
+--                        \1                 1\n\
+--                        \2                 2\n\
+--                        \3                 3\n\
+--                        \4                 4\n\
+--                        \5                 5\n\
+--                        \6                 6\n\
+--                        \7                 7\n\
+--                        \  0 1 2 3 4 5 6 7  \n\
+--                        \  U       U     U\n\
+--                        \[Black]"
+--         board2 = setB blackKingPos (Piece Black King) board1
+--         board3 = setB whiteKingPos (Piece White King) board2
+--         board4 = setB pawnStart (Piece Black Pawn) board3
+--         expMove = Promote pawnStart pawnEnd Queen
+
+prop_deferPromoteBug7 :: Property
+prop_deferPromoteBug7 = verifyMakesOneOfMoves [move1, move2] board
+    where
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0                 0\n\
+                      \1                 1\n\
+                      \2                 2\n\
+                      \3                 3\n\
+                      \4                 4\n\
+                      \5     ♚           5\n\
+                      \6 ♟               6\n\
+                      \7     ♔           7\n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \  U       U     U\n\
+                      \[Black]"
+        move1 = Promote (Pos 6 0) (Pos 7 0) Queen
+        move2 = Promote (Pos 6 0) (Pos 7 0) Rook
+
+-- Here the correct move is actually to defer the promote
+prop_deferPromoteBug8 :: Property
+prop_deferPromoteBug8 = assert (board2 == board2') $
+                        assert (moves == [onlyMove]) $
+                        assert (board3 == board3') $
+                        verifyMakesMove' move1 board1 3 .&&.
+                        verifyMakesOneOfMoves' moves3 board3 3
+    where
         board1 = read  "  U       U     U  \n\
                        \  0 1 2 3 4 5 6 7  \n\
                        \0                 0\n\
                        \1                 1\n\
                        \2                 2\n\
                        \3                 3\n\
-                       \4                 4\n\
+                       \4               ♚ 4\n\
                        \5                 5\n\
-                       \6                 6\n\
-                       \7                 7\n\
+                       \6 ♟               6\n\
+                       \7               ♔ 7\n\
                        \  0 1 2 3 4 5 6 7  \n\
-                       \  U       U     U"
-        board2 = setB blackKingPos (Piece Black King) board1
-        board3 = setB whiteKingPos (Piece White King) board2
-        board4 = setB pawnStart (Piece Black Pawn) board3
-        expMove = Promote pawnStart pawnEnd Queen
+                       \  U       U     U\n\
+                       \[Black]"
+        move1 = NormalMove (Pos 4 7) (Pos 5 6)
+        board2 = applyMove move1 board1
+        board2' = read  "  U       U     U  \n\
+                        \  0 1 2 3 4 5 6 7  \n\
+                        \0                 0\n\
+                        \1                 1\n\
+                        \2                 2\n\
+                        \3                 3\n\
+                        \4                 4\n\
+                        \5             ♚   5\n\
+                        \6 ♟               6\n\
+                        \7               ♔ 7\n\
+                        \  0 1 2 3 4 5 6 7  \n\
+                        \  U       U     U\n\
+                        \[White]"
+        moves = movesFun board2
+        onlyMove = NormalMove (Pos 7 7) (Pos 7 6)
+
+        board3 = applyMove onlyMove board2
+        board3' = read  "  U       U     U  \n\
+                        \  0 1 2 3 4 5 6 7  \n\
+                        \0                 0\n\
+                        \1                 1\n\
+                        \2                 2\n\
+                        \3                 3\n\
+                        \4                 4\n\
+                        \5             ♚   5\n\
+                        \6 ♟               6\n\
+                        \7             ♔   7\n\
+                        \  0 1 2 3 4 5 6 7  \n\
+                        \  U       U     U\n\
+                        \[Black]"
+        moves3 = [Promote (Pos 6 0) (Pos 7 0) Rook,
+                  Promote (Pos 6 0) (Pos 7 0) Queen]
+
 
 posDist :: Pos -> Pos -> Int
 posDist (Pos r1 c1) (Pos r2 c2) = max (abs (r1 - r2)) (abs (c1 - c2))
@@ -464,7 +567,8 @@ prop_numberOfMovesTieBreak = verifyMakesMove' expMove board 3
                       \6     ♘     ♝ ♜ ♖ 6\n\
                       \7       ♞ ♔     ♖ 7\n\
                       \  0 1 2 3 4 5 6 7  \n\
-                      \  U       U     U"
+                      \  U       U     U\n\
+                      \[Black]"
         expMove = NormalMove (Pos 1 6) (Pos 1 3)
 
         -- TODO: This shows a bug - doesn't do check?
@@ -489,19 +593,13 @@ prop_legalMove board = not (null legalMoves) ==>
                        -- TODO: Test for more depths when the algorithm is faster
                        conjoin [verifyMakesOneOfMoves' legalMoves board d | d <- [1..2]]
     where
-        legalMoves = movesFun Black board
+        legalMoves = movesFun board
 
 -- TODO: escape from check
 
 --------------------------------------------------------------------------------
 -- Helper functions
 --------------------------------------------------------------------------------
-
-makeMove :: Int -> Board -> Move
-makeMove depth board = moveColor depth Black board
-
-makeMoveWhite :: Int -> Board -> Move
-makeMoveWhite depth board = moveColor depth White board
 
 -- TODO: make depth a parameter to more functions
 depths :: [Int]
@@ -525,7 +623,7 @@ verifyMakesOneOfMoves' expMoves board depth =
     counterexample errorString result
     where
         result = move `elem` expMoves
-        move = makeMove depth board 
+        move = selectMove depth board 
         errorString = show board ++ "\n" ++
                       "Expected moves: " ++ show expMoves ++ "\n\n" ++
                       "Actual move: " ++ show move ++ "\n\n" ++
@@ -536,7 +634,7 @@ verifyDoesNotCastle board = all pred depths
     where
         -- I used to check "does not make move", but that is risky with castle since
         -- if color by mistake is flipped, it will return true for the wrong reason.
-        pred depth = not $ isCastle $ makeMove depth board
+        pred depth = not $ isCastle $ selectMove depth board
 
 
 return []

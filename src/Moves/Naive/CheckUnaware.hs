@@ -15,15 +15,15 @@ movesFun :: MovesFun
 movesFun = concatApply [normalAndPromotesMovesFun, castlingsMovesFun]
 
 concatApply :: [MovesFun] -> MovesFun
-concatApply movesFuns color board = concat [movesFun color board | movesFun <- movesFuns]
+concatApply movesFuns board = concat [movesFun board | movesFun <- movesFuns]
 
 normalAndPromotesMovesFun :: MovesFun
-normalAndPromotesMovesFun color board = concat [movesFromPos (Pos row col) color board |
-                                                row <- [0..7], col <- [0..7]]
+normalAndPromotesMovesFun board = concat [movesFromPos (Pos row col) board |
+                                          row <- [0..7], col <- [0..7]]
 
-movesFromPos :: Pos -> Color -> Board -> [Move]
-movesFromPos pos color board
-    | isColor color atPos = movesFun pos board
+movesFromPos :: Pos -> Board -> [Move]
+movesFromPos pos board
+    | isColor (getTurn board) atPos = movesFun pos board
     | otherwise = []
     where
         atPos = getB pos board
@@ -171,27 +171,25 @@ castlingsMovesFun :: MovesFun
 castlingsMovesFun = concatApply [kingSideCastle, queenSideCastle]
 
 kingSideCastle :: MovesFun
-kingSideCastle color = castleHelper laneNeededforCastle cols KingSide color
-    where
-        laneNeededforCastle = [Piece color King, Empty, Empty, Piece color Rook]
-        cols = [4..7]
+kingSideCastle = castleHelper KingSide
 
 queenSideCastle :: MovesFun
-queenSideCastle color = castleHelper laneNeededforCastle cols QueenSide color
-    where
-        laneNeededforCastle = [Piece color Rook, Empty, Empty, Empty, Piece color King]
-        cols = [0..4]
+queenSideCastle = castleHelper QueenSide
 
-castleHelper :: [Square] -> [Int] -> Side -> MovesFun
-castleHelper laneNeededforCastle cols castleSide color board
-    | laneMatches && unmoved = [Castle color castleSide]
+castleHelper :: Side -> MovesFun
+castleHelper castleSide board
+    | rowMatches && unmoved = [Castle turn castleSide]
     | otherwise = []
     where
-        -- TODO: Change lane to row
-        actualLane = getBList [Pos (homeRow color) col | col <- cols] board
-        laneMatches = actualLane == laneNeededforCastle
+        turn = getTurn board
+        (rowNeededforCastle, cols) = case castleSide of
+            KingSide -> ([Piece turn King, Empty, Empty, Piece turn Rook], [4..7])
+            QueenSide -> ([Piece turn Rook, Empty, Empty, Empty, Piece turn King], [0..4])
+        
+        actualRow = getBList [Pos (homeRow turn) col | col <- cols] board
+        rowMatches = actualRow == rowNeededforCastle
 
-        castleState = getCastleState color board
+        castleState = getCastleState turn board
         kingState = king castleState
         rookState = case castleSide of
                     KingSide -> rightRook castleState
