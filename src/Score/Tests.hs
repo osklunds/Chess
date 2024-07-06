@@ -10,7 +10,7 @@ import Score
 
 
 prop_scoreNormal :: Bool
-prop_scoreNormal = scoreForBoard board == score
+prop_scoreNormal = score board == expScore
   where
     board = read  "  U       M     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -26,7 +26,7 @@ prop_scoreNormal = scoreForBoard board == score
                   \  U       M     M\n\
                   \[Black]"
 
-    score =          0-10 +0+0+0+0+3
+    expScore =       0-10 +0+0+0+0+3
                     +1+3+0+0+0+0+0+3
                     +0-0+0+0+3+0+0+0
                     +0+0+5+0-1+0+0-1
@@ -36,7 +36,7 @@ prop_scoreNormal = scoreForBoard board == score
                     +0+0+0+5+0+3-5+3
 
 prop_scoreCheck :: Bool
-prop_scoreCheck = scoreForBoard board == score
+prop_scoreCheck = score board == expScore
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -52,7 +52,7 @@ prop_scoreCheck = scoreForBoard board == score
                   \  U       M     U\n\
                   \[Black]"
 
-    score =          0-10 +0+0+0+0+3
+    expScore =       0-10 +0+0+0+0+3
                     +1+3+0+0+0+0+0+3
                     +0-0+0+0+3+0+0+0
                     +0+0+5+0-1+0+0-1
@@ -62,7 +62,7 @@ prop_scoreCheck = scoreForBoard board == score
                     +0+0+0+5+0+3-5+3
 
 prop_scoreCheckmate :: Bool
-prop_scoreCheckmate = scoreForBoard board == maxBound
+prop_scoreCheckmate = score board == maxBound
   where
     board = read  "  U       M     M  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -76,10 +76,10 @@ prop_scoreCheckmate = scoreForBoard board == maxBound
                   \7       ♜   ♞ ♖ ♝ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
                   \  U       U     U\n\
-                  \[Black]"
+                  \[White]"
 
 prop_scoreDraw :: Bool
-prop_scoreDraw = scoreForBoard board == 0
+prop_scoreDraw = score board == 0
   where
     board = read  "  U       M     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -93,10 +93,10 @@ prop_scoreDraw = scoreForBoard board == 0
                   \7       ♜   ♞   ♝ 7\n\
                   \  0 1 2 3 4 5 6 7  \n\
                   \  U       M     M\n\
-                  \[Black]"
+                  \[White]"
 
 prop_scoreNoOtherKing :: Bool
-prop_scoreNoOtherKing = scoreForBoard board == maxBound
+prop_scoreNoOtherKing = score board == maxBound
   where
     board = read  "  U       M     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -113,7 +113,7 @@ prop_scoreNoOtherKing = scoreForBoard board == maxBound
                   \[Black]"
 
 prop_scoreNoOwnKing :: Bool
-prop_scoreNoOwnKing = scoreForBoard board == minBound
+prop_scoreNoOwnKing = score board == minBound
   where
     board = read  "  U       M     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -132,11 +132,6 @@ prop_scoreNoOwnKing = scoreForBoard board == minBound
 --------------------------------------------------------------------------------
 -- Helper functions
 --------------------------------------------------------------------------------
-
-scoreForBoard :: Board -> Int
-scoreForBoard = scoreForColor Black turn
-  where
-    turn = White
 
 
 return []

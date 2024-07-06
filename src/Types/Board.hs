@@ -27,6 +27,7 @@ module Types.Board
     -- Turn
     , getTurn
     , setTurn
+    , invertTurn
     
     -- Other
     , applyMove
@@ -331,6 +332,9 @@ getTurn = turn
 
 setTurn :: Color -> Board -> Board
 setTurn newTurn board = board { turn = newTurn }
+
+invertTurn :: Board -> Board
+invertTurn board = board { turn = invert (turn board) }
 
 --------------------------------------------------------------------------------
 -- Misc
