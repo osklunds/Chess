@@ -510,6 +510,30 @@ prop_deferPromoteBugArbitrary pawnCol' blackKingPos whiteKingPos =
 
 -- Depth: 3
 
+-- *** Failed! Falsified (after 34 tests and 2 shrinks):  
+-- 0
+-- Pos 5 2
+-- Pos 7 2
+--   U       U     U
+--   a b c d e f g h
+-- 8                 8
+-- 7                 7
+-- 6                 6
+-- 5                 5
+-- 4                 4
+-- 3     ♚           3
+-- 2 ♟               2
+-- 1     ♔           1
+--   a b c d e f g h
+--   U       U     U
+-- [Black]
+-- Expected moves: [Promote (Pos 6 0) (Pos 7 0) Queen]
+
+-- Actual move: Promote (Pos 6 0) (Pos 7 0) Rook
+
+-- Depth: 2
+
+
 posDist :: Pos -> Pos -> Int
 posDist (Pos r1 c1) (Pos r2 c2) = max (abs (r1 - r2)) (abs (c1 - c2))
 
