@@ -1,6 +1,7 @@
 
 module Score
 ( score
+, Result(..)
 )
 where
 
@@ -13,24 +14,27 @@ data FoldState = FoldState { scoreValue :: Int
                            , foundBlackKing :: Bool
                            , foundWhiteKing :: Bool
                            }
+                 
+data Result = Normal
+            | Check
+            | Draw
+            | Checkmate
+            deriving (Eq, Show)
 
-score :: Board -> (Int, Bool, [Move])
-score board = (score, isThreatened, moves)
+score :: Board -> (Int, Result, [Move])
+score board = (score, result, moves)
     where
         moves = movesFun board
         canMove = not $ null $ moves
         isThreatened = threatensKing $ invertTurn board
-        score = case canMove of
-                True ->
-                    calculateScore board
-                False ->
-                    case isThreatened of
-                        True ->
-                            case getTurn board of
-                                Black -> minBound
-                                White -> maxBound
-                        False ->
-                            0
+        scoreValue = calculateScore board
+        (score, result) = case (canMove, isThreatened) of
+                            (False, False) -> (0, Draw)
+                            (False, True) -> (if getTurn board == Black
+                                                  then minBound
+                                                  else maxBound, Checkmate)
+                            (True, False) -> (scoreValue, Normal)
+                            (True, True) -> (scoreValue, Check)
 
 -- Positive means Black is leading, negative means White is leading
 -- (Talk about controversy :D)

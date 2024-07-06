@@ -3,7 +3,7 @@
 
 module Score.Tests where
 
-import Test.QuickCheck
+import Test.QuickCheck hiding (Result)
 
 import Types
 import Score
@@ -11,9 +11,9 @@ import Score
 
 prop_scoreNormal :: Bool
 prop_scoreNormal = scoreValueBlack == expScore &&
-                   isThreatenedBlack == False &&
+                   resultBlack == Normal &&
                    scoreValueWhite == expScore &&
-                   isThreatenedWhite == False
+                   resultWhite == Normal
   where
     board = read  "  U       M     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -29,7 +29,7 @@ prop_scoreNormal = scoreValueBlack == expScore &&
                   \  U       M     M\n\
                   \[Black]"
 
-    (scoreValueBlack, isThreatenedBlack, scoreValueWhite, isThreatenedWhite) =
+    (scoreValueBlack, resultBlack, scoreValueWhite, resultWhite) =
         getValues board
 
     expScore =       0-10 +0+0+0+0+3
@@ -43,9 +43,9 @@ prop_scoreNormal = scoreValueBlack == expScore &&
 
 prop_scoreCheck :: Bool
 prop_scoreCheck = scoreValueBlack == expScore &&
-                  isThreatenedBlack == False &&
+                  resultBlack == Normal &&
                   scoreValueWhite == expScore &&
-                  isThreatenedWhite == True
+                  resultWhite == Check
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -61,7 +61,7 @@ prop_scoreCheck = scoreValueBlack == expScore &&
                   \  U       M     U\n\
                   \[Black]"
 
-    (scoreValueBlack, isThreatenedBlack, scoreValueWhite, isThreatenedWhite) =
+    (scoreValueBlack, resultBlack, scoreValueWhite, resultWhite) =
         getValues board
 
     expScore =       0-10 +0+0+0+0+3
@@ -75,10 +75,10 @@ prop_scoreCheck = scoreValueBlack == expScore &&
 
 prop_boardWhereWhiteIsCheckmated :: Bool
 prop_boardWhereWhiteIsCheckmated = scoreValueWhite == maxBound &&
-                                   isThreatenedWhite == True &&
+                                   resultWhite == Checkmate &&
                                    scoreValueBlack > 0 &&
                                    scoreValueBlack < maxBound &&
-                                   isThreatenedBlack == False
+                                   resultBlack == Normal
   where
     board = read  "  U       M     M  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -94,15 +94,15 @@ prop_boardWhereWhiteIsCheckmated = scoreValueWhite == maxBound &&
                   \  U       U     U\n\
                   \[Black]"
 
-    (scoreValueBlack, isThreatenedBlack, scoreValueWhite, isThreatenedWhite) =
+    (scoreValueBlack, resultBlack, scoreValueWhite, resultWhite) =
         getValues board
 
 prop_boardWhereBlackIsCheckmated :: Bool
 prop_boardWhereBlackIsCheckmated = scoreValueBlack == minBound &&
-                                   isThreatenedBlack == True &&
+                                   resultBlack == Checkmate &&
                                    scoreValueWhite > 0 &&
                                    scoreValueWhite < maxBound &&
-                                   isThreatenedWhite == False
+                                   resultWhite == Normal
   where
     board = read  "  U       M     M  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -118,15 +118,15 @@ prop_boardWhereBlackIsCheckmated = scoreValueBlack == minBound &&
                   \  U       U     U\n\
                   \[Black]"
 
-    (scoreValueBlack, isThreatenedBlack, scoreValueWhite, isThreatenedWhite) =
+    (scoreValueBlack, resultBlack, scoreValueWhite, resultWhite) =
         getValues board
 
 prop_boardWhereWhiteCantMove :: Bool
 prop_boardWhereWhiteCantMove = scoreValueWhite == 0 &&
-                               isThreatenedWhite == False &&
+                               resultWhite == Draw &&
                                scoreValueBlack > 0 &&
                                scoreValueBlack < maxBound &&
-                               isThreatenedBlack == False
+                               resultBlack == Normal
   where
     board = read  "  U       M     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -142,18 +142,18 @@ prop_boardWhereWhiteCantMove = scoreValueWhite == 0 &&
                   \  U       M     M\n\
                   \[Black]"
 
-    (scoreValueBlack, isThreatenedBlack, scoreValueWhite, isThreatenedWhite) =
+    (scoreValueBlack, resultBlack, scoreValueWhite, resultWhite) =
         getValues board
 
 --------------------------------------------------------------------------------
 -- Helper functions
 --------------------------------------------------------------------------------
 
-getValues :: Board -> (Int, Bool, Int, Bool)
-getValues board = (scoreValueBlack, isThreatenedBlack, scoreValueWhite, isThreatenedWhite)
+getValues :: Board -> (Int, Result, Int, Result)
+getValues board = (scoreValueBlack, resultBlack, scoreValueWhite, resultWhite)
     where
-        (scoreValueBlack, isThreatenedBlack, _movesBlack) = score $ setTurn Black board
-        (scoreValueWhite, isThreatenedWhite, _movesWhite) = score $ setTurn White board
+        (scoreValueBlack, resultBlack, _movesBlack) = score $ setTurn Black board
+        (scoreValueWhite, resultWhite, _movesWhite) = score $ setTurn White board
 
 
 return []
