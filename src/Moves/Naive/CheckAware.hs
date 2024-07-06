@@ -4,7 +4,7 @@
 
 module Moves.Naive.CheckAware
 ( movesFun
-, isKingThreatened
+, threatensKing
 )
 where
 
@@ -54,13 +54,13 @@ castleToKingPoss color side = [Pos row (kingCol `op` delta) | delta <- [0..2]]
                     QueenSide -> (-)
 
 isOtherAllowed :: Move -> Board -> Bool
-isOtherAllowed move board = not $ isKingThreatened newBoard
+isOtherAllowed move board = not $ threatensKing newBoard
     where
         newBoard = applyMove move board
 
--- TODO: Adjust so that makes more sense
-isKingThreatened :: Board -> Bool
-isKingThreatened board = any (== Piece (invert turn) King) destSquares
+-- Read as "the player who's turn it is now threatens its opponents's king"
+threatensKing :: Board -> Bool
+threatensKing board = any (== Piece (invert turn) King) destSquares
     where
         turn = getTurn board
         attPoss = attackedPositions board
