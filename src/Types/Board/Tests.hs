@@ -610,10 +610,10 @@ prop_castleDistribution = moveDistribution pred
     where
         pred = (`elem` [Castle Black QueenSide, Castle Black KingSide])
 
-moveDistribution :: (Move -> Bool) -> Board -> Property
+moveDistribution :: (Move -> Bool) -> Board -> Property
 moveDistribution pred b = collect moveAvailable True
     where
-        moves = movesFun Black b
+        moves = movesFun b
         moveAvailable = any (pred) moves
 
 
