@@ -12,29 +12,31 @@ import Types
 import qualified Moves.Naive.CheckUnaware as CU
 import Moves.Common
 import Control.Exception
+import Debug.Trace
 
 
 movesFun :: MovesFun
-movesFun color board = filter isAllowed $ CU.movesFun color board
+movesFun board = filter isAllowed $ CU.movesFun board
     where
-        attPoss = attackedPositions (invert color) board
-        isAllowed move = isMoveAllowed move color board attPoss
+        isAllowed move = isMoveAllowed move board
 
-isMoveAllowed :: Move -> Color -> Board -> [Pos] -> Bool
+isMoveAllowed :: Move -> Board -> Bool
 isMoveAllowed (Castle color side) = isCastleAllowed color side
 isMoveAllowed move                = isOtherAllowed move
 
-isCastleAllowed :: Color -> Side -> Color -> Board -> [Pos] -> Bool
-isCastleAllowed castleColor side moveColor _board attPoss =
-    assert (castleColor == moveColor) allowed
+isCastleAllowed :: Color -> Side -> Board -> Bool
+isCastleAllowed castleColor side board = assert (castleColor == turn) allowed
     where
-        kingPoss = castleToKingPoss moveColor side
+        turn = getTurn board
+        attPoss = attackedPositions $ setTurn (invert turn) board 
+        kingPoss = castleToKingPoss castleColor side
         allowed = not $ any (`elem` kingPoss) attPoss
 
-attackedPositions :: Color -> Board -> [Pos]
-attackedPositions color board = dests
+-- Read as "Positions the player who's turn it is can attack"
+attackedPositions :: Board -> [Pos]
+attackedPositions board = dests
     where
-        moves = CU.movesFun color board
+        moves = CU.movesFun board
         dests = concatMap moveToCapturedPoss moves
 
 moveToCapturedPoss :: Move -> [Pos]
@@ -51,13 +53,15 @@ castleToKingPoss color side = [Pos row (kingCol `op` delta) | delta <- [0..2]]
                     KingSide -> (+)
                     QueenSide -> (-)
 
-isOtherAllowed :: Move -> Color -> Board -> [Pos] -> Bool
-isOtherAllowed move color board _attPoss = not $ isKingThreatened color newBoard
+isOtherAllowed :: Move -> Board -> Bool
+isOtherAllowed move board = not $ isKingThreatened newBoard
     where
         newBoard = applyMove move board
 
-isKingThreatened :: Color -> Board -> Bool
-isKingThreatened color board = any (== Piece color King) destSquares
+-- TODO: Adjust so that makes more sense
+isKingThreatened :: Board -> Bool
+isKingThreatened board = any (== Piece (invert turn) King) destSquares
     where
-        attPoss = attackedPositions (invert color) board
+        turn = getTurn board
+        attPoss = attackedPositions board
         destSquares = map (\dest -> getB dest board) attPoss

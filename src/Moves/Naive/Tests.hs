@@ -11,13 +11,14 @@ import Moves.Naive.CheckAware
 import qualified Moves.Naive.CheckUnaware as CU
 import Moves.Common
 import Lib
+import Debug.Trace
 
 --------------------------------------------------------------------------------
 -- General
 --------------------------------------------------------------------------------
 
 prop_board1 :: Property
-prop_board1 = verifyMoves expMoves Black board
+prop_board1 = verifyMoves expMoves board
   where
     board = read  "  M       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -231,7 +232,7 @@ prop_srcIsSameColor color board = all srcIsSameColor moves
 --------------------------------------------------------------------------------
 
 prop_pawns :: Property
-prop_pawns = verifyMoves expMoves Black board
+prop_pawns = verifyMoves expMoves board
   where
     board = read  "  M       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -296,7 +297,7 @@ prop_pawns = verifyMoves expMoves Black board
                (normalMovesFrom (Pos 0 0) [(Pos 0 1), (Pos 1 0)])
 
 prop_knights :: Property
-prop_knights = verifyMoves expMoves Black board
+prop_knights = verifyMoves expMoves board
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -359,7 +360,7 @@ prop_knights = verifyMoves expMoves Black board
 --------------------------------------------------------------------------------
 
 prop_allKindsPreventKingMove :: Property
-prop_allKindsPreventKingMove = verifyMoves expMoves White board
+prop_allKindsPreventKingMove = verifyMoves expMoves board
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -377,7 +378,7 @@ prop_allKindsPreventKingMove = verifyMoves expMoves White board
     expMoves = normalMovesFrom (Pos 5 3) [(Pos 6 4)]
 
 prop_kingMovesAwayIfChecked :: Property
-prop_kingMovesAwayIfChecked = verifyMoves expMoves White board
+prop_kingMovesAwayIfChecked = verifyMoves expMoves board
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -396,7 +397,7 @@ prop_kingMovesAwayIfChecked = verifyMoves expMoves White board
                                           (Pos 6 2), (Pos 6 3), (Pos 6 4)]
 
 prop_blocksWithOtherIfKingIsChecked :: Property
-prop_blocksWithOtherIfKingIsChecked = verifyMoves expMoves White board
+prop_blocksWithOtherIfKingIsChecked = verifyMoves expMoves board
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -415,7 +416,7 @@ prop_blocksWithOtherIfKingIsChecked = verifyMoves expMoves White board
                (normalMovesFrom (Pos 4 2) [(Pos 5 2)])
 
 prop_capturesThreatIfKingIsChecked :: Property
-prop_capturesThreatIfKingIsChecked = verifyMoves expMoves White board
+prop_capturesThreatIfKingIsChecked = verifyMoves expMoves board
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -433,7 +434,7 @@ prop_capturesThreatIfKingIsChecked = verifyMoves expMoves White board
     expMoves = normalMovesFrom (Pos 0 5) [(Pos 5 0)]
 
 prop_kingCanCaptureThreat :: Property
-prop_kingCanCaptureThreat = verifyMoves expMoves White board
+prop_kingCanCaptureThreat = verifyMoves expMoves board
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -451,7 +452,7 @@ prop_kingCanCaptureThreat = verifyMoves expMoves White board
     expMoves = normalMovesFrom (Pos 5 7) [(Pos 5 6)]
 
 prop_checkedMultipleTypesOfMoves :: Property
-prop_checkedMultipleTypesOfMoves = verifyMoves expMoves White board
+prop_checkedMultipleTypesOfMoves = verifyMoves expMoves board
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -470,7 +471,7 @@ prop_checkedMultipleTypesOfMoves = verifyMoves expMoves White board
                (normalMovesFrom (Pos 6 5) [(Pos 5 6)])
 
 prop_kingPinned :: Property
-prop_kingPinned = verifyMoves expMoves White board
+prop_kingPinned = verifyMoves expMoves board
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -489,19 +490,19 @@ prop_kingPinned = verifyMoves expMoves White board
                                            (Pos 4 6), (Pos 5 6), (Pos 6 6),
                                            (Pos 6 5), (Pos 6 4)])
 
-prop_movesAreSubsetOfCheckUnawareMoves :: Color -> Board -> Bool
-prop_movesAreSubsetOfCheckUnawareMoves color board =
+prop_movesAreSubsetOfCheckUnawareMoves :: Board -> Bool
+prop_movesAreSubsetOfCheckUnawareMoves board =
   moves `isSubsetOf` movesCheckUnaware
   where
-    moves             = movesFunForColor color board
-    movesCheckUnaware = CU.movesFun color board
+    moves             = movesFun board
+    movesCheckUnaware = CU.movesFun board
 
 --------------------------------------------------------------------------------
 -- Castling
 --------------------------------------------------------------------------------
 
 prop_noCastlingSinceKingWouldPassThreat :: Property
-prop_noCastlingSinceKingWouldPassThreat = verifyCastlingMoves expMoves White board
+prop_noCastlingSinceKingWouldPassThreat = verifyCastlingMoves expMoves board
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -519,7 +520,7 @@ prop_noCastlingSinceKingWouldPassThreat = verifyCastlingMoves expMoves White boa
         expMoves = [Castle White KingSide]
 
 prop_noCastlingSinceKingIsChecked :: Property
-prop_noCastlingSinceKingIsChecked = verifyCastlingMoves expMoves White board
+prop_noCastlingSinceKingIsChecked = verifyCastlingMoves expMoves board
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -537,7 +538,7 @@ prop_noCastlingSinceKingIsChecked = verifyCastlingMoves expMoves White board
         expMoves = []
 
 prop_noCastlingSinceDstAttacked :: Property
-prop_noCastlingSinceDstAttacked = verifyCastlingMoves expMoves Black board
+prop_noCastlingSinceDstAttacked = verifyCastlingMoves expMoves board
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -555,7 +556,7 @@ prop_noCastlingSinceDstAttacked = verifyCastlingMoves expMoves Black board
         expMoves = [Castle Black QueenSide]
 
 prop_bothCastlingsPossible :: Property
-prop_bothCastlingsPossible = verifyCastlingMoves expMoves Black board
+prop_bothCastlingsPossible = verifyCastlingMoves expMoves board
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -573,7 +574,7 @@ prop_bothCastlingsPossible = verifyCastlingMoves expMoves Black board
         expMoves = [Castle Black QueenSide, Castle Black KingSide]
 
 prop_castlingKingSide :: Property
-prop_castlingKingSide = verifyCastlingMoves expMoves Black board
+prop_castlingKingSide = verifyCastlingMoves expMoves board
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -591,7 +592,7 @@ prop_castlingKingSide = verifyCastlingMoves expMoves Black board
         expMoves = [Castle Black KingSide]
 
 prop_castlingQueenSide :: Property
-prop_castlingQueenSide = verifyCastlingMoves expMoves Black board
+prop_castlingQueenSide = verifyCastlingMoves expMoves board
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -628,7 +629,7 @@ prop_noCastlingOtherRow = movesFromBoardWithKingAtRow 0 `listEq` allCastlings &&
                       \  0 1 2 3 4 5 6 7  \n\
                       \  U       U     U\n\
                       \[Black]"
-        movesFromBoardWithKingAtRow row = movesFunOnlyCastling Black board'
+        movesFromBoardWithKingAtRow row = movesFunOnlyCastling board'
             where
                 board' = setB (Pos row 4) (Piece Black King) $
                          setB (Pos row 4) Empty $ board
@@ -637,8 +638,8 @@ prop_noCastlingOtherRow = movesFromBoardWithKingAtRow 0 `listEq` allCastlings &&
         allCastlings = [Castle Black KingSide, Castle Black QueenSide]
 
 prop_noCastlingSinceLeftRookMoved :: Property
-prop_noCastlingSinceLeftRookMoved = verifyCastlingMoves expMoves White board .&&.
-                                    verifyCastlingMoves expMoves' White board'
+prop_noCastlingSinceLeftRookMoved = verifyCastlingMoves expMoves board .&&.
+                                    verifyCastlingMoves expMoves' board'
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -665,8 +666,8 @@ allCastleAvailableState = (CastleState { leftRook = Unmoved,
                                         })
 
 prop_noCastlingSinceRightRookMoved :: Property
-prop_noCastlingSinceRightRookMoved = verifyCastlingMoves expMoves White board .&&.
-                                     verifyCastlingMoves expMoves' White board'
+prop_noCastlingSinceRightRookMoved = verifyCastlingMoves expMoves board .&&.
+                                     verifyCastlingMoves expMoves' board'
     where
         board = read  "  U       U     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -688,8 +689,8 @@ prop_noCastlingSinceRightRookMoved = verifyCastlingMoves expMoves White board .&
         expMoves' = expMoves ++ [Castle White KingSide]
 
 prop_noCastlingSinceKingMoved :: Property
-prop_noCastlingSinceKingMoved = verifyCastlingMoves expMoves Black board .&&.
-                                verifyCastlingMoves expMoves' Black board'
+prop_noCastlingSinceKingMoved = verifyCastlingMoves expMoves board .&&.
+                                verifyCastlingMoves expMoves' board'
     where
         board = read  "  U       M     U  \n\
                       \  0 1 2 3 4 5 6 7  \n\
@@ -718,14 +719,14 @@ prop_noCastlingSinceKingMoved = verifyCastlingMoves expMoves Black board .&&.
 -- Helpers
 --------------------------------------------------------------------------------
 
-type VerifyMovesFun = [Move] -> Color -> Board -> Property
+type VerifyMovesFun = [Move] -> Board -> Property
 
 verifyMovesCustomFun :: MovesFun -> VerifyMovesFun
-verifyMovesCustomFun movesFun expMoves' color board =
+verifyMovesCustomFun movesFun expMoves' board =
     counterexample errorString verificationResult
     where
         expMoves = sort expMoves'
-        actMoves = sort $ movesFun color board
+        actMoves = sort $ movesFun board
         verificationResult = expMoves == actMoves
         actualMissing = expMoves \\ actMoves
         actualExtra = actMoves \\ expMoves
@@ -742,7 +743,7 @@ verifyCastlingMoves :: VerifyMovesFun
 verifyCastlingMoves = verifyMovesCustomFun movesFunOnlyCastling
 
 movesFunOnlyCastling :: MovesFun
-movesFunOnlyCastling color board = filter isCastle $ movesFun color board
+movesFunOnlyCastling board = filter isCastle $ movesFun board
 
 normalMovesFrom :: Pos -> [Pos] -> [Move]
 normalMovesFrom src dsts = map (NormalMove src) dsts
@@ -750,8 +751,8 @@ normalMovesFrom src dsts = map (NormalMove src) dsts
 promotesFrom :: Pos -> [Pos] -> [Move]
 promotesFrom src dsts = [Promote src dst k | k <- [Rook, Bishop, Knight, Queen], dst <- dsts]
 
-movesFunForColor :: MovesFun
-movesFunForColor color board = movesFun color $ setTurn color board
+movesFunForColor :: Color -> MovesFun
+movesFunForColor color board = movesFun $ setTurn color board
 
 
 return []

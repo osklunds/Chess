@@ -6,4 +6,4 @@ where
 
 import Types
 
-type MovesFun = Color -> Board -> [Move]
+type MovesFun = Board -> [Move]
