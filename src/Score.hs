@@ -14,10 +14,15 @@ data FoldState = FoldState { scoreValue :: Int
                            , foundWhiteKing :: Bool
                            }
 
-score :: Board -> Int
-score board = case canMove of
+score :: Board -> (Int, Bool, [Move])
+score board = (score, isThreatened, moves)
+    where
+        moves = movesFun board
+        canMove = not $ null $ moves
+        isThreatened = threatensKing $ invertTurn board
+        score = case canMove of
                 True ->
-                    scoreValue
+                    calculateScore board
                 False ->
                     case isThreatened of
                         True ->
@@ -26,11 +31,6 @@ score board = case canMove of
                                 White -> maxBound
                         False ->
                             0
-    where
-        -- TODO: This is where moves can be re-used
-        canMove = not $ null $ movesFun board
-        isThreatened = threatensKing $ invertTurn board
-        scoreValue = calculateScore board
 
 -- Positive means Black is leading, negative means White is leading
 -- (Talk about controversy :D)
