@@ -29,12 +29,17 @@ score board = (score, result, moves)
         scoreValue = calculateScore board
         -- isThreatened is expensive, so include it as a field that
         -- only is lazily calculated if needed, i.e. by Cli
-        (score, result) = case (canMove, isThreatened) of
-                            (True, _) -> (scoreValue, Normal isThreatened)
-                            (False, False) -> (0, Draw)
-                            (False, True) -> (if getTurn board == Black
-                                                  then minBound
-                                                  else maxBound, Checkmate)
+        (score, result) = case canMove of
+                            True ->
+                                (scoreValue, Normal isThreatened)
+                            False ->
+                                case isThreatened of
+                                    False ->
+                                        (0, Draw)
+                                    True ->
+                                        (if getTurn board == Black
+                                             then minBound
+                                             else maxBound, Checkmate)
 
 -- Positive means Black is leading, negative means White is leading
 -- (Talk about controversy :D)
