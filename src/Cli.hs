@@ -91,9 +91,9 @@ playerTurnValidateMove st move = do
           printBoard newGs
 
           case result of
-            Normal ->
+            Normal False ->
               computerTurn $ st { gameStates = (newGs:gss) }
-            Check -> do
+            Normal True -> do
               putStrLn "Computer is checked"
               computerTurn $ st { gameStates = (newGs:gss) }
             Checkmate ->
@@ -111,9 +111,9 @@ computerTurn st = do
     printBoardWithMove move newGs
 
     case result of
-        Normal ->
+        Normal False ->
             playerTurn $ st { gameStates = (newGs:gss) }
-        Check -> do
+        Normal True -> do
             putStrLn "You're checked"
             playerTurn $ st { gameStates = (newGs:gss) }
         Checkmate ->
