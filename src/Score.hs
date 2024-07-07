@@ -15,8 +15,7 @@ data FoldState = FoldState { scoreValue :: Int
                            , foundWhiteKing :: Bool
                            }
                  
-data Result = Normal
-            | Check
+data Result = Normal Bool
             | Draw
             | Checkmate
             deriving (Eq, Show)
@@ -28,13 +27,14 @@ score board = (score, result, moves)
         canMove = not $ null $ moves
         isThreatened = threatensKing $ invertTurn board
         scoreValue = calculateScore board
+        -- isThreatened is expensive, so include it as a field that
+        -- only is lazily calculated if needed, i.e. by Cli
         (score, result) = case (canMove, isThreatened) of
+                            (True, _) -> (scoreValue, Normal isThreatened)
                             (False, False) -> (0, Draw)
                             (False, True) -> (if getTurn board == Black
                                                   then minBound
                                                   else maxBound, Checkmate)
-                            (True, False) -> (scoreValue, Normal)
-                            (True, True) -> (scoreValue, Check)
 
 -- Positive means Black is leading, negative means White is leading
 -- (Talk about controversy :D)

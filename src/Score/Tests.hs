@@ -11,9 +11,9 @@ import Score
 
 prop_scoreNormal :: Bool
 prop_scoreNormal = scoreValueBlack == expScore &&
-                   resultBlack == Normal &&
+                   resultBlack == Normal False &&
                    scoreValueWhite == expScore &&
-                   resultWhite == Normal
+                   resultWhite == Normal False
   where
     board = read  "  U       M     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -43,9 +43,9 @@ prop_scoreNormal = scoreValueBlack == expScore &&
 
 prop_scoreCheck :: Bool
 prop_scoreCheck = scoreValueBlack == expScore &&
-                  resultBlack == Normal &&
+                  resultBlack == Normal False &&
                   scoreValueWhite == expScore &&
-                  resultWhite == Check
+                  resultWhite == Normal True
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -78,7 +78,7 @@ prop_boardWhereWhiteIsCheckmated = scoreValueWhite == maxBound &&
                                    resultWhite == Checkmate &&
                                    scoreValueBlack > 0 &&
                                    scoreValueBlack < maxBound &&
-                                   resultBlack == Normal
+                                   resultBlack == Normal False
   where
     board = read  "  U       M     M  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -102,7 +102,7 @@ prop_boardWhereBlackIsCheckmated = scoreValueBlack == minBound &&
                                    resultBlack == Checkmate &&
                                    scoreValueWhite > 0 &&
                                    scoreValueWhite < maxBound &&
-                                   resultWhite == Normal
+                                   resultWhite == Normal False
   where
     board = read  "  U       M     M  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -126,7 +126,7 @@ prop_boardWhereWhiteCantMove = scoreValueWhite == 0 &&
                                resultWhite == Draw &&
                                scoreValueBlack > 0 &&
                                scoreValueBlack < maxBound &&
-                               resultBlack == Normal
+                               resultBlack == Normal False
   where
     board = read  "  U       M     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
