@@ -26,7 +26,8 @@ import qualified Optimize.Types
 
 data State = State { board :: Board
                    , prevStates :: [State]
-                   , reachBy :: Maybe Move }
+                   , reachBy :: Maybe Move
+                   , optimizeFor :: Color }
            deriving (Eq, Ord, Show)
 
 -- depth must be 2 or larger in order to detect check and checkmate
@@ -36,7 +37,8 @@ selectMove depth board = fromJust $ reachBy nextState
   where
     initialState = State { board
                          , prevStates = []
-                         , reachBy = Nothing }
+                         , reachBy = Nothing
+                         , optimizeFor = getTurn board }
     nextState = optimize genStates evalState depth initialState
 
 --------------------------------------------------------------------------------
@@ -61,7 +63,8 @@ genStates currentState = states
         -- detect if someone external doesn't use applyMove to update the board
         states = map (\move -> State { board = applyMove move board
                                      , prevStates = currentState:prevStates
-                                     , reachBy = Just move }) moves
+                                     , reachBy = Just move
+                                     , optimizeFor = optimizeFor currentState}) moves
 
 --------------------------------------------------------------------------------
 -- Score
@@ -125,7 +128,8 @@ comparePreviousScores (StateScore state1) (StateScore state2) =
 
 scoreOfState :: State -> Int
 scoreOfState state = let (scoreValue, _result) = score $ board state
-                     in scoreValue
+                         modifier = if optimizeFor state == White then -1 else 1
+                     in scoreValue * modifier
 
 compareScoreLists :: [Int] -> [Int] -> Ordering
 compareScoreLists [] [] = EQ

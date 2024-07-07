@@ -41,6 +41,27 @@ verifyCapturesPiece kind = verifyMakesMove expMove board'
     piece  = Piece White kind
     board' = setB dst piece board
 
+-- TODO: Test this bug more thoroughly by mirroring the board
+-- like in the move generation test
+prop_playAsWhite :: Property
+prop_playAsWhite = verifyMakesMove expMove board
+  where
+    expMove = NormalMove (Pos 3 2) (Pos 3 3)
+
+    board  = read  "  U       M     U  \n\
+                   \  0 1 2 3 4 5 6 7  \n\
+                   \0                 0\n\
+                   \1                 1\n\
+                   \2                 2\n\
+                   \3     ♔ ♟         3\n\
+                   \4                 4\n\
+                   \5             ♚   5\n\
+                   \6                 6\n\
+                   \7                 7\n\
+                   \  0 1 2 3 4 5 6 7  \n\
+                   \  U       M     M\n\
+                   \[White]"
+
 prop_escape :: Bool
 -- TODO: Use Int5 etc for depths instead
 prop_escape = and [verifyEscapesFromThreat d k | d <- depths, k <- nonKingKinds]
