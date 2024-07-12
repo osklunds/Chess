@@ -3,6 +3,50 @@
 
 Chess AI written in Haskell.
 
+# Documentation
+
+## Source code overview
+
+This section provides an overview and introduction to the design and architecture of the program.
+
+<img src="doc/modules.png" width="200"/>
+
+The diagram is generated with `~/.cabal/bin/graphmod | dot -Gdpi=300 -Tpng > doc/modules.png`
+
+`Types` contains the data representations of a chess board and chess moves. The `Board` type contains the entire state at a given point in time:
+- Which piece, if any, a square contains
+- Whether a castling move is possible
+- Whether it's white's or black's turn
+
+`Moves` generates all possible moves for a given board. The `Naive` module is a simple move generation algorithm that first generates all pseudo-legal moves using `CheckUnaware` and then filters the moves that result in check using `CheckAware`. It's not the most efficient algorithm, but it can be used as comparison for better algorithms using property-based testing.
+
+`Score` calculates the score of a given board. It also takes into account if the current player is in check, checkmate or it's a draw.
+
+`Optimize` is a general implementation of the [Minimax](https://en.wikipedia.org/wiki/Minimax) algorithm. The submodules are different variants of it, with `AlphaBetaMemo` being the fastest one and thus the one used in the rest of the program. Using property-based testing, it's verified that all implementations give the same result.
+
+`MoveSelection` is the composition of `Moves`, `Score` and `Optimize`. I.e. Minimax applied to chess, where `Moves` is the state generator and `Score` the state evaluator. `MoveSelection` provides a single function: `selectMove :: Int -> Board -> Move` that given a search depth and a board, finds the "best" move. The move selection is tested for a number of boards of interesting situations where there exists an obvious best move. It's verified that `selectMove` indeed makes that obvious best move. For example, consider the board below (black's turn) from `MoveSelection.Tests.prop_checkmate`.
+
+```
+  a b c d e f g h
+8 ♔   ♝           8
+7     ♟           7
+6     ♟           6
+5     ♟           5
+4     ♟         ♚ 4
+3     ♟           3
+2   ♜ ♟           2
+1   ♜ ♞           1
+  a b c d e f g h
+```
+
+It's obvious that the best move is b1->a1 or b2->a2. The test verifies that `selectMove` move picks one of those moves. If `selectMove` doesn't make these obvious moves, something must be wrong.
+
+`Game` contains the game state for a human playing against the computer. It's UI-agnostic.
+
+`Cli` provides a command line interface for letting a human play against the computer.
+
+`Main` is a thin entry point to `Cli`.
+
 # Ideas to work in
 
 - Rules
@@ -22,6 +66,7 @@ Chess AI written in Haskell.
 - Score
     - Give more weight to squares in the center
     - Take into account the number of attacked squares
+    - Numbers of possible moves, hard coded for when the opponent has few pieces left
 - Testing
     - More invariants for e.g. Board
     - More unit tests for move generation, move selection, and everything else
