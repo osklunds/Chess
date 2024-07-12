@@ -9,7 +9,7 @@ Chess AI written in Haskell.
 
 This section provides an overview and introduction to the design and architecture of the program.
 
-<img src="doc/modules.png" width="200"/>
+![](doc/modules.png)
 
 The diagram is generated with `~/.cabal/bin/graphmod | dot -Gdpi=300 -Tpng > doc/modules.png`
 
