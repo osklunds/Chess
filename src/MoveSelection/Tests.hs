@@ -596,6 +596,27 @@ prop_moveDefaultBoard = verifyMakesOneOfMoves expMoves board
                       \  U       U     U\n\
                       \[White]"
 
+prop_scoreBasedMove :: Property
+prop_scoreBasedMove = verifyMakesOneOfMoves expMoves board
+    where
+        expMoves = [NormalMove (Pos 2 0) (Pos 1 0),
+                    NormalMove (Pos 2 1) (Pos 1 1),
+                    NormalMove (Pos 2 6) (Pos 1 6),
+                    NormalMove (Pos 2 7) (Pos 1 7)]
+
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0                 0\n\
+                      \1                 1\n\
+                      \2 ♙ ♙ ♙ ♙ ♙ ♙ ♙ ♙ 2\n\
+                      \3                 3\n\
+                      \4                 4\n\
+                      \5                 5\n\
+                      \6                 6\n\
+                      \7 ♔             ♚ 7\n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \  U       U     U\n\
+                      \[White]"
 
 --------------------------------------------------------------------------------
 -- Whitebox testing
