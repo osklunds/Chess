@@ -105,7 +105,7 @@ computerTurn :: State -> IO ()
 computerTurn st = do
     let gss@(curGs:_restGss) = gameStates st
     let computerColor = T.invert $ playerColor st
-    let move = selectMove 3 $ board curGs
+    let move = selectMove 4 $ board curGs
     let (newGs,result) = G.applyMove move curGs
     putStrLn ""
     printBoardWithMove move newGs
@@ -201,6 +201,8 @@ printBoardWithMove move = putStrLn . (showBoardWithMarkers markers) . board
         markersAsPos = case move of
                     (NormalMove src dst) -> [src, dst]
                     (Promote src dst _kind) -> [src, dst]
+                    (Castle Black _) -> [(Pos 0 4)]
+                    (Castle White _) -> [(Pos 7 4)]
         markers = [(r,c) | (Pos r c) <- markersAsPos]
 
 showBoardWithMarkers :: [(Int,Int)] -> Board -> String

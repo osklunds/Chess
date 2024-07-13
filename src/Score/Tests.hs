@@ -9,11 +9,8 @@ import Types
 import Score
 
 
-prop_scoreNormal :: Bool
-prop_scoreNormal = scoreValueBlack == expScore &&
-                   resultBlack == Normal False &&
-                   scoreValueWhite == expScore &&
-                   resultWhite == Normal False
+prop_scoreNormal :: Property
+prop_scoreNormal = counterexample (show (expScore, scoreValueWhite)) result
   where
     board = read  "  U       M     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -32,20 +29,31 @@ prop_scoreNormal = scoreValueBlack == expScore &&
     (scoreValueBlack, resultBlack, scoreValueWhite, resultWhite) =
         getValues board
 
-    expScore =       0-10 +0+0+0+0+3
-                    +0+3+0+0+0+0+0+3
-                    +0-0+0+0+3+0+0+0
-                    +0+0+5+0-1+0+0-1
-                    +0+0+10 -5+1-3+0
-                    +0+0-5+0+0+0-0+5
-                    +0+0+0-3+3+1+3+1
-                    +0+0+0+5+0+3-5+3
+    expScore = sum [900, -330,
+                    -320, -330,
+                    0, -330,
+                    -500, 100, 100,
+                    -900, 500, -100, 330, 0,
+                    500, -500,
+                    320, -320, -100, -330, -100,
+                    -500, -320, 500, -330]
+               +
+               sum [-10, 20,
+                    20, 10,
+                    -40, -10,
+                    0, 25, 5,
+                    -5, 0, -10, 0, 30,
+                    0, 5,
+                    5, 0, -50, 0, -50,
+                    0, 30, 0, 20]
 
-prop_scoreCheck :: Bool
-prop_scoreCheck = scoreValueBlack == expScore &&
-                  resultBlack == Normal False &&
-                  scoreValueWhite == expScore &&
-                  resultWhite == Normal True
+    result = scoreValueBlack == expScore &&
+             resultBlack == Normal False &&
+             scoreValueWhite == expScore &&
+             resultWhite == Normal False
+
+prop_scoreCheck :: Property
+prop_scoreCheck = counterexample (show (scoreValueBlack, expScore)) result
   where
     board = read  "  U       U     U  \n\
                   \  0 1 2 3 4 5 6 7  \n\
@@ -64,20 +72,32 @@ prop_scoreCheck = scoreValueBlack == expScore &&
     (scoreValueBlack, resultBlack, scoreValueWhite, resultWhite) =
         getValues board
 
-    expScore =       0-10 +0+0+0+0+3
-                    +0+3+0+0+0+0+0+3
-                    +0-0+0+0+3+0+0+0
-                    +0+0+5+0-1+0+0-1
-                    +0+0+10 -5+1-3+0
-                    +0+0-5+0+0+0-0+5
-                    +0+0+0-3+3+1+3+1
-                    +0+0+0+5+0+3-5+3
+    expScore = sum [900, -330,
+                    -320, -330,
+                    0, -500, -330,
+                    100, 100,
+                    -900, 500, -100, 330, 0,
+                    500, -500,
+                    320, -320, -100, -330, -100,
+                    -500, -320, 500, -330]
+               +
+               sum [-10, 20,
+                    20, 10,
+                    -40, 0, -10,
+                    25, 5,
+                    -5, 0, -10, 0, 30,
+                    0, 5,
+                    5, 0, -50, 0, -50,
+                    0, 30, 0, 20]
+    result = scoreValueBlack == expScore &&
+             resultBlack == Normal False &&
+             scoreValueWhite == expScore &&
+             resultWhite == Normal True
 
 prop_boardWhereWhiteIsCheckmated :: Bool
-prop_boardWhereWhiteIsCheckmated = scoreValueWhite == maxBound &&
+prop_boardWhereWhiteIsCheckmated = scoreValueWhite == minBound &&
                                    resultWhite == Checkmate &&
-                                   scoreValueBlack > 0 &&
-                                   scoreValueBlack < maxBound &&
+                                   scoreValueBlack < 0 &&
                                    resultBlack == Normal False
   where
     board = read  "  U       M     M  \n\
@@ -98,10 +118,9 @@ prop_boardWhereWhiteIsCheckmated = scoreValueWhite == maxBound &&
         getValues board
 
 prop_boardWhereBlackIsCheckmated :: Bool
-prop_boardWhereBlackIsCheckmated = scoreValueBlack == minBound &&
+prop_boardWhereBlackIsCheckmated = scoreValueBlack == maxBound &&
                                    resultBlack == Checkmate &&
-                                   scoreValueWhite > 0 &&
-                                   scoreValueWhite < maxBound &&
+                                   scoreValueWhite < 0 &&
                                    resultWhite == Normal False
   where
     board = read  "  U       M     M  \n\
@@ -124,8 +143,7 @@ prop_boardWhereBlackIsCheckmated = scoreValueBlack == minBound &&
 prop_boardWhereWhiteCantMove :: Bool
 prop_boardWhereWhiteCantMove = scoreValueWhite == 0 &&
                                resultWhite == Draw &&
-                               scoreValueBlack > 0 &&
-                               scoreValueBlack < maxBound &&
+                               scoreValueBlack < 0 &&
                                resultBlack == Normal False
   where
     board = read  "  U       M     U  \n\

@@ -128,8 +128,14 @@ comparePreviousScores (StateScore state1) (StateScore state2) =
 
 scoreOfState :: State -> Int
 scoreOfState state = let (scoreValue, _result) = score $ board state
-                         modifier = if optimizeFor state == White then -1 else 1
-                     in scoreValue * modifier
+                         modifier = if optimizeFor state == White then id else negate'
+                     in modifier scoreValue
+
+negate' :: Int -> Int
+negate' n
+    | n == minBound = maxBound
+    | n == maxBound = minBound
+    | otherwise     = negate n
 
 compareScoreLists :: [Int] -> [Int] -> Ordering
 compareScoreLists [] [] = EQ

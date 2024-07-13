@@ -386,7 +386,7 @@ prop_deferPromoteBug4 = verifyMakesMove expMove board
 -- sees that white will capture the queen, so 4 is OK.
 prop_deferPromoteBug5 :: Property
 prop_deferPromoteBug5 = conjoin [verifyMakesMove' expMoveSmart board 2,
-                                 verifyMakesMove' expMoveDumb  board 3,
+                                 verifyMakesOneOfMoves' expMovesDumb  board 3,
                                  verifyMakesMove' expMoveSmart board 4,
                                  verifyMakesMove' expMoveSmart board 5,
                                  verifyMakesMove' expMoveSmart board 6,
@@ -412,7 +412,9 @@ prop_deferPromoteBug5 = conjoin [verifyMakesMove' expMoveSmart board 2,
                       \  U       U     U\n\
                       \[Black]"
         expMoveSmart = Promote (Pos 6 5) (Pos 7 5) Rook
-        expMoveDumb = NormalMove (Pos 4 7) (Pos 4 6)
+        expMovesDumb = [NormalMove (Pos 4 7) (Pos 4 6),
+                        NormalMove (Pos 4 7) (Pos 3 7),
+                        NormalMove (Pos 4 7) (Pos 3 6)]
 
 prop_deferPromoteBug6 :: Property
 prop_deferPromoteBug6 = verifyMakesMove expMove board
@@ -569,6 +571,52 @@ prop_deferPromoteBug8 = assert (board2 == board2') $
 
 posDist :: Pos -> Pos -> Int
 posDist (Pos r1 c1) (Pos r2 c2) = max (abs (r1 - r2)) (abs (c1 - c2))
+
+--------------------------------------------------------------------------------
+-- Score
+--------------------------------------------------------------------------------
+
+prop_moveDefaultBoard :: Property
+prop_moveDefaultBoard = verifyMakesOneOfMoves expMoves board
+    where
+        expMoves = [NormalMove (Pos 7 1) (Pos 5 2),
+                    NormalMove (Pos 7 5) (Pos 5 5)]
+
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0 ♜ ♞ ♝ ♛ ♚ ♝ ♞ ♜ 0\n\
+                      \1 ♟ ♟ ♟ ♟ ♟ ♟ ♟ ♟ 1\n\
+                      \2                 2\n\
+                      \3                 3\n\
+                      \4                 4\n\
+                      \5                 5\n\
+                      \6 ♙ ♙ ♙ ♙ ♙ ♙ ♙ ♙ 6\n\
+                      \7 ♖ ♘ ♗ ♕ ♔ ♗ ♘ ♖ 7\n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \  U       U     U\n\
+                      \[White]"
+
+prop_scoreBasedMove :: Property
+prop_scoreBasedMove = verifyMakesOneOfMoves expMoves board
+    where
+        expMoves = [NormalMove (Pos 2 0) (Pos 1 0),
+                    NormalMove (Pos 2 1) (Pos 1 1),
+                    NormalMove (Pos 2 6) (Pos 1 6),
+                    NormalMove (Pos 2 7) (Pos 1 7)]
+
+        board = read  "  U       U     U  \n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \0                 0\n\
+                      \1                 1\n\
+                      \2 ♙ ♙ ♙ ♙ ♙ ♙ ♙ ♙ 2\n\
+                      \3                 3\n\
+                      \4                 4\n\
+                      \5                 5\n\
+                      \6                 6\n\
+                      \7 ♔             ♚ 7\n\
+                      \  0 1 2 3 4 5 6 7  \n\
+                      \  U       U     U\n\
+                      \[White]"
 
 --------------------------------------------------------------------------------
 -- Whitebox testing

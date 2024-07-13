@@ -1,13 +1,19 @@
 
+{-# LANGUAGE TemplateHaskell #-}
+
 module Score
 ( score
 , Result(..)
 )
 where
 
+import Data.List
+import Language.Haskell.TH.Syntax (lift)
+
 import Types
 import Moves
 import Moves.Naive.CheckAware (threatensKing)
+import Score.PieceSquareTable
 
 -- By keeping track of if found kings, a speed improvement was observed
 data FoldState = FoldState { scoreValue :: Int
@@ -37,44 +43,58 @@ score board = (score, result)
                                         (0, Draw)
                                     True ->
                                         (if getTurn board == Black
-                                             then minBound
-                                             else maxBound, Checkmate)
+                                             then maxBound
+                                             else minBound, Checkmate)
 
--- Positive means Black is leading, negative means White is leading
+-- Positive means White is leading, negative means Black is leading
 -- (Talk about controversy :D)
 calculateScore :: Board -> Int
 calculateScore board
    -- Test all combinations of black and white king existing
    -- TODO: Should never happen that not 1 of each king. Assert
    -- and fix board generation
-   | not $ foundBlackKing finalState = minBound
-   | not $ foundWhiteKing finalState = maxBound
-   | otherwise                       = scoreValue finalState
+   | scoreSum > 100000 = maxBound
+   | scoreSum < -100000 = minBound
+   | otherwise      = scoreSum
    where
-       initState = FoldState { scoreValue = 0
-                             , foundBlackKing = False
-                             , foundWhiteKing = False }
-       finalState = foldB foldFun initState board
+       (scoreSum, []) = foldB foldFunction (0, allPieceSquareTables') board
 
-foldFun :: FoldState -> Square -> FoldState
-foldFun state (Piece color King)
-  | color == Black = state { foundBlackKing = True }
-  | color == White = state { foundWhiteKing = True }
-foldFun state square = state { scoreValue = curScore + accScore }
-  where
-    curScore = scoreForSquare square
-    accScore = scoreValue state
-
-scoreForSquare :: Square -> Int
-scoreForSquare  Empty = 0
-scoreForSquare (Piece color kind) = case kind of
-                                        -- Kings are treated separately
-                                        Queen  -> 10*multiplier
-                                        Rook   -> 5*multiplier
-                                        Bishop -> 3*multiplier
-                                        Knight -> 3*multiplier
-                                        Pawn   -> 1*multiplier
+-- TODO: Is there a way to make this fast and better looking?
+   
+foldFunction :: (Int, [((Int,Int,Int,Int,Int,Int), (Int,Int,Int,Int,Int,Int), Int)]) ->
+       Square ->
+       (Int, [((Int,Int,Int,Int,Int,Int), (Int,Int,Int,Int,Int,Int), Int)])
+foldFunction (accScore, (((wp, wn, wb, wr, wq, wk), (bp, bn, bb, br, bq, bk), e)):rest)
+    square = (accScore+pstScore+materialScore, rest)
     where
-        multiplier = case color of
-                        Black -> 1
-                        White -> -1
+        pstScore = case square of
+                       (Piece White Pawn)   -> wp
+                       (Piece White Knight) -> wn
+                       (Piece White Bishop) -> wb
+                       (Piece White Rook)   -> wr
+                       (Piece White Queen)  -> wq
+                       (Piece White King)   -> wk
+                       (Piece Black Pawn)   -> bp
+                       (Piece Black Knight) -> bn
+                       (Piece Black Bishop) -> bb
+                       (Piece Black Rook)   -> br
+                       (Piece Black Queen)  -> bq
+                       (Piece Black King)   -> bk
+                       Empty                -> e
+        materialScore = materialValue square
+
+materialValue :: Square -> Int
+materialValue (Piece White Pawn) = 100
+materialValue (Piece White Knight) = 320
+materialValue (Piece White Bishop) = 330
+materialValue (Piece White Rook) = 500
+materialValue (Piece White Queen) = 900
+materialValue (Piece White King) = 200000
+materialValue (Piece Black p) = -(materialValue $ Piece White p)
+materialValue Empty = 0
+
+allPieceSquareTables' :: [((Int,Int,Int,Int,Int,Int), (Int,Int,Int,Int,Int,Int), Int)]
+allPieceSquareTables' = $(lift (allPieceSquareTables))
+
+-- Numerical values from
+-- https://www.chessprogramming.org/Simplified_Evaluation_Function
