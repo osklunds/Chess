@@ -73,6 +73,7 @@ instance Read Square where
 
 fromString :: String -> Square
 fromString " " = Empty
+fromString "■" = Empty
 fromString "♟" = Piece Black Pawn
 fromString "♝" = Piece Black Bishop
 fromString "♞" = Piece Black Knight
