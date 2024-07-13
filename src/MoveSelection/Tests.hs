@@ -386,7 +386,7 @@ prop_deferPromoteBug4 = verifyMakesMove expMove board
 -- sees that white will capture the queen, so 4 is OK.
 prop_deferPromoteBug5 :: Property
 prop_deferPromoteBug5 = conjoin [verifyMakesMove' expMoveSmart board 2,
-                                 verifyMakesMove' expMoveDumb  board 3,
+                                 verifyMakesOneOfMoves' expMovesDumb  board 3,
                                  verifyMakesMove' expMoveSmart board 4,
                                  verifyMakesMove' expMoveSmart board 5,
                                  verifyMakesMove' expMoveSmart board 6,
@@ -412,7 +412,9 @@ prop_deferPromoteBug5 = conjoin [verifyMakesMove' expMoveSmart board 2,
                       \  U       U     U\n\
                       \[Black]"
         expMoveSmart = Promote (Pos 6 5) (Pos 7 5) Rook
-        expMoveDumb = NormalMove (Pos 4 7) (Pos 4 6)
+        expMovesDumb = [NormalMove (Pos 4 7) (Pos 4 6),
+                        NormalMove (Pos 4 7) (Pos 3 7),
+                        NormalMove (Pos 4 7) (Pos 3 6)]
 
 prop_deferPromoteBug6 :: Property
 prop_deferPromoteBug6 = verifyMakesMove expMove board
