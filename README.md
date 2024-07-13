@@ -64,7 +64,7 @@ It's obvious that the best move is b1->a1 or b2->a2. The test verifies that `sel
     - ~~fix the issue about move order, i.e. that need to do what is short-term
       good as well, otherwise the good move is "procrastinated" forever.~~
 - Score
-    - Give more weight to squares in the center
+    - ~~Give more weight to squares in the center~~
     - Take into account the number of attacked squares
     - Numbers of possible moves, hard coded for when the opponent has few pieces left
 - Testing
