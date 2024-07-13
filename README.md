@@ -70,6 +70,7 @@ It's obvious that the best move is b1->a1 or b2->a2. The test verifies that `sel
 - Testing
     - More invariants for e.g. Board
     - More unit tests for move generation, move selection, and everything else
+    - Test that within, say 10, moves, the computer manages checkmate. Could be useful for endgames
 - Move selection tests
     - Checkmate with King+Rook
     - Checkmate with King+Queen
