@@ -55,16 +55,8 @@ calculateScore board
    where
        (scoreSum, []) = foldB foldFunction (0, allPieceSquareTables) board
 
-materialValue :: Square -> Int
-materialValue (Piece White Pawn) = 100
-materialValue (Piece White Knight) = 320
-materialValue (Piece White Bishop) = 330
-materialValue (Piece White Rook) = 500
-materialValue (Piece White Queen) = 900
-materialValue (Piece White King) = 200000
-materialValue (Piece Black p) = -(materialValue $ Piece White p)
-materialValue Empty = 0
-
+-- TODO: Is there a way to make this fast and better looking?
+   
 foldFunction :: (Int, [((Int,Int,Int,Int,Int,Int), (Int,Int,Int,Int,Int,Int), Int)]) ->
        Square ->
        (Int, [((Int,Int,Int,Int,Int,Int), (Int,Int,Int,Int,Int,Int), Int)])
@@ -86,6 +78,16 @@ foldFunction (accScore, (((wp, wn, wb, wr, wq, wk), (bp, bn, bb, br, bq, bk), e)
                        (Piece Black King)   -> bk
                        Empty                -> e
         materialScore = materialValue square
+
+materialValue :: Square -> Int
+materialValue (Piece White Pawn) = 100
+materialValue (Piece White Knight) = 320
+materialValue (Piece White Bishop) = 330
+materialValue (Piece White Rook) = 500
+materialValue (Piece White Queen) = 900
+materialValue (Piece White King) = 200000
+materialValue (Piece Black p) = -(materialValue $ Piece White p)
+materialValue Empty = 0
 
 allPieceSquareTables = zip3 whitePieceSquareTables
                             blackPieceSquareTables
